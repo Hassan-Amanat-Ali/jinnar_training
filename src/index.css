@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import 'tailwindcss';
+
+@theme {
+  /* Colors */
+  --color-primary: #013c77; /* Hero background + Active links */
+  --color-secondary: #003d77; /* Buttons background (blue-ish) */
+  --color-success: #16a34a; /* Green (success states, highlights) */
+  --color-black: #000000; /* Text / hover */
+  --color-white: #ffffff; /* Text / hover */
+  --color-muted: #d4d4d4;
+
+  /* Fonts */
+  --font-base: 'Montserrat', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+}
+
+@layer base {
+  html {
+    @apply font-base text-black bg-white font-normal text-base leading-normal;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .section-container {
+    @apply max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl text-center font-heading font-semibold my-12 text-black;
+    @apply tracking-tight;
+  }
+
+  .btn-base-large {
+    @apply px-6 py-4 rounded-md transition-colors min-w-[220px] cursor-pointer;
+  }
+
+  .btn-base-medium {
+    @apply px-4 py-2 rounded-md transition-colors min-w-[180px] cursor-pointer;
+  }
+
+  .btn-base-small {
+    @apply px-3 py-1 rounded-md transition-colors min-w-[140px] cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/80 transition-colors;
+  }
+
+  .btn-gray {
+    @apply bg-muted text-black/80 hover:bg-muted/80 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-success text-white hover:bg-success transition-colors;
+  }
+
+  .btn-outline {
+    @apply bg-white text-success border border-success hover:bg-success hover:text-white;
+  }
+
+  .scroll-to-top-btn {
+    @apply fixed bottom-6 right-6 z-50 p-3 bg-primary text-white shadow-lg hover:bg-primary/90 transition-all duration-300 ease-in-out;
+    @apply rounded-md border border-primary/20 hover:shadow-xl transform hover:scale-105;
+    @apply flex items-center justify-center min-w-[48px] min-h-[48px];
+  }
+}
