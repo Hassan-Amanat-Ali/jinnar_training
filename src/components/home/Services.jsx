@@ -31,7 +31,7 @@ const Services = () => {
               className={`px-6 py-3 font-medium transition-all duration-200 cursor-pointer ${
                 category === activeCategory
                   ? 'bg-success text-white'
-                  : 'bg-gray-100 text-black/50 hover:bg-gray-200'
+                  : 'bg-gray-100 text-black/50 hover:bg-success/10'
               }`}
             >
               {category}
@@ -40,7 +40,7 @@ const Services = () => {
         </div>
 
         {/* Courses Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12'>
+        <div className='flex flex-wrap gap-8 mb-12 items-center justify-center'>
           {filteredCourses.map((course) => {
             const actionButtons = (
               <>
@@ -64,7 +64,7 @@ const Services = () => {
                 duration={course.duration}
                 students={course.students}
                 actionButtons={actionButtons}
-                className='hover:shadow-xl transition-all duration-300'
+                className='hover:shadow-xl transition-all duration-300 max-w-[350px] lg:max-w-[420px]'
               />
             );
           })}

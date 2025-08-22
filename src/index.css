@@ -10,7 +10,7 @@
   --color-black: #000000; /* Text / hover */
   --color-white: #ffffff; /* Text / hover */
   --color-muted: #d4d4d4;
-
+  --color-dark-green: #01854a;
   /* Fonts */
   --font-base: 'Montserrat', sans-serif;
   --font-body: 'Montserrat', sans-serif;
@@ -41,15 +41,15 @@
   }
 
   .btn-base-large {
-    @apply px-6 py-4 rounded-md transition-colors min-w-[220px] cursor-pointer;
+    @apply px-6 py-4 rounded-md transition-colors min-w-[140px] md:min-w-[220px] cursor-pointer;
   }
 
   .btn-base-medium {
-    @apply px-4 py-2 rounded-md transition-colors min-w-[180px] cursor-pointer;
+    @apply px-4 py-2 rounded-md transition-colors min-w-[140px] md:min-w-[180px] cursor-pointer;
   }
 
   .btn-base-small {
-    @apply px-3 py-1 rounded-md transition-colors min-w-[140px] cursor-pointer;
+    @apply px-3 py-1 rounded-md transition-colors min-w-[100px] md:min-w-[140px] cursor-pointer;
   }
 
   .btn-primary {

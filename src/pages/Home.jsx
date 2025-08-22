@@ -6,8 +6,8 @@ const Home = () => {
     <div>
       <Hero />
       <Services />
-      <Goals />
       <About />
+      <Goals />
       <Testimonials />
     </div>
   );

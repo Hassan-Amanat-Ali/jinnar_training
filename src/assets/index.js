@@ -14,8 +14,23 @@ import Course5 from './images/course-5.png';
 import Course6 from './images/course-6.png';
 
 // about Section
-
 import AboutImg from './images/about-img.png';
+
+//goals section
+import HandsOntraining from './images/hands-on-training.png';
+import CertificationPrep from './images/certificate-prep.png';
+import TrackProgress from './images/insights.png';
+import CustomizableContent from './images/customizable-content.png';
+import GoalsSS from './images/goals-ss.png';
+// footer
+import FooterBg from './images/footer-bg.png';
+
+//! about page
+import AboutHeroImg from './images/about-hero.png';
+import AboutSkillsImg from './images/about-skills.png';
+import Professor1 from './images/professor-1.png';
+import Professor2 from './images/professor-2.png';
+import Professor3 from './images/professor-3.png';
 
 // Export all assets
 export {
@@ -30,4 +45,15 @@ export {
   Course6,
   AboutImg,
   ProfileImg,
+  HandsOntraining,
+  CertificationPrep,
+  TrackProgress,
+  CustomizableContent,
+  GoalsSS,
+  FooterBg,
+  AboutHeroImg,
+  AboutSkillsImg,
+  Professor1,
+  Professor2,
+  Professor3,
 };

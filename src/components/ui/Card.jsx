@@ -70,7 +70,9 @@ const Card = ({
         )}
 
         {/* Action Buttons */}
-        {actionButtons && <div className='flex gap-3'>{actionButtons}</div>}
+        {actionButtons && (
+          <div className='flex-col lg:flex-row flex gap-3'>{actionButtons}</div>
+        )}
 
         {/* Fallback for custom content */}
         {!title && !description && !image && children}
