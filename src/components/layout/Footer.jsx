@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Button } from '../ui';
 import { Logo, FooterBg } from '../../assets';
+import { ROUTES } from '../../constants/routes';
 import {
   FaTwitter,
   FaInstagram,
@@ -15,6 +18,78 @@ import { FaFigma } from 'react-icons/fa';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [email, setEmail] = useState('');
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate email
+    if (!email || email.trim() === '') {
+      toast.warning('lease enter your email address', {
+        position: 'bottom-left',
+      });
+      return;
+    }
+
+    if (!validateEmail(email.trim())) {
+      toast.warning('Please enter a valid email address', {
+        position: 'bottom-left',
+      });
+      return;
+    }
+
+    setIsSubscribing(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('email', email.trim());
+      formData.append(
+        '_subject',
+        'New Newsletter Subscription - Training Jinnar'
+      );
+      formData.append('_next', window.location.href);
+      formData.append('_captcha', 'true');
+      formData.append('subscription_type', 'Newsletter');
+
+      const response = await fetch(
+        'https://formsubmit.co/ajax/shoaiballahbakhsh@gmail.com',
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        toast.success(
+          '🎉 Successfully subscribed! Welcome to our newsletter!',
+          {
+            position: 'bottom-left',
+          }
+        );
+
+        // Reset email input
+        setEmail('');
+      } else {
+        throw new Error('Subscription failed');
+      }
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      toast.error('❌ Subscription failed. Please try again later.', {
+        position: 'bottom-left',
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   const useCases = [
     'Web designers',
@@ -35,11 +110,11 @@ const Footer = () => {
   const company = ['About Us', 'Careers', 'FAQs', 'Teams', 'Contact Us'];
 
   const legalLinks = [
-    'Privacy Policy',
-    'Terms of Use',
-    'Sales and Refunds',
-    'Legal',
-    'Site Map',
+    { name: 'Privacy Policy', href: ROUTES.PRIVACY_POLICY },
+    { name: 'Terms of Service', href: ROUTES.TERMS_OF_SERVICE },
+    { name: 'Refunds', href: ROUTES.REFUNDS },
+    { name: 'Legal', href: ROUTES.LEGAL },
+    { name: 'Site Map', href: '#' },
   ];
 
   const socialIcons = [
@@ -107,17 +182,25 @@ const Footer = () => {
               </p>
 
               {/* Newsletter Signup */}
-              <div className='flex-col md:flex-row flex gap-2 mb-6'>
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className='flex-col md:flex-row flex gap-2 mb-6'
+              >
                 <input
                   type='email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder='Enter your email address'
-                  className='flex-1 px-4 py-3 border border-gray-300  bg-primary/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
+                  className='flex-1 px-4 py-3 border border-gray-300 bg-primary/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
+                  disabled={isSubscribing}
                 />
                 <Button
-                  text='Subscribe'
+                  text={isSubscribing ? 'Subscribing...' : 'Subscribe'}
                   className='btn-base-medium btn-primary px-6'
+                  type='submit'
+                  disabled={isSubscribing}
                 />
-              </div>
+              </form>
 
               {/* Social Icons */}
               <div className='flex gap-3'>
@@ -204,15 +287,25 @@ const Footer = () => {
             <div className='flex flex-col justify-center items-center gap-4'>
               {/* Legal Links */}
               <div className='flex flex-wrap justify-center lg:justify-start gap-6'>
-                {legalLinks.map((link, index) => (
-                  <a
-                    key={index}
-                    href='#'
-                    className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
-                  >
-                    {link}
-                  </a>
-                ))}
+                {legalLinks.map((link, index) =>
+                  link.href.startsWith('/') ? (
+                    <Link
+                      key={index}
+                      to={link.href}
+                      className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
+                    >
+                      {link.name}
+                    </Link>
+                  ) : (
+                    <a
+                      key={index}
+                      href={link.href}
+                      className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
+                    >
+                      {link.name}
+                    </a>
+                  )
+                )}
               </div>
 
               {/* Copyright */}

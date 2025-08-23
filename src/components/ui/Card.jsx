@@ -14,7 +14,8 @@ const Card = ({
   shadow = true,
   ...props
 }) => {
-  const baseClasses = 'bg-white rounded-lg overflow-hidden';
+  const baseClasses =
+    'bg-white rounded-lg overflow-hidden flex flex-col h-full';
   const shadowClasses = shadow
     ? 'shadow-sm hover:shadow-lg transition-shadow duration-300'
     : '';
@@ -37,7 +38,7 @@ const Card = ({
       )}
 
       {/* Card Content */}
-      <div className={padding ? 'p-6' : ''}>
+      <div className={`${padding ? 'p-6' : ''} flex flex-col flex-1`}>
         {/* Course Title */}
         {title && (
           <h3 className='text-xl font-semibold text-black mb-3 line-clamp-2'>
@@ -47,7 +48,7 @@ const Card = ({
 
         {/* Course Description */}
         {description && (
-          <p className='text-black/80 mb-4 text-sm leading-relaxed line-clamp-3'>
+          <p className='text-black/80 mb-4 text-sm leading-relaxed line-clamp-3 flex-1'>
             {description}
           </p>
         )}
@@ -71,7 +72,9 @@ const Card = ({
 
         {/* Action Buttons */}
         {actionButtons && (
-          <div className='flex-col lg:flex-row flex gap-3'>{actionButtons}</div>
+          <div className='flex-col lg:flex-row flex gap-3 mt-auto'>
+            {actionButtons}
+          </div>
         )}
 
         {/* Fallback for custom content */}

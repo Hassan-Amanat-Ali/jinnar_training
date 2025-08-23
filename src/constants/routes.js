@@ -7,7 +7,7 @@ export const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
   CONTACT: '/contact',
-  SERVICES: '/services',
+  COURSES: '/courses',
   PORTFOLIO: '/portfolio',
   BLOG: '/blog',
   LOGIN: '/login',
@@ -16,6 +16,10 @@ export const ROUTES = {
   PROFILE: '/profile',
   SETTINGS: '/settings',
   COMPONENT_DEMO: '/components',
+  PRIVACY_POLICY: '/privacy-policy',
+  TERMS_OF_SERVICE: '/terms-of-service',
+  REFUNDS: '/refunds',
+  LEGAL: '/legal',
   // Add more routes as needed
 };
 
@@ -29,10 +33,14 @@ export const PUBLIC_ROUTES = [
   ROUTES.HOME,
   ROUTES.ABOUT,
   ROUTES.CONTACT,
-  ROUTES.SERVICES,
+  ROUTES.COURSES,
   ROUTES.PORTFOLIO,
   ROUTES.BLOG,
   ROUTES.LOGIN,
   ROUTES.SIGNUP,
   ROUTES.COMPONENT_DEMO,
+  ROUTES.PRIVACY_POLICY,
+  ROUTES.TERMS_OF_SERVICE,
+  ROUTES.REFUNDS,
+  ROUTES.LEGAL,
 ];

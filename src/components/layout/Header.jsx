@@ -8,7 +8,7 @@ import DesktopMenu from './DesktopMenu';
 
 const NAVIGATION = [
   { name: 'Home', href: ROUTES.HOME },
-  { name: 'Courses', href: ROUTES.SERVICES },
+  { name: 'Courses', href: ROUTES.COURSES },
   { name: 'About Us', href: ROUTES.ABOUT },
   { name: 'Contact Us', href: ROUTES.CONTACT },
 ];

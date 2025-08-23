@@ -1,11 +1,17 @@
 import React from 'react';
-import { Hero, Services, Goals, About, Testimonials } from '../components/home';
+import {
+  Hero,
+  CoursesShowcase,
+  Goals,
+  About,
+  Testimonials,
+} from '../components/home';
 
 const Home = () => {
   return (
     <div>
       <Hero />
-      <Services />
+      <CoursesShowcase />
       <About />
       <Goals />
       <Testimonials />

@@ -84,10 +84,10 @@ const NotFound = () => {
               About
             </Link>
             <Link
-              to={ROUTES.SERVICES}
+              to={ROUTES.COURSES}
               className='text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors'
             >
-              Services
+              Courses
             </Link>
             <Link
               to={ROUTES.CONTACT}

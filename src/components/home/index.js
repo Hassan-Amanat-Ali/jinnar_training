@@ -1,7 +1,7 @@
 import Hero from './Hero';
-import Services from './Services';
+import CoursesShowcase from './CoursesShowcase';
 import Goals from './Goals';
 import About from './About';
 import Testimonials from './Testimonials';
 
-export { Hero, Services, Goals, About, Testimonials };
+export { Hero, CoursesShowcase, Goals, About, Testimonials };
