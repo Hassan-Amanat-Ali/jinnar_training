@@ -8,6 +8,7 @@ import {
   About,
   Contact,
   Courses,
+  CourseDetail,
   Portfolio,
   Blog,
   Login,
@@ -17,6 +18,12 @@ import {
   TermsOfService,
   Refunds,
   Legal,
+  // Profile Pages
+  EditProfile,
+  MyCourses,
+  Team,
+  Notification,
+  Settings,
 } from './pages';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -43,6 +50,7 @@ function App() {
 
         {/* Legal with custom layout (floating header) */}
         <Route path={ROUTES.LEGAL} element={<Legal />} />
+        <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
 
         {/* Main routes with layout */}
         <Route
@@ -54,8 +62,16 @@ function App() {
                 <Route path={ROUTES.ABOUT} element={<About />} />
                 <Route path={ROUTES.CONTACT} element={<Contact />} />
                 <Route path={ROUTES.COURSES} element={<Courses />} />
+
                 <Route path={ROUTES.PORTFOLIO} element={<Portfolio />} />
                 <Route path={ROUTES.BLOG} element={<Blog />} />
+
+                {/* Profile Routes */}
+                <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
+                <Route path={ROUTES.MY_COURSES} element={<MyCourses />} />
+                <Route path={ROUTES.TEAM} element={<Team />} />
+                <Route path={ROUTES.NOTIFICATION} element={<Notification />} />
+                <Route path={ROUTES.SETTINGS} element={<Settings />} />
 
                 {/* 404 Route */}
                 <Route path='*' element={<NotFound />} />

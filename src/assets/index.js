@@ -32,6 +32,8 @@ import Professor1 from './images/professor-1.png';
 import Professor2 from './images/professor-2.png';
 import Professor3 from './images/professor-3.png';
 
+import AuthPageImg from './images/auth-page-img.png';
+
 // Export all assets
 export {
   Logo,
@@ -56,4 +58,5 @@ export {
   Professor1,
   Professor2,
   Professor3,
+  AuthPageImg,
 };

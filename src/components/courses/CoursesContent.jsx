@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 import CoursesFilters from './CoursesFilters';
 import CoursesListing from './CoursesListing';
 import { courses } from '../../data/courses';
 
 const CoursesContent = () => {
+  const navigate = useNavigate();
   // State for courses (to handle favorites)
   const [coursesState, setCoursesState] = useState(courses);
 
@@ -170,13 +173,7 @@ const CoursesContent = () => {
 
   // Handle view details
   const handleViewDetails = (courseId) => {
-    const course = coursesState.find((c) => c.id === courseId);
-    if (course) {
-      toast.info(`Viewing details for ${course.title}`, {
-        position: 'top-center',
-      });
-      // Here you would typically navigate to a course detail page
-    }
+    navigate(`/courses/${courseId}`);
   };
 
   return (

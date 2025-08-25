@@ -21,7 +21,7 @@ const Header = () => {
   const isActiveRoute = (href) => location.pathname === href;
 
   return (
-    <header className={`${isLoggedIn ? '' : 'bg-transparent'} py-4`}>
+    <header className='bg-white py-4'>
       <div className='section-container'>
         <nav className='rounded-full shadow-lg border border-muted px-6 bg-white'>
           <div className='flex justify-between items-center h-20'>
