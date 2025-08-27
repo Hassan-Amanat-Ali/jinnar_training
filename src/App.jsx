@@ -25,6 +25,7 @@ import {
   Notification,
   Settings,
 } from './pages';
+import Watch from './pages/Watch';
 
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -51,6 +52,7 @@ function App() {
         {/* Legal with custom layout (floating header) */}
         <Route path={ROUTES.LEGAL} element={<Legal />} />
         <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
+        <Route path={ROUTES.WATCH} element={<Watch />} />
 
         {/* Main routes with layout */}
         <Route

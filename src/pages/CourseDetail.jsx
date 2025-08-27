@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/layout/Footer';
-import TransparentHeader from '../components/layout/TransparentHeader';
+import { Header } from '../components/layout';
 import { courses } from '../data/courses';
 import { courseDetailData } from '../data/courseDetail';
 import {
@@ -20,6 +20,7 @@ import { ScrollToTop } from '../components/ui';
 
 const CourseDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -38,14 +39,15 @@ const CourseDetail = () => {
     setIsFavorite((prev) => !prev);
   };
 
+  const handleStartLearning = () => {
+    // Demo: first lecture id is '1'
+    navigate(`/courses/${id}/watch/1`);
+  };
+
   if (loading) {
     return (
       <div className='min-h-screen flex flex-col bg-white'>
-        {/* Floating Header - absolute position */}
-        <div className='absolute top-0 left-0 right-0 z-50'>
-          <TransparentHeader />
-        </div>
-
+        <Header floating />
         <main className='flex-grow'>
           <div className='section-container py-12 px-4 pt-32'>
             <div className='animate-pulse'>
@@ -57,7 +59,6 @@ const CourseDetail = () => {
             </div>
           </div>
         </main>
-
         <Footer />
         <ScrollToTop />
       </div>
@@ -67,11 +68,7 @@ const CourseDetail = () => {
   if (!course) {
     return (
       <div className='min-h-screen flex flex-col bg-white'>
-        {/* Floating Header - absolute position */}
-        <div className='absolute top-0 left-0 right-0 z-50'>
-          <TransparentHeader />
-        </div>
-
+        <Header floating />
         <main className='flex-grow'>
           <div className='section-container py-12 px-4 pt-32 text-center'>
             <h2 className='text-2xl font-bold mb-4'>Course not found</h2>
@@ -80,7 +77,6 @@ const CourseDetail = () => {
             </p>
           </div>
         </main>
-
         <Footer />
         <ScrollToTop />
       </div>
@@ -89,9 +85,7 @@ const CourseDetail = () => {
 
   return (
     <div className='min-h-screen flex flex-col'>
-      <div className='absolute top-0 left-0 right-0 z-50'>
-        <TransparentHeader />
-      </div>
+      <Header floating />
 
       {/* Main Content */}
       <main className='flex-grow'>
@@ -100,6 +94,7 @@ const CourseDetail = () => {
           course={course}
           isFavorite={isFavorite}
           toggleFavorite={toggleFavorite}
+          onStartLearning={handleStartLearning}
         />
 
         {/* Course Content Section */}

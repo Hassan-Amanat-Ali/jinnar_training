@@ -39,7 +39,12 @@ const renderStars = (rating) => {
   return stars;
 };
 
-const CourseHero = ({ course }) => {
+const CourseHero = ({
+  course,
+  isPlaying = false,
+  onStartLearning,
+  videoSrc,
+}) => {
   return (
     <>
       {/* Hero Section */}
@@ -120,25 +125,43 @@ const CourseHero = ({ course }) => {
       <div className='relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='lg:absolute lg:right-8 lg:-top-60 lg:w-96 lg:mt-0 mt-8'>
           <div className='bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden'>
-            {/* Course Image with Play Button */}
+            {/* Course Image with Play Button OR Video */}
             <div className='relative'>
-              <img
-                src={course.image}
-                alt={course.title}
-                className='w-full h-56 object-cover'
-              />
-              <div className='absolute inset-0 bg-black/20 flex items-center justify-center'>
-                <button className='relative rounded-full p-5 bg-white text-gray-900 shadow-xl transition-transform hover:scale-105'>
-                  <span className='absolute inset-0 rounded-full ring-4 ring-white/70'></span>
-                  <FaPlay className='relative w-6 h-6 ml-1' />
-                </button>
-              </div>
+              {isPlaying ? (
+                <video
+                  src={videoSrc}
+                  className='w-full h-56 object-cover'
+                  controls
+                  autoPlay
+                />
+              ) : (
+                <>
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className='w-full h-56 object-cover'
+                  />
+                  <div className='absolute inset-0 bg-black/20 flex items-center justify-center'>
+                    <button
+                      className='relative rounded-full p-5 bg-white text-gray-900 shadow-xl transition-transform hover:scale-105'
+                      onClick={onStartLearning}
+                      aria-label='Play preview'
+                    >
+                      <span className='absolute inset-0 rounded-full ring-4 ring-white/70'></span>
+                      <FaPlay className='relative w-6 h-6 ml-1' />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className='p-6'>
               {/* Action Buttons */}
               <div className='space-y-3 mb-6'>
-                <button className='w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-300'>
+                <button
+                  className='w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-300'
+                  onClick={onStartLearning}
+                >
                   Start Learning
                 </button>
                 <button className='w-full text-gray-900 font-semibold py-2'>
