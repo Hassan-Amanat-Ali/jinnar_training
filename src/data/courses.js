@@ -1,10 +1,19 @@
+import {
+  Course1,
+  Course2,
+  Course3,
+  Course4,
+  Course5,
+  Course6,
+} from '../assets';
+
 export const courses = [
   {
     id: 1,
     title: 'Complete React Development',
     description:
       'Master React from basics to advanced concepts with hands-on projects. Learn component architecture, state management, and modern React patterns.',
-    image: '/src/assets/images/course-1.png',
+    image: Course1,
     duration: '12 Hours',
     enrolled: 2248,
     category: 'Development',
@@ -20,7 +29,7 @@ export const courses = [
     title: 'Advanced JavaScript Concepts',
     description:
       'Deep dive into JavaScript fundamentals, ES6+ features, async programming, and modern development practices.',
-    image: '/src/assets/images/course-2.png',
+    image: Course2,
     duration: '8 Hours',
     enrolled: 1856,
     category: 'Development',
@@ -36,7 +45,7 @@ export const courses = [
     title: 'Machine Learning Fundamentals',
     description:
       'Introduction to machine learning algorithms, data preprocessing, and model evaluation techniques.',
-    image: '/src/assets/images/course-3.png',
+    image: Course3,
     duration: '15 Hours',
     enrolled: 3421,
     category: 'Machine Learning',
@@ -52,7 +61,7 @@ export const courses = [
     title: 'Data Science Essentials',
     description:
       'Learn data analysis, visualization, and statistical methods for data-driven decision making.',
-    image: '/src/assets/images/course-4.png',
+    image: Course4,
     duration: '10 Hours',
     enrolled: 1987,
     category: 'Data Science',
@@ -68,7 +77,7 @@ export const courses = [
     title: 'UI/UX Design Principles',
     description:
       'Master the fundamentals of user interface and user experience design with practical projects.',
-    image: '/src/assets/images/course-5.png',
+    image: Course5,
     duration: '14 Hours',
     enrolled: 2765,
     category: 'Design',
@@ -84,7 +93,7 @@ export const courses = [
     title: 'Python for Data Analysis',
     description:
       'Learn Python programming specifically for data analysis, pandas, numpy, and matplotlib.',
-    image: '/src/assets/images/course-6.png',
+    image: Course6,
     duration: '11 Hours',
     enrolled: 3124,
     category: 'Data Science',
@@ -100,7 +109,7 @@ export const courses = [
     title: 'Web Development Bootcamp',
     description:
       'Complete web development course covering HTML, CSS, JavaScript, and modern frameworks.',
-    image: '/src/assets/images/course-1.png',
+    image: Course1,
     duration: '20 Hours',
     enrolled: 4567,
     category: 'Web Development',
@@ -116,7 +125,7 @@ export const courses = [
     title: 'Artificial Intelligence Basics',
     description:
       'Introduction to AI concepts, neural networks, and practical applications in modern technology.',
-    image: '/src/assets/images/course-2.png',
+    image: Course2,
     duration: '16 Hours',
     enrolled: 2890,
     category: 'Artificial Intelligence',
@@ -132,7 +141,7 @@ export const courses = [
     title: 'Mobile App Development',
     description:
       'Learn to build mobile applications using React Native and modern mobile development practices.',
-    image: '/src/assets/images/course-3.png',
+    image: Course3,
     duration: '18 Hours',
     enrolled: 2341,
     category: 'Development',
@@ -148,7 +157,7 @@ export const courses = [
     title: 'Node.js Backend Development',
     description:
       'Build scalable backend applications with Node.js, Express, and MongoDB. Learn API development and server-side programming.',
-    image: '/src/assets/images/course-4.png',
+    image: Course4,
     duration: '14 Hours',
     enrolled: 1987,
     category: 'Development',
@@ -164,7 +173,7 @@ export const courses = [
     title: 'Digital Marketing Mastery',
     description:
       'Comprehensive digital marketing course covering SEO, social media, email marketing, and analytics.',
-    image: '/src/assets/images/course-5.png',
+    image: Course5,
     duration: '12 Hours',
     enrolled: 3456,
     category: 'Marketing',
@@ -180,7 +189,7 @@ export const courses = [
     title: 'Cloud Computing with AWS',
     description:
       'Master Amazon Web Services and cloud computing concepts. Learn deployment, scaling, and cloud architecture.',
-    image: '/src/assets/images/course-6.png',
+    image: Course6,
     duration: '16 Hours',
     enrolled: 2234,
     category: 'Cloud Computing',
@@ -196,7 +205,7 @@ export const courses = [
     title: 'Cybersecurity Fundamentals',
     description:
       'Learn essential cybersecurity concepts, threat detection, and security best practices for modern applications.',
-    image: '/src/assets/images/course-1.png',
+    image: Course1,
     duration: '13 Hours',
     enrolled: 1876,
     category: 'Cybersecurity',
@@ -212,7 +221,7 @@ export const courses = [
     title: 'Blockchain Development',
     description:
       'Dive into blockchain technology, smart contracts, and decentralized application development.',
-    image: '/src/assets/images/course-2.png',
+    image: Course2,
     duration: '18 Hours',
     enrolled: 1543,
     category: 'Blockchain',
@@ -228,7 +237,7 @@ export const courses = [
     title: 'iOS App Development',
     description:
       'Create native iOS applications using Swift and Xcode. Learn iOS development from basics to advanced concepts.',
-    image: '/src/assets/images/course-3.png',
+    image: Course3,
     duration: '20 Hours',
     enrolled: 2987,
     category: 'Mobile Development',
