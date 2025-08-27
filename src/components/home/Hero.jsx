@@ -1,14 +1,18 @@
 import { Button } from '../ui';
 import { HomeHeroImg, SatisfiedClients } from '../../assets';
 import { MdNavigateNext } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   const handleStartLearning = () => {
-    console.log('start learning clicked');
+    navigate(ROUTES.COURSES);
   };
 
   const handleWatchDemo = () => {
-    console.log('watch demo clicked');
+    navigate(ROUTES.COURSES);
   };
 
   return (

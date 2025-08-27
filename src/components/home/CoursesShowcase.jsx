@@ -2,14 +2,28 @@ import React, { useState } from 'react';
 import { Card, Button } from '../ui';
 import { courses, categories } from '../../data/courses';
 import { FaArrowRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 const CoursesShowcase = () => {
   const [activeCategory, setActiveCategory] = useState('All');
+  const navigate = useNavigate();
 
   const filteredCourses =
     activeCategory === 'All'
       ? courses
       : courses.filter((course) => course.category === activeCategory);
+
+  const handleViewDetails = (id) => {
+    const path = ROUTES.COURSE_DETAIL.replace(':id', String(id));
+    navigate(path);
+  };
+
+  const handleEnroll = (id) => {
+    // For now, navigate to details page; replace with checkout later
+    const path = ROUTES.COURSE_DETAIL.replace(':id', String(id));
+    navigate(path);
+  };
 
   return (
     <section className='py-20 bg-secondary/10'>
@@ -58,10 +72,12 @@ const CoursesShowcase = () => {
                 <Button
                   text='Enroll Now'
                   className='btn-base-medium btn-primary flex-1'
+                  onClick={() => handleEnroll(course.id)}
                 />
                 <Button
                   text='View Details'
                   className='btn-base-medium btn-outline flex-1'
+                  onClick={() => handleViewDetails(course.id)}
                 />
               </>
             );
@@ -87,6 +103,7 @@ const CoursesShowcase = () => {
             text='View All Courses'
             icon={<FaArrowRight className='text-white w-4 h-4' />}
             className='btn-base-large btn-primary mx-auto'
+            onClick={() => navigate(ROUTES.COURSES)}
           />
         </div>
       </div>

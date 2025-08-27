@@ -1,8 +1,12 @@
 import React from 'react';
 import { Button } from '../ui';
 import { AboutHeroImg } from '../../assets';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className='bg-white py-16 lg:py-20 relative overflow-hidden'>
       {/* Blue geometric background element - top right only */}
@@ -29,6 +33,7 @@ const Hero = () => {
                 text='Say Hello to us'
                 className='btn-base-large bg-success text-white hover:bg-success/90'
                 icon='👋'
+                onClick={() => navigate(ROUTES.CONTACT)}
               />
             </div>
           </div>

@@ -1,7 +1,13 @@
 import React from 'react';
+import { ProfileLayout } from '../components/profile';
+import MyCoursesContent from '../components/my-courses/MyCoursesContent';
 
 const MyCourses = () => {
-  return <div>My Courses Page</div>;
+  return (
+    <ProfileLayout>
+      <MyCoursesContent />
+    </ProfileLayout>
+  );
 };
 
 export default MyCourses;

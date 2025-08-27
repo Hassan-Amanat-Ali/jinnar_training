@@ -13,15 +13,22 @@ const NAVIGATION = [
   { name: 'Contact Us', href: ROUTES.CONTACT },
 ];
 
-const Header = () => {
+const Header = ({ floating = false }) => {
   const location = useLocation();
   const [isMobileMenuOpen, { toggle: toggleMobileMenu }] = useToggle();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
-  const isActiveRoute = (href) => location.pathname === href;
+  const isActiveRoute = (href) => {
+    if (location.pathname === href) return true;
+    // Treat nested routes as active for parent (e.g., /courses/123 => Courses)
+    if (href !== '/' && location.pathname.startsWith(href + '/')) return true;
+    return false;
+  };
 
   return (
-    <header className='bg-white py-4'>
+    <header
+      className={`${floating ? 'absolute top-0 left-0 right-0 z-50' : ''} py-4`}
+    >
       <div className='section-container'>
         <nav className='rounded-full shadow-lg border border-muted px-6 bg-white'>
           <div className='flex justify-between items-center h-20'>

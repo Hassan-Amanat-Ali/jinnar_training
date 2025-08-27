@@ -1,13 +1,32 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import AuthPageImg from '../assets/images/auth-page-img.png';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [name, setName] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      toast.warning('Please enter your username.', { position: 'top-center' });
+      return;
+    }
+    if (!password.trim()) {
+      toast.warning('Please enter your password.', { position: 'top-center' });
+      return;
+    }
+    toast.success('Logged in successfully.', { position: 'top-center' });
+    navigate(ROUTES.EDIT_PROFILE);
+  };
+
   return (
     <div className='min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white'>
       {/* Left side image */}
@@ -61,12 +80,14 @@ const Login = () => {
             </p>
           </div>
 
-          <form className='space-y-5'>
+          <form className='space-y-5' onSubmit={handleSubmit}>
             <Input
               label='Name :'
               placeholder='Please enter username'
               className='h-12 rounded-none focus:ring-0 focus:ring-offset-0 focus:border-none bg-[#D9D9D9]/24 '
               required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
             <Input
               label='Password :'
@@ -74,6 +95,8 @@ const Login = () => {
               placeholder='Please enter password'
               className='h-12 rounded-none focus:ring-0 focus:ring-offset-0 focus:border-none bg-[#D9D9D9]/24 '
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
 
             <Button

@@ -31,7 +31,7 @@ const Footer = () => {
 
     // Validate email
     if (!email || email.trim() === '') {
-      toast.warning('lease enter your email address', {
+      toast.warning('Please enter your email address', {
         position: 'bottom-left',
       });
       return;
@@ -91,30 +91,26 @@ const Footer = () => {
     }
   };
 
-  const useCases = [
-    'Web designers',
-    'Marketers',
-    'Small Business',
-    'Website Builder',
+  // Relevant internal links only
+  const exploreLinks = [
+    { name: 'Home', href: ROUTES.HOME },
+    { name: 'Courses', href: ROUTES.COURSES },
+    { name: 'Blog', href: ROUTES.BLOG },
   ];
 
-  const resources = [
-    'Academy',
-    'Blog',
-    'Themes',
-    'Hosting',
-    'Developers',
-    'Support',
-  ];
-
-  const company = ['About Us', 'Careers', 'FAQs', 'Teams', 'Contact Us'];
-
-  const legalLinks = [
+  const resourcesLinks = [
     { name: 'Privacy Policy', href: ROUTES.PRIVACY_POLICY },
     { name: 'Terms of Service', href: ROUTES.TERMS_OF_SERVICE },
     { name: 'Refunds', href: ROUTES.REFUNDS },
     { name: 'Legal', href: ROUTES.LEGAL },
-    { name: 'Site Map', href: '#' },
+  ];
+
+  const companyLinks = [
+    { name: 'About Us', href: ROUTES.ABOUT },
+    { name: 'Teams', href: ROUTES.TEAM },
+    { name: 'My Courses', href: ROUTES.MY_COURSES },
+    { name: 'Notifications', href: ROUTES.NOTIFICATION },
+    { name: 'Contact Us', href: ROUTES.CONTACT },
   ];
 
   const socialIcons = [
@@ -145,10 +141,12 @@ const Footer = () => {
 
             {/* Right Side - CTA Button */}
             <div className='flex-shrink-0'>
-              <Button
-                text='View Pricing'
-                className='btn-base-large btn-gray text-black bg-white px-8 py-4 text-lg font-medium'
-              />
+              <Link to={ROUTES.COURSES}>
+                <Button
+                  text='View Pricing'
+                  className='btn-base-large btn-gray text-black bg-white px-8 py-4 text-lg font-medium'
+                />
+              </Link>
             </div>
           </div>
         </div>
@@ -222,20 +220,20 @@ const Footer = () => {
             {/* Right Side - Links Grid */}
             <div className='flex-1'>
               <div className='grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12'>
-                {/* Use Cases */}
+                {/* Explore */}
                 <div>
                   <h3 className='font-semibold text-black mb-6 text-base'>
-                    Use Cases
+                    Explore
                   </h3>
                   <ul className='space-y-4'>
-                    {useCases.map((item, index) => (
+                    {exploreLinks.map((item, index) => (
                       <li key={index}>
-                        <a
-                          href='#'
+                        <Link
+                          to={item.href}
                           className='text-black/70 hover:text-primary transition-colors duration-200 text-sm'
                         >
-                          {item}
-                        </a>
+                          {item.name}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -247,14 +245,14 @@ const Footer = () => {
                     Resources
                   </h3>
                   <ul className='space-y-4'>
-                    {resources.map((item, index) => (
+                    {resourcesLinks.map((item, index) => (
                       <li key={index}>
-                        <a
-                          href='#'
+                        <Link
+                          to={item.href}
                           className='text-black/70 hover:text-primary transition-colors duration-200 text-sm'
                         >
-                          {item}
-                        </a>
+                          {item.name}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -266,14 +264,14 @@ const Footer = () => {
                     Company
                   </h3>
                   <ul className='space-y-4'>
-                    {company.map((item, index) => (
+                    {companyLinks.map((item, index) => (
                       <li key={index}>
-                        <a
-                          href='#'
+                        <Link
+                          to={item.href}
                           className='text-black/70 hover:text-primary transition-colors duration-200 text-sm'
                         >
-                          {item}
-                        </a>
+                          {item.name}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -287,25 +285,15 @@ const Footer = () => {
             <div className='flex flex-col justify-center items-center gap-4'>
               {/* Legal Links */}
               <div className='flex flex-wrap justify-center lg:justify-start gap-6'>
-                {legalLinks.map((link, index) =>
-                  link.href.startsWith('/') ? (
-                    <Link
-                      key={index}
-                      to={link.href}
-                      className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
-                    >
-                      {link.name}
-                    </Link>
-                  ) : (
-                    <a
-                      key={index}
-                      href={link.href}
-                      className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
-                    >
-                      {link.name}
-                    </a>
-                  )
-                )}
+                {resourcesLinks.map((link, index) => (
+                  <Link
+                    key={index}
+                    to={link.href}
+                    className='text-sm text-black/60 hover:text-primary transition-colors duration-200'
+                  >
+                    {link.name}
+                  </Link>
+                ))}
               </div>
 
               {/* Copyright */}

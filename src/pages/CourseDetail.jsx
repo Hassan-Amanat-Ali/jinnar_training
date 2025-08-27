@@ -89,7 +89,6 @@ const CourseDetail = () => {
 
   return (
     <div className='min-h-screen flex flex-col'>
-      {/* Floating Header - uses absolute positioning like PrivacyPolicy */}
       <div className='absolute top-0 left-0 right-0 z-50'>
         <TransparentHeader />
       </div>

@@ -1,7 +1,13 @@
 import React from 'react';
+import { ProfileLayout } from '../components/profile';
+import NotificationsContent from '../components/notification/NotificationsContent';
 
 const Notification = () => {
-  return <div>Notification Page</div>;
+  return (
+    <ProfileLayout>
+      <NotificationsContent />
+    </ProfileLayout>
+  );
 };
 
 export default Notification;

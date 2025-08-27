@@ -2,8 +2,15 @@ import React from 'react';
 import { Button } from '../ui';
 import { AboutImg } from '../../assets';
 import { FaArrowRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 const About = () => {
+  const navigate = useNavigate();
+
+  const handleExploreCourses = () => navigate(ROUTES.COURSES);
+  const handleAboutUs = () => navigate(ROUTES.ABOUT);
+
   return (
     <section className='py-20 bg-white'>
       <div className='section-container'>
@@ -55,10 +62,12 @@ const About = () => {
                 text='Explore Courses'
                 icon={<FaArrowRight className='text-white w-4 h-4' />}
                 className='btn-base-large btn-primary'
+                onClick={handleExploreCourses}
               />
               <Button
                 text='About Us'
                 className='btn-base-large btn-secondary'
+                onClick={handleAboutUs}
               />
             </div>
           </div>

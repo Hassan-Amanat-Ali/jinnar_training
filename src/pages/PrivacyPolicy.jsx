@@ -2,18 +2,15 @@ import React from 'react';
 import { Header, Footer } from '../components/layout';
 import { PrivacyHero, PrivacyContent } from '../components/privacy-policy';
 import { ScrollToTop } from '../components/ui';
-
 export default function PrivacyPolicy() {
   return (
     <div className='min-h-screen flex flex-col bg-white'>
       {/* Floating Header */}
-      <div className='absolute top-0 left-0 right-0 z-50'>
-        <Header />
-      </div>
-
+      <Header floating />
       {/* Main Content */}
-      <main className='flex-grow'>
+      <main className='flex-grow relative'>
         {/* Hero section starts from the very top, header floats over it */}
+
         <PrivacyHero />
         <PrivacyContent />
       </main>
