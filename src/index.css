@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
   /* Colors */
@@ -13,9 +13,9 @@
   --color-muted-secondary: #4b5563;
   --color-dark-green: #01854a;
   /* Fonts */
-  --font-base: 'Montserrat', sans-serif;
-  --font-body: 'Montserrat', sans-serif;
-  --font-heading: 'Montserrat', sans-serif;
+  --font-base: "Montserrat", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-heading: "Montserrat", sans-serif;
 }
 
 @layer base {
@@ -88,5 +88,53 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Google Translate Styling - Minimal approach */
+  .google-translate-wrapper .goog-te-gadget {
+    font-family: inherit !important;
+    font-size: inherit !important;
+  }
+
+  .google-translate-wrapper .goog-te-gadget-simple {
+    background-color: transparent !important;
+    border: none !important;
+    font-size: inherit !important;
+    display: inline-block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide only the banner and unwanted UI elements */
+  .goog-te-banner-frame,
+  .goog-te-ftab,
+  .goog-te-balloon-frame,
+  .VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Ensure body doesn't get top margin from Google Translate */
+  body {
+    top: 0 !important;
+    position: static !important;
+  }
+
+  body.goog-te-hl-processing {
+    top: 0 !important;
+    position: static !important;
+  }
+
+  /* Remove Google Translate highlighting if desired */
+  .goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Custom language selector styling */
+  .google-translate-wrapper select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-primary);
+    border-color: transparent;
   }
 }
