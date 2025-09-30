@@ -1,36 +1,36 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ProfileImg } from "../../assets";
-import { GoogleTranslate } from "../common";
 
 const DesktopMenu = ({ navigation, isActiveRoute, isLoggedIn, ROUTES }) => (
-  <div className="flex items-center space-x-6">
+  <>
     <DesktopNavigation navigation={navigation} isActiveRoute={isActiveRoute} />
-    <GoogleTranslate />
     <DesktopActions isLoggedIn={isLoggedIn} ROUTES={ROUTES} />
-  </div>
+  </>
 );
 
 const DesktopNavigation = ({ navigation, isActiveRoute }) => (
-  <div className="flex items-center space-x-6">
-    {navigation.map((item) => (
-      <Link
-        key={item.name}
-        to={item.href}
-        className={`text-base font-medium transition-colors whitespace-nowrap ${
-          isActiveRoute(item.href)
-            ? "text-primary"
-            : "text-black/80 hover:text-primary"
-        }`}
-      >
-        {item.name}
-      </Link>
-    ))}
+  <div className="hidden lg:block">
+    <div className="flex items-center space-x-8">
+      {navigation.map((item) => (
+        <Link
+          key={item.name}
+          to={item.href}
+          className={`text-base font-medium transition-colors ${
+            isActiveRoute(item.href)
+              ? "text-primary"
+              : "text-black/80 hover:text-primary"
+          }`}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </div>
   </div>
 );
 
 const DesktopActions = ({ isLoggedIn, ROUTES }) => (
-  <div className="flex items-center">
+  <div className="hidden lg:flex items-center">
     {!isLoggedIn ? <DesktopAuthButtons ROUTES={ROUTES} /> : <DesktopUserMenu />}
   </div>
 );
