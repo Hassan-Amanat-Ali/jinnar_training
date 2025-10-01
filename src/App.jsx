@@ -1,8 +1,9 @@
-import { Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { Layout } from './components/layout';
-import { ScrollToTopOnRouteChange } from './components/common';
-import { ROUTES } from './constants/routes';
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { Layout } from "./components/layout";
+import { ScrollToTopOnRouteChange } from "./components/common";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ROUTES } from "./constants/routes";
 import {
   Home,
   About,
@@ -24,79 +25,84 @@ import {
   Team,
   Notification,
   Settings,
-} from './pages';
-import Watch from './pages/Watch';
+} from "./pages";
+import Watch from "./pages/Watch";
 
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <div className='App'>
-      {/* Scroll to top on route change */}
-      <ScrollToTopOnRouteChange />
+    <AuthProvider>
+      <div className="App">
+        {/* Scroll to top on route change */}
+        <ScrollToTopOnRouteChange />
 
-      <Routes>
-        {/* Auth routes without layout */}
-        <Route path={ROUTES.LOGIN} element={<Login />} />
-        <Route path={ROUTES.SIGNUP} element={<Signup />} />
+        <Routes>
+          {/* Auth routes without layout */}
+          <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.SIGNUP} element={<Signup />} />
 
-        {/* Privacy Policy with custom layout (floating header) */}
-        <Route path={ROUTES.PRIVACY_POLICY} element={<PrivacyPolicy />} />
+          {/* Privacy Policy with custom layout (floating header) */}
+          <Route path={ROUTES.PRIVACY_POLICY} element={<PrivacyPolicy />} />
 
-        {/* Terms of Service with custom layout (floating header) */}
-        <Route path={ROUTES.TERMS_OF_SERVICE} element={<TermsOfService />} />
+          {/* Terms of Service with custom layout (floating header) */}
+          <Route path={ROUTES.TERMS_OF_SERVICE} element={<TermsOfService />} />
 
-        {/* Refunds with custom layout (floating header) */}
-        <Route path={ROUTES.REFUNDS} element={<Refunds />} />
+          {/* Refunds with custom layout (floating header) */}
+          <Route path={ROUTES.REFUNDS} element={<Refunds />} />
 
-        {/* Legal with custom layout (floating header) */}
-        <Route path={ROUTES.LEGAL} element={<Legal />} />
-        <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
-        <Route path={ROUTES.WATCH} element={<Watch />} />
+          {/* Legal with custom layout (floating header) */}
+          <Route path={ROUTES.LEGAL} element={<Legal />} />
+          <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
+          <Route path={ROUTES.WATCH} element={<Watch />} />
 
-        {/* Main routes with layout */}
-        <Route
-          path='*'
-          element={
-            <Layout>
-              <Routes>
-                <Route path={ROUTES.HOME} element={<Home />} />
-                <Route path={ROUTES.ABOUT} element={<About />} />
-                <Route path={ROUTES.CONTACT} element={<Contact />} />
-                <Route path={ROUTES.COURSES} element={<Courses />} />
+          {/* Main routes with layout */}
+          <Route
+            path="*"
+            element={
+              <Layout>
+                <Routes>
+                  <Route path={ROUTES.HOME} element={<Home />} />
+                  <Route path={ROUTES.ABOUT} element={<About />} />
+                  <Route path={ROUTES.CONTACT} element={<Contact />} />
+                  <Route path={ROUTES.COURSES} element={<Courses />} />
 
-                <Route path={ROUTES.PORTFOLIO} element={<Portfolio />} />
-                <Route path={ROUTES.BLOG} element={<Blog />} />
+                  <Route path={ROUTES.PORTFOLIO} element={<Portfolio />} />
+                  <Route path={ROUTES.BLOG} element={<Blog />} />
 
-                {/* Profile Routes */}
-                <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
-                <Route path={ROUTES.MY_COURSES} element={<MyCourses />} />
-                <Route path={ROUTES.TEAM} element={<Team />} />
-                <Route path={ROUTES.NOTIFICATION} element={<Notification />} />
-                <Route path={ROUTES.SETTINGS} element={<Settings />} />
+                  {/* Profile Routes */}
+                  <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
+                  <Route path={ROUTES.MY_COURSES} element={<MyCourses />} />
+                  <Route path={ROUTES.TEAM} element={<Team />} />
+                  <Route
+                    path={ROUTES.NOTIFICATION}
+                    element={<Notification />}
+                  />
+                  <Route path={ROUTES.SETTINGS} element={<Settings />} />
 
-                {/* 404 Route */}
-                <Route path='*' element={<NotFound />} />
-              </Routes>
-            </Layout>
-          }
+                  {/* 404 Route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            }
+          />
+        </Routes>
+
+        {/* Toast Container */}
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
         />
-      </Routes>
-
-      {/* Toast Container */}
-      <ToastContainer
-        position='top-center'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme='light'
-      />
-    </div>
+      </div>
+    </AuthProvider>
   );
 }
 

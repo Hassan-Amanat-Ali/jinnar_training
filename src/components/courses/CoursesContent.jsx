@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../constants/routes';
-import CoursesFilters from './CoursesFilters';
-import CoursesListing from './CoursesListing';
-import { courses } from '../../data/courses';
+import React, { useState, useEffect, useMemo } from "react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../constants/routes";
+import CoursesFilters from "./CoursesFilters";
+import CoursesListing from "./CoursesListing";
+import { courses } from "../../data/courses";
 
 const CoursesContent = () => {
   const navigate = useNavigate();
@@ -12,14 +12,14 @@ const CoursesContent = () => {
   const [coursesState, setCoursesState] = useState(courses);
 
   // State for filters
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedLevels, setSelectedLevels] = useState([]);
   const [selectedDurations, setSelectedDurations] = useState([]);
 
   // State for view and pagination
-  const [viewMode, setViewMode] = useState('grid');
-  const [sortBy, setSortBy] = useState('Most Popular');
+  const [viewMode, setViewMode] = useState("grid");
+  const [sortBy, setSortBy] = useState("Most Popular");
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 9;
 
@@ -58,11 +58,11 @@ const CoursesContent = () => {
       filtered = filtered.filter((course) => {
         const duration = course.duration;
         return selectedDurations.some((selectedDuration) => {
-          if (selectedDuration === '0-3 Hours') {
+          if (selectedDuration === "0-3 Hours") {
             return parseInt(duration) <= 3;
-          } else if (selectedDuration === '3-6 Hours') {
+          } else if (selectedDuration === "3-6 Hours") {
             return parseInt(duration) > 3 && parseInt(duration) <= 6;
-          } else if (selectedDuration === '6-12 Hours') {
+          } else if (selectedDuration === "6-12 Hours") {
             return parseInt(duration) > 6 && parseInt(duration) <= 12;
           }
           return true;
@@ -72,22 +72,22 @@ const CoursesContent = () => {
 
     // Sort courses
     switch (sortBy) {
-      case 'Most Popular':
+      case "Most Popular":
         filtered.sort((a, b) => b.enrolled - a.enrolled);
         break;
-      case 'Newest':
+      case "Newest":
         filtered.sort((a, b) => b.id - a.id);
         break;
-      case 'Price: Low to High':
+      case "Price: Low to High":
         filtered.sort((a, b) => a.price - b.price);
         break;
-      case 'Price: High to Low':
+      case "Price: High to Low":
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case 'Rating: High to Low':
+      case "Rating: High to Low":
         filtered.sort((a, b) => b.rating - a.rating);
         break;
-      case 'Duration: Short to Long':
+      case "Duration: Short to Long":
         filtered.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
         break;
       default:
@@ -118,20 +118,20 @@ const CoursesContent = () => {
   // Auto-switch to grid view on smaller screens
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024 && viewMode === 'list') {
-        setViewMode('grid');
+      if (window.innerWidth < 1024 && viewMode === "list") {
+        setViewMode("grid");
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     handleResize(); // Check on initial load
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [viewMode]);
 
   // Clear all filters
   const handleClearAll = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setSelectedCategories([]);
     setSelectedLevels([]);
     setSelectedDurations([]);
@@ -154,9 +154,9 @@ const CoursesContent = () => {
     if (course) {
       toast.success(
         course.isFavorite
-          ? 'Course added to favorites!'
-          : 'Course removed from favorites!',
-        { position: 'top-center' }
+          ? "Course added to favorites!"
+          : "Course removed from favorites!",
+        { position: "top-center" }
       );
     }
   };
@@ -166,7 +166,7 @@ const CoursesContent = () => {
     const course = coursesState.find((c) => c.id === courseId);
     if (course) {
       toast.success(`Successfully enrolled in ${course.title}!`, {
-        position: 'top-center',
+        position: "top-center",
       });
     }
   };
@@ -177,11 +177,11 @@ const CoursesContent = () => {
   };
 
   return (
-    <section className='py-16 lg:py-20 bg-gray-50'>
-      <div className='section-container'>
-        <div className='grid grid-cols-1 lg:grid-cols-4 gap-8'>
+    <section className="py-16 lg:py-20 bg-gray-50">
+      <div className="section-container">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar - Filters */}
-          <div className='lg:col-span-1'>
+          <div className="lg:col-span-1">
             <CoursesFilters
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -196,7 +196,7 @@ const CoursesContent = () => {
           </div>
 
           {/* Right Side - Course Listing */}
-          <div className='lg:col-span-3'>
+          <div className="lg:col-span-3">
             <CoursesListing
               filteredCourses={filteredCourses}
               viewMode={viewMode}

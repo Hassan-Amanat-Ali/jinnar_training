@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { useToggle } from "../../hooks";
+import { useAuth } from "../../hooks/useAuth";
 import { Logo } from "../../assets";
 import { GoogleTranslate } from "../common";
 import MobileMenu from "./MobileMenu";
@@ -17,7 +18,7 @@ const NAVIGATION = [
 const Header = ({ floating = false }) => {
   const location = useLocation();
   const [isMobileMenuOpen, { toggle: toggleMobileMenu }] = useToggle();
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const { currentUser, isAuthenticated } = useAuth();
 
   const isActiveRoute = (href) => {
     if (location.pathname === href) return true;
@@ -32,19 +33,45 @@ const Header = ({ floating = false }) => {
     >
       <div className="section-container">
         <nav className="rounded-full shadow-lg border border-muted px-6 bg-white">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex items-center h-20">
             <LogoSection />
 
-            <DesktopMenu
-              navigation={NAVIGATION}
-              isActiveRoute={isActiveRoute}
-              isLoggedIn={isLoggedIn}
-              ROUTES={ROUTES}
-            />
+            {/* Centered Navigation */}
+            <div className="flex-1 flex justify-center">
+              <div className="hidden lg:block">
+                <div className="flex items-center space-x-8">
+                  {NAVIGATION.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`text-base font-medium transition-colors ${
+                        isActiveRoute(item.href)
+                          ? "text-primary"
+                          : "text-black/80 hover:text-primary"
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-            {/* Language Selector and Mobile Menu */}
+            {/* Right Section - Auth + Mobile Menu */}
             <div className="flex items-center space-x-4">
-              <GoogleTranslate className="hidden lg:block" />
+              {/* Google Translate for Mobile */}
+
+              <GoogleTranslate containerId="google_translate_header" />
+
+              <DesktopMenu
+                navigation={NAVIGATION}
+                isActiveRoute={isActiveRoute}
+                isLoggedIn={isAuthenticated}
+                currentUser={currentUser}
+                ROUTES={ROUTES}
+              />
+
+              {/* Mobile Menu Button */}
               <MobileMenuButton
                 isOpen={isMobileMenuOpen}
                 onToggle={toggleMobileMenu}
@@ -57,7 +84,8 @@ const Header = ({ floating = false }) => {
             onClose={toggleMobileMenu}
             navigation={NAVIGATION}
             isActiveRoute={isActiveRoute}
-            isLoggedIn={isLoggedIn}
+            isLoggedIn={isAuthenticated}
+            currentUser={currentUser}
             ROUTES={ROUTES}
           />
         </nav>

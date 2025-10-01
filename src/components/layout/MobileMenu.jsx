@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Logo, ProfileImg } from "../../assets";
+import { Logo } from "../../assets";
 import { GoogleTranslate } from "../common";
+import { useAuth } from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
 const MobileMenu = ({
   isOpen,
@@ -9,6 +11,7 @@ const MobileMenu = ({
   navigation,
   isActiveRoute,
   isLoggedIn,
+  currentUser,
   ROUTES,
 }) => {
   useEffect(() => {
@@ -42,6 +45,7 @@ const MobileMenu = ({
           />
           <MobileMenuActions
             isLoggedIn={isLoggedIn}
+            currentUser={currentUser}
             onClose={onClose}
             ROUTES={ROUTES}
           />
@@ -97,20 +101,24 @@ const MobileMenuNavigation = ({ navigation, isActiveRoute, onClose }) => (
   </div>
 );
 
-const MobileMenuActions = ({ isLoggedIn, onClose, ROUTES }) => (
+const MobileMenuActions = ({ isLoggedIn, currentUser, onClose, ROUTES }) => (
   <div className="p-6 border-t border-black/10 space-y-4">
     {/* Language Selector for Mobile */}
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Choose Language
       </label>
-      <GoogleTranslate />
+      <GoogleTranslate containerId="google_translate_mobile" />
     </div>
 
     {!isLoggedIn ? (
       <LoggedOutActions onClose={onClose} ROUTES={ROUTES} />
     ) : (
-      <LoggedInProfile />
+      <LoggedInProfile
+        currentUser={currentUser}
+        onClose={onClose}
+        ROUTES={ROUTES}
+      />
     )}
   </div>
 );
@@ -130,53 +138,104 @@ const LoggedOutActions = ({ onClose, ROUTES }) => (
   </div>
 );
 
-const LoggedInProfile = () => (
-  <div className="flex items-center space-x-4 p-4 bg-black/5 rounded-xl">
-    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center overflow-hidden">
-      <img
-        src={ProfileImg}
-        alt="User profile"
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <div className="flex-1">
-      <div className="text-base font-semibold text-black">John Doe</div>
-      <div className="text-sm text-black/50">john@example.com</div>
-    </div>
-    <div className="flex space-x-2">
-      <IconButton>
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      const result = await signOut();
+      if (result.success) {
+        toast.success(result.message, { position: "top-center" });
+        onClose();
+      } else {
+        toast.error(result.message, { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Failed to sign out. Please try again.", {
+        position: "top-center",
+      });
+    }
+  };
+
+  const getUserDisplayName = () => {
+    if (currentUser?.displayName) {
+      return currentUser.displayName;
+    }
+    if (currentUser?.email) {
+      return currentUser.email.split("@")[0];
+    }
+    return "User";
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* User Profile Section */}
+      <div className="flex items-center space-x-4 p-4 bg-black/5 rounded-xl">
+        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+          {currentUser?.photoURL ? (
+            <img
+              src={currentUser.photoURL}
+              alt="User profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-white font-medium text-sm">
+              {getUserInitials()}
+            </span>
+          )}
+        </div>
+        <div className="flex-1">
+          <div className="text-base font-semibold text-black">
+            {getUserDisplayName()}
+          </div>
+          <div className="text-sm text-black/50">{currentUser?.email}</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="space-y-2">
+        <Link
+          to={ROUTES.EDIT_PROFILE}
+          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          onClick={onClose}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </IconButton>
-      <IconButton>
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+          Edit Profile
+        </Link>
+        <Link
+          to={ROUTES.MY_COURSES}
+          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          onClick={onClose}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"
-          />
-        </svg>
-      </IconButton>
+          My Courses
+        </Link>
+        <Link
+          to={ROUTES.SETTINGS}
+          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          onClick={onClose}
+        >
+          Settings
+        </Link>
+        <button
+          onClick={handleSignOut}
+          className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+        >
+          Sign Out
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const IconButton = ({ children, onClick }) => (
   <button

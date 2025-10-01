@@ -1,37 +1,23 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ProfileImg } from "../../assets";
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
-const DesktopMenu = ({ navigation, isActiveRoute, isLoggedIn, ROUTES }) => (
-  <>
-    <DesktopNavigation navigation={navigation} isActiveRoute={isActiveRoute} />
-    <DesktopActions isLoggedIn={isLoggedIn} ROUTES={ROUTES} />
-  </>
+const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
+  <DesktopActions
+    isLoggedIn={isLoggedIn}
+    currentUser={currentUser}
+    ROUTES={ROUTES}
+  />
 );
 
-const DesktopNavigation = ({ navigation, isActiveRoute }) => (
-  <div className="hidden lg:block">
-    <div className="flex items-center space-x-8">
-      {navigation.map((item) => (
-        <Link
-          key={item.name}
-          to={item.href}
-          className={`text-base font-medium transition-colors ${
-            isActiveRoute(item.href)
-              ? "text-primary"
-              : "text-black/80 hover:text-primary"
-          }`}
-        >
-          {item.name}
-        </Link>
-      ))}
-    </div>
-  </div>
-);
-
-const DesktopActions = ({ isLoggedIn, ROUTES }) => (
-  <div className="hidden lg:flex items-center">
-    {!isLoggedIn ? <DesktopAuthButtons ROUTES={ROUTES} /> : <DesktopUserMenu />}
+const DesktopActions = ({ isLoggedIn, currentUser, ROUTES }) => (
+  <div className="hidden lg:flex items-center space-x-4">
+    {!isLoggedIn ? (
+      <DesktopAuthButtons ROUTES={ROUTES} />
+    ) : (
+      <DesktopUserMenu currentUser={currentUser} ROUTES={ROUTES} />
+    )}
   </div>
 );
 
@@ -50,51 +36,186 @@ const DesktopAuthButtons = ({ ROUTES }) => (
   </div>
 );
 
-const DesktopUserMenu = () => (
-  <div className="flex items-center space-x-4">
-    <IconButton>
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-    </IconButton>
+const DesktopUserMenu = ({ currentUser, ROUTES }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
-    <IconButton>
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"
-        />
-      </svg>
-    </IconButton>
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-    <div className="flex items-center space-x-2">
-      <button className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-primary hover:ring-opacity-50 transition-all">
-        <img
-          src={ProfileImg}
-          alt="User profile"
-          className="w-full h-full object-cover"
-        />
-      </button>
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Reset image error when currentUser changes
+  useEffect(() => {
+    setImageError(false);
+    // Debug logging for Google auth data
+    if (currentUser) {
+      console.log("Current user data:", {
+        displayName: currentUser.displayName,
+        email: currentUser.email,
+        photoURL: currentUser.photoURL,
+        providerId: currentUser.providerId,
+        providerData: currentUser.providerData,
+      });
+    }
+  }, [currentUser?.photoURL, currentUser]);
+
+  // Enhanced function to get optimized photo URL
+  const getOptimizedPhotoURL = () => {
+    if (!currentUser?.photoURL) return null;
+
+    let photoURL = currentUser.photoURL;
+
+    // If it's a Google photo, try to optimize it for better loading
+    if (photoURL.includes("googleusercontent.com")) {
+      // Remove size parameter and add our own for consistent sizing
+      photoURL = photoURL.replace(/=s\d+/, "=s96");
+      console.log("Optimized Google photo URL:", photoURL);
+    }
+
+    return photoURL;
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const result = await signOut();
+      if (result.success) {
+        toast.success(result.message, { position: "top-center" });
+        navigate(ROUTES.HOME);
+      } else {
+        toast.error(result.message, { position: "top-center" });
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Failed to sign out. Please try again.", {
+        position: "top-center",
+      });
+    }
+    setIsDropdownOpen(false);
+  };
+
+  const getUserDisplayName = () => {
+    if (currentUser?.displayName) {
+      return currentUser.displayName;
+    }
+    if (currentUser?.email) {
+      return currentUser.email.split("@")[0];
+    }
+    return "User";
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const optimizedPhotoURL = getOptimizedPhotoURL();
+
+  return (
+    <div className="flex items-center space-x-4">
+      {/* User Profile Dropdown */}
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-primary hover:ring-opacity-50 transition-all"
+        >
+          {optimizedPhotoURL && !imageError ? (
+            <img
+              src={optimizedPhotoURL}
+              alt="User profile"
+              className="w-full h-full object-cover"
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                console.log("Profile image failed to load:", optimizedPhotoURL);
+                console.log("Error details:", e.target.error);
+                setImageError(true);
+              }}
+              onLoad={() => {
+                setImageError(false);
+              }}
+            />
+          ) : (
+            <span className="text-white font-medium text-sm">
+              {getUserInitials()}
+            </span>
+          )}
+        </button>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 min-w-64 max-w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+            <div className="px-4 py-2 border-b border-gray-100">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {getUserDisplayName()}
+              </p>
+              <p className="text-xs text-gray-500 truncate break-all">
+                {currentUser?.email}
+              </p>
+            </div>
+
+            <Link
+              to={ROUTES.EDIT_PROFILE}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Edit Profile
+            </Link>
+
+            <Link
+              to={ROUTES.MY_COURSES}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              My Courses
+            </Link>
+
+            <Link
+              to={ROUTES.NOTIFICATION}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Notifications
+            </Link>
+
+            <Link
+              to={ROUTES.SETTINGS}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Settings
+            </Link>
+
+            <div className="border-t border-gray-100">
+              <button
+                onClick={handleSignOut}
+                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 whitespace-nowrap"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const IconButton = ({ children, onClick }) => (
   <button
