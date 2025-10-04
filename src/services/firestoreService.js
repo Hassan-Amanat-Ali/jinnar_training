@@ -159,6 +159,31 @@ class FirestoreService {
     }
   }
 
+  // Upsert a document (create if doesn't exist, update if exists)
+  async upsert(collectionName, docId, data) {
+    try {
+      const docRef = doc(this.db, collectionName, docId);
+      await setDoc(
+        docRef,
+        {
+          ...data,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return {
+        success: true,
+        message: "Document saved successfully!",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.code,
+        message: error.message,
+      };
+    }
+  }
+
   // Delete a document
   async delete(collectionName, docId) {
     try {

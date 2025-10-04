@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "../../assets";
 import { GoogleTranslate } from "../common";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import { firestoreService } from "../../services";
 
 const MobileMenu = ({
   isOpen,
@@ -140,6 +141,30 @@ const LoggedOutActions = ({ onClose, ROUTES }) => (
 
 const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
   const { signOut } = useAuth();
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      setUserRole(null);
+      return;
+    }
+    const unsubscribe = firestoreService.onDocumentSnapshot(
+      "users",
+      currentUser.uid,
+      (doc) => {
+        if (doc) {
+          let role = doc.role;
+          if (!role && doc.userRole) role = doc.userRole;
+          if (!role && typeof doc.role === "object" && doc.role?.name)
+            role = doc.role.name;
+          setUserRole((role || "student").toString().toLowerCase());
+        } else {
+          setUserRole(null);
+        }
+      }
+    );
+    return () => unsubscribe && unsubscribe();
+  }, [currentUser?.uid]);
 
   const handleSignOut = async () => {
     try {
@@ -205,6 +230,15 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
 
       {/* Quick Actions */}
       <div className="space-y-2">
+        {userRole === "admin" && (
+          <Link
+            to={ROUTES.ADMIN_DASHBOARD}
+            className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+            onClick={onClose}
+          >
+            Admin Dashboard
+          </Link>
+        )}
         <Link
           to={ROUTES.EDIT_PROFILE}
           className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"

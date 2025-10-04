@@ -15,6 +15,7 @@ export const ROUTES = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   DASHBOARD: "/dashboard",
+  ADMIN_DASHBOARD: "/admin",
   PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
   MY_COURSES: "/my-courses",
@@ -31,6 +32,7 @@ export const ROUTES = {
 
 export const PROTECTED_ROUTES = [
   ROUTES.DASHBOARD,
+  ROUTES.ADMIN_DASHBOARD,
   ROUTES.PROFILE,
   ROUTES.EDIT_PROFILE,
   ROUTES.MY_COURSES,

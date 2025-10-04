@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import { firestoreService } from "../../services";
 
 const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
   <DesktopActions
@@ -39,6 +40,7 @@ const DesktopAuthButtons = ({ ROUTES }) => (
 const DesktopUserMenu = ({ currentUser, ROUTES }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -59,17 +61,31 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
   // Reset image error when currentUser changes
   useEffect(() => {
     setImageError(false);
-    // Debug logging for Google auth data
-    if (currentUser) {
-      console.log("Current user data:", {
-        displayName: currentUser.displayName,
-        email: currentUser.email,
-        photoURL: currentUser.photoURL,
-        providerId: currentUser.providerId,
-        providerData: currentUser.providerData,
-      });
-    }
   }, [currentUser?.photoURL, currentUser]);
+
+  // Subscribe to user role changes from Firestore (users collection)
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      setUserRole(null);
+      return;
+    }
+    const unsubscribe = firestoreService.onDocumentSnapshot(
+      "users",
+      currentUser.uid,
+      (doc) => {
+        if (doc) {
+          let role = doc.role;
+          if (!role && doc.userRole) role = doc.userRole;
+          if (!role && typeof doc.role === "object" && doc.role?.name)
+            role = doc.role.name;
+          setUserRole((role || "student").toString().toLowerCase());
+        } else {
+          setUserRole(null);
+        }
+      }
+    );
+    return () => unsubscribe && unsubscribe();
+  }, [currentUser?.uid]);
 
   // Enhanced function to get optimized photo URL
   const getOptimizedPhotoURL = () => {
@@ -81,7 +97,6 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
     if (photoURL.includes("googleusercontent.com")) {
       // Remove size parameter and add our own for consistent sizing
       photoURL = photoURL.replace(/=s\d+/, "=s96");
-      console.log("Optimized Google photo URL:", photoURL);
     }
 
     return photoURL;
@@ -142,9 +157,7 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
               className="w-full h-full object-cover"
               crossOrigin="anonymous"
               referrerPolicy="no-referrer"
-              onError={(e) => {
-                console.log("Profile image failed to load:", optimizedPhotoURL);
-                console.log("Error details:", e.target.error);
+              onError={() => {
                 setImageError(true);
               }}
               onLoad={() => {
@@ -169,6 +182,16 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
                 {currentUser?.email}
               </p>
             </div>
+
+            {userRole === "admin" && (
+              <Link
+                to={ROUTES.ADMIN_DASHBOARD}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Admin Dashboard
+              </Link>
+            )}
 
             <Link
               to={ROUTES.EDIT_PROFILE}

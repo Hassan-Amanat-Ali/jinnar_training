@@ -1,6 +1,7 @@
 // Firebase Services Export
 export { default as authService } from "./authService";
 export { default as firestoreService } from "./firestoreService";
+export { default as profileService } from "./profileService";
 
 // Cloudinary Service Export
 export { default as cloudinaryService } from "./cloudinaryService";

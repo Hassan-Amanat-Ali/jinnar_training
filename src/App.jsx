@@ -25,6 +25,7 @@ import {
   Team,
   Notification,
   Settings,
+  AdminDashboard,
 } from "./pages";
 import Watch from "./pages/Watch";
 
@@ -56,6 +57,7 @@ function App() {
           <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
           <Route path={ROUTES.WATCH} element={<Watch />} />
 
+          <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboard />} />
           {/* Main routes with layout */}
           <Route
             path="*"

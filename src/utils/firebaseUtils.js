@@ -30,7 +30,6 @@ class FirebaseUtils {
 
       return existingProfile;
     } catch (error) {
-      console.error("Error initializing user profile:", error);
       return {
         success: false,
         error: error.message,
@@ -53,7 +52,7 @@ class FirebaseUtils {
         return authResult;
       }
 
-      // 2. Create user profile in Firestore
+      // 2. Create user profile in Firestore (users collection)
       const userData = {
         email: authResult.user.email,
         displayName: displayName,
@@ -77,6 +76,14 @@ class FirebaseUtils {
         };
       }
 
+      // 3. Also initialize userProfiles document for sidebar/profile page
+      const { profileService } = await import("../services");
+      await profileService.initializeUserProfile(authResult.user.uid, {
+        email: authResult.user.email,
+        photoURL: authResult.user.photoURL || "",
+        displayName: displayName,
+      });
+
       return {
         success: true,
         user: authResult.user,
@@ -84,7 +91,6 @@ class FirebaseUtils {
         message: "Registration completed successfully!",
       };
     } catch (error) {
-      console.error("Error during registration:", error);
       return {
         success: false,
         error: error.message,
@@ -102,8 +108,23 @@ class FirebaseUtils {
         return authResult;
       }
 
-      // 2. Initialize/update user profile
+      // 2. Initialize/update user profile (creates user doc in 'users' collection)
       const profileResult = await this.initializeUserProfile(authResult.user);
+
+      // 3. Ensure userProfiles document is initialized for sidebar/profile page
+      const { profileService } = await import("../services");
+      const userProfileCheck = await profileService.getUserProfile(
+        authResult.user.uid
+      );
+
+      if (!userProfileCheck.success || !userProfileCheck.data) {
+        // Initialize separate userProfiles doc if it doesn't exist
+        await profileService.initializeUserProfile(authResult.user.uid, {
+          email: authResult.user.email,
+          photoURL: authResult.user.photoURL || "",
+          displayName: authResult.user.displayName || "",
+        });
+      }
 
       return {
         success: true,
@@ -143,8 +164,23 @@ class FirebaseUtils {
         return authResult;
       }
 
-      // Initialize user profile for social login
+      // Initialize user profile for social login (creates user doc in 'users' collection)
       const profileResult = await this.initializeUserProfile(authResult.user);
+
+      // Also ensure userProfiles document is initialized for sidebar/profile page
+      const { profileService } = await import("../services");
+      const userProfileCheck = await profileService.getUserProfile(
+        authResult.user.uid
+      );
+
+      if (!userProfileCheck.success || !userProfileCheck.data) {
+        // Initialize separate userProfiles doc if it doesn't exist
+        await profileService.initializeUserProfile(authResult.user.uid, {
+          email: authResult.user.email,
+          photoURL: authResult.user.photoURL || "",
+          displayName: authResult.user.displayName || "",
+        });
+      }
 
       return {
         success: true,

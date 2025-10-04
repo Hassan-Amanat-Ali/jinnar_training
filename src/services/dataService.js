@@ -4,6 +4,7 @@ import firestoreService from "./firestoreService";
 export const COLLECTIONS = {
   USERS: "users",
   COURSES: "courses",
+  LECTURES: "lectures",
   ENROLLMENTS: "enrollments",
   REVIEWS: "reviews",
   NOTIFICATIONS: "notifications",
@@ -15,21 +16,17 @@ export const COLLECTIONS = {
 export class UserService {
   static async createUser(userId, userData) {
     return await firestoreService.createWithId(COLLECTIONS.USERS, userId, {
-      email: userData.email,
+      email: userData.email || "",
       displayName: userData.displayName || "",
       photoURL: userData.photoURL || "",
-      role: "student",
+      emailVerified: userData.emailVerified || false,
+      provider: userData.provider || "email",
+      role: userData.role || "student",
       preferences: {
         language: "en",
         notifications: true,
         theme: "light",
-      },
-      profile: {
-        bio: "",
-        location: "",
-        website: "",
-        skills: [],
-        interests: [],
+        ...userData.preferences,
       },
     });
   }

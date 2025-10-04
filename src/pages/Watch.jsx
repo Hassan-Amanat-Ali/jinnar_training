@@ -1,31 +1,31 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Header, Footer } from '../components/layout';
-import VideoPlayer from '../components/video/VideoPlayer';
-import Playlist from '../components/video/Playlist';
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Header, Footer } from "../components/layout";
+import VideoPlayer from "../components/video/VideoPlayer";
+import Playlist from "../components/video/Playlist";
 
 // Demo data (replace with real lecture data later)
 const demoLectures = [
   {
-    id: '1',
-    title: 'Lecture 1',
-    subtitle: 'Artificial Intelligence (AI) Training Courses - Lecture 1',
-    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
-    thumb: '/src/assets/images/course-1.png',
+    id: "1",
+    title: "Lecture 1",
+    subtitle: "Artificial Intelligence (AI) Training Courses - Lecture 1",
+    src: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    thumb: "/src/assets/images/course-1.png",
   },
   {
-    id: '2',
-    title: 'Lecture 2',
-    subtitle: 'Artificial Intelligence (AI) Training Courses - Lecture 2',
-    src: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
-    thumb: '/src/assets/images/course-2.png',
+    id: "2",
+    title: "Lecture 2",
+    subtitle: "Artificial Intelligence (AI) Training Courses - Lecture 2",
+    src: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    thumb: "/src/assets/images/course-2.png",
   },
   {
-    id: '3',
-    title: 'Lecture 3',
-    subtitle: 'Artificial Intelligence (AI) Training Courses - Lecture 3',
-    src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumb: '/src/assets/images/course-3.png',
+    id: "3",
+    title: "Lecture 3",
+    subtitle: "Artificial Intelligence (AI) Training Courses - Lecture 3",
+    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    thumb: "/src/assets/images/course-3.png",
   },
 ];
 
@@ -38,7 +38,7 @@ const Watch = () => {
 
   React.useEffect(() => {
     if (lectureId && lectureId !== currentId) setCurrentId(lectureId);
-  }, [lectureId]);
+  }, [lectureId, currentId]);
 
   const index = demoLectures.findIndex((l) => l.id === currentId);
   const current = demoLectures[index] || demoLectures[0];
@@ -62,11 +62,11 @@ const Watch = () => {
   const canNext = index < demoLectures.length - 1;
 
   return (
-    <div className='min-h-screen bg-white text-black'>
+    <div className="min-h-screen bg-white text-black">
       <Header />
-      <main className='section-container py-6'>
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-          <div className='lg:col-span-2'>
+      <main className="section-container py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <VideoPlayer
               src={current.src}
               poster={current.thumb}
@@ -77,7 +77,7 @@ const Watch = () => {
               canNext={canNext}
             />
           </div>
-          <div className='lg:col-span-1'>
+          <div className="lg:col-span-1">
             <Playlist
               items={demoLectures}
               currentId={currentId}
