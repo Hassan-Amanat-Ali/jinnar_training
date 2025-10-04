@@ -39,6 +39,44 @@ const renderStars = (rating) => {
   return stars;
 };
 
+const formatLastUpdated = (dateValue) => {
+  try {
+    if (!dateValue) return "Recently";
+
+    let date;
+
+    // Handle different date formats
+    if (dateValue.toDate && typeof dateValue.toDate === "function") {
+      // Firestore Timestamp
+      date = dateValue.toDate();
+    } else if (dateValue.seconds) {
+      // Firestore Timestamp object
+      date = new Date(dateValue.seconds * 1000);
+    } else if (typeof dateValue === "string") {
+      // ISO string
+      date = new Date(dateValue);
+    } else if (dateValue instanceof Date) {
+      // Already a Date object
+      date = dateValue;
+    } else {
+      return "Recently";
+    }
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Recently";
+    }
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Recently";
+  }
+};
+
 const CourseHero = ({
   course,
   isPlaying = false,
@@ -101,11 +139,13 @@ const CourseHero = ({
               <div className="flex items-center space-x-4 text-sm">
                 <div className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                  <span>Last updated April 2023</span>
+                  <span>
+                    Last updated {formatLastUpdated(course.updatedAt)}
+                  </span>
                 </div>
                 <div className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                  <span>English</span>
+                  <span>{course.language || "English"}</span>
                 </div>
                 <div className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                   <span>{course.enrolled.toLocaleString()} students</span>
@@ -182,7 +222,7 @@ const CourseHero = ({
                 <ul className="space-y-3">
                   <li className="flex items-center text-sm text-gray-700">
                     <FaPlay className="w-4 h-4 mr-3 text-gray-500" />
-                    <span>65 hours on-demand video</span>
+                    <span>{course.duration || "0 hours"} on-demand video</span>
                   </li>
                   <li className="flex items-center text-sm text-gray-700">
                     <svg
@@ -197,7 +237,7 @@ const CourseHero = ({
                         clipRule="evenodd"
                       ></path>
                     </svg>
-                    <span>85 articles</span>
+                    <span>{course.articleCount || "Multiple"} articles</span>
                   </li>
                   <li className="flex items-center text-sm text-gray-700">
                     <svg
@@ -211,7 +251,9 @@ const CourseHero = ({
                         clipRule="evenodd"
                       ></path>
                     </svg>
-                    <span>490 downloadable resources</span>
+                    <span>
+                      {course.resourceCount || "Downloadable"} resources
+                    </span>
                   </li>
                   <li className="flex items-center text-sm text-gray-700">
                     <FaInfinity className="w-4 h-4 mr-3 text-gray-500" />

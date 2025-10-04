@@ -41,9 +41,9 @@ const Header = ({ floating = false }) => {
               <div className="hidden lg:block">
                 <div className="flex items-center space-x-8">
                   {NAVIGATION.map((item) => (
-                    <Link
+                    <a
                       key={item.name}
-                      to={item.href}
+                      href={item.href}
                       className={`text-base font-medium transition-colors ${
                         isActiveRoute(item.href)
                           ? "text-primary"
@@ -51,7 +51,7 @@ const Header = ({ floating = false }) => {
                       }`}
                     >
                       {item.name}
-                    </Link>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -98,9 +98,9 @@ const Header = ({ floating = false }) => {
 
 const LogoSection = () => (
   <div className="flex-shrink-0">
-    <Link to={ROUTES.HOME} className="flex items-center">
+    <a href={ROUTES.HOME} className="flex items-center">
       <img src={Logo} alt="Training Jinnar" className="h-12 md:h-16 w-auto" />
-    </Link>
+    </a>
   </div>
 );
 

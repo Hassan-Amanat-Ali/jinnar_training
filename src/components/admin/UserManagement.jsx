@@ -10,13 +10,13 @@ const UserManagement = () => {
   // Optimize profile picture URL for Google photos
   const optimizePhotoURL = (photoURL) => {
     if (!photoURL) return null;
-    
+
     // Handle Google profile photos
     if (photoURL.includes("googleusercontent.com")) {
       // Normalize Google photo URL to consistent size with CORS support
       return photoURL.replace(/=s\d+(?:-c)?/, "=s96-c");
     }
-    
+
     return photoURL;
   };
 
@@ -109,14 +109,26 @@ const UserManagement = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <img
-                        src={optimizePhotoURL(user.photoURL) || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || user.email || "User") + "&background=random"}
+                        src={
+                          optimizePhotoURL(user.photoURL) ||
+                          "https://ui-avatars.com/api/?name=" +
+                            encodeURIComponent(
+                              user.displayName || user.email || "User"
+                            ) +
+                            "&background=random"
+                        }
                         alt={user.displayName || "User"}
                         className="w-10 h-10 rounded-full mr-3 object-cover"
                         crossOrigin="anonymous"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           // Fallback to UI Avatars if image fails to load
-                          e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || user.email || "User") + "&background=random";
+                          e.target.src =
+                            "https://ui-avatars.com/api/?name=" +
+                            encodeURIComponent(
+                              user.displayName || user.email || "User"
+                            ) +
+                            "&background=random";
                         }}
                       />
                       <div>

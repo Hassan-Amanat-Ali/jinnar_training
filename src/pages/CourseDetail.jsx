@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import { Header } from "../components/layout";
-import { courses } from "../data/courses";
+import { courses as dummyCourses } from "../data/courses";
 import { courseDetailData } from "../data/courseDetail";
+import { CourseService } from "../services";
 import {
   CourseHero,
   CourseRelated,
@@ -26,13 +27,67 @@ const CourseDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    // Fetch course data based on ID
-    const courseData = courses.find((course) => course.id === parseInt(id));
-    if (courseData) {
-      setCourse(courseData);
-      setIsFavorite(courseData.isFavorite || false);
-    }
-    setLoading(false);
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+
+        // First try to fetch from database
+        const result = await CourseService.getCourseById(id);
+
+        if (result.success && result.data) {
+          // Transform database course to match expected format
+          const dbCourse = {
+            id: result.data.id,
+            title: result.data.title,
+            description: result.data.description,
+            image: result.data.thumbnail || "/placeholder-course.jpg",
+            duration: result.data.duration || "0 Hours",
+            enrolled: result.data.totalEnrollments || 0,
+            category: result.data.category,
+            level: result.data.level,
+            price: result.data.price || 0,
+            originalPrice: result.data.price ? result.data.price * 1.3 : 0,
+            rating: result.data.rating || 0,
+            instructor: result.data.instructor || "Instructor",
+            isFavorite: false,
+            detailedDescription: result.data.detailedDescription,
+            highlights: result.data.highlights,
+            requirements: result.data.requirements || [],
+            learningOutcomes: result.data.learningOutcomes || [],
+            tags: result.data.tags || [],
+            published: result.data.published,
+            reviewCount: result.data.reviewCount || 0,
+            createdAt: result.data.createdAt,
+            updatedAt: result.data.updatedAt,
+          };
+          setCourse(dbCourse);
+          setIsFavorite(dbCourse.isFavorite || false);
+        } else {
+          // Fallback to dummy data
+          const dummyCourse = dummyCourses.find(
+            (course) => course.id === parseInt(id)
+          );
+          if (dummyCourse) {
+            setCourse(dummyCourse);
+            setIsFavorite(dummyCourse.isFavorite || false);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+        // Fallback to dummy data on error
+        const dummyCourse = dummyCourses.find(
+          (course) => course.id === parseInt(id)
+        );
+        if (dummyCourse) {
+          setCourse(dummyCourse);
+          setIsFavorite(dummyCourse.isFavorite || false);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourse();
   }, [id]);
 
   const toggleFavorite = () => {
@@ -101,10 +156,28 @@ const CourseDetail = () => {
         <div className="section-container py-12 bg-white">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <WhatYouWillLearn items={courseDetailData.whatYouWillLearn} />
-              <CourseContent content={courseDetailData.courseContent} />
-              <Requirements requirements={courseDetailData.requirements} />
-              <Description description={courseDetailData.description} />
+              <WhatYouWillLearn
+                items={
+                  course.learningOutcomes && course.learningOutcomes.length > 0
+                    ? course.learningOutcomes
+                    : courseDetailData.whatYouWillLearn
+                }
+              />
+              <CourseContent courseId={id} />
+              <Requirements
+                requirements={
+                  course.requirements && course.requirements.length > 0
+                    ? course.requirements
+                    : courseDetailData.requirements
+                }
+              />
+              <Description
+                description={
+                  course.detailedDescription ||
+                  course.description ||
+                  courseDetailData.description
+                }
+              />
               <YourProgress />
               {/* <Instructor instructor={courseDetailData.instructor} /> */}
               <StudentFeedback feedback={courseDetailData.studentFeedback} />

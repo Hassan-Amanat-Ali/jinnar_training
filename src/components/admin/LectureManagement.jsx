@@ -161,15 +161,52 @@ const LectureManagement = () => {
                 <tr key={lecture.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-16 relative">
-                        <img
-                          src={lecture.thumbnail || lecture.videoThumbnail}
-                          alt={lecture.title}
-                          className="w-full h-full object-cover rounded"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded">
-                          <FiPlay className="text-white" />
-                        </div>
+                      <div className="flex-shrink-0 h-16 w-20 relative bg-gray-200 rounded-lg overflow-hidden">
+                        {lecture.thumbnail ? (
+                          <div className="relative w-full h-full">
+                            <img
+                              src={lecture.thumbnail}
+                              alt={lecture.title}
+                              className="w-full h-full object-cover rounded-lg"
+                              style={{ display: "block" }}
+                              onLoad={(e) => {
+                                console.log(
+                                  "✅ Thumbnail loaded successfully:",
+                                  lecture.thumbnail
+                                );
+                                // Ensure the image is visible
+                                e.target.style.opacity = "1";
+                              }}
+                              onError={(e) => {
+                                console.error(
+                                  "❌ Thumbnail failed to load:",
+                                  lecture.thumbnail
+                                );
+                                // Hide the broken image and show fallback
+                                e.target.style.display = "none";
+                                const parent = e.target.parentElement;
+                                parent.innerHTML = `
+                                  <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-200 rounded-lg">
+                                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M8 5v10l8-5z"/>
+                                    </svg>
+                                    <span class="text-xs">Failed</span>
+                                  </div>
+                                `;
+                              }}
+                            />
+                            {/* Play overlay */}
+                            <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center rounded-lg">
+                              <FiPlay className="text-white text-lg drop-shadow-md" />
+                            </div>
+                          </div>
+                        ) : (
+                          /* No thumbnail available */
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-200 rounded-lg">
+                            <FiPlay className="text-2xl mb-1" />
+                            <span className="text-xs">No Thumb</span>
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
@@ -180,6 +217,15 @@ const LectureManagement = () => {
                             {lecture.subtitle}
                           </div>
                         )}
+
+                        {/* Show learning points count if available */}
+                        {lecture.learningPoints &&
+                          lecture.learningPoints.length > 0 && (
+                            <div className="text-xs text-emerald-600 mt-1">
+                              {lecture.learningPoints.length} learning point
+                              {lecture.learningPoints.length !== 1 ? "s" : ""}
+                            </div>
+                          )}
                       </div>
                     </div>
                   </td>
@@ -194,6 +240,25 @@ const LectureManagement = () => {
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
+                      {/* Preview button */}
+                      <button
+                        onClick={() => {
+                          if (lecture.videoUrl) {
+                            window.open(
+                              `/courses/${lecture.courseId}/watch/${lecture.id}`,
+                              "_blank"
+                            );
+                          } else {
+                            toast.error(
+                              "No video URL available for this lecture"
+                            );
+                          }
+                        }}
+                        className="text-green-600 hover:text-green-900"
+                        title="Preview Lecture"
+                      >
+                        <FiPlay />
+                      </button>
                       <button
                         onClick={() => handleEdit(lecture)}
                         className="text-blue-600 hover:text-blue-900"

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
 import { CourseService } from "../../services";
 import { toast } from "react-toastify";
+import FileUpload from "../ui/FileUpload";
 
 const AddCourseModal = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -10,16 +11,30 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
     category: "",
     level: "Beginner",
     duration: "",
-    price: "",
+    language: "English",
     thumbnail: "",
-    instructor: "",
-    instructorImage: "",
     tags: "",
     requirements: "",
     learningOutcomes: "",
+    detailedDescription: "",
+    highlights: "",
     published: false,
   });
   const [loading, setLoading] = useState(false);
+
+  const handleFileUpload = (field) => (uploadResult) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: uploadResult.url,
+    }));
+  };
+
+  const handleFileRemove = (field) => () => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: "",
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,8 +56,14 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
 
     try {
       const courseData = {
-        ...formData,
-        price: parseFloat(formData.price) || 0,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        level: formData.level,
+        duration: formData.duration,
+        language: formData.language,
+        price: 0,
+        thumbnail: formData.thumbnail,
         tags: formData.tags
           .split(",")
           .map((tag) => tag.trim())
@@ -55,6 +76,10 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
           .split("\n")
           .map((outcome) => outcome.trim())
           .filter(Boolean),
+        detailedDescription:
+          formData.detailedDescription || formData.description,
+        highlights: formData.highlights || "",
+        published: formData.published,
         totalEnrollments: 0,
         rating: 0,
         reviewCount: 0,
@@ -90,7 +115,7 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform transition-all animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-50">
           <h3 className="text-xl font-bold">Add New Course</h3>
           <button
             onClick={onClose}
@@ -184,55 +209,68 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price ($)
+                Language
               </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
+              <select
+                name="language"
+                value={formData.language}
                 onChange={handleChange}
-                step="0.01"
-                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="English">English</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Italian">Italian</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Detailed Description
+              </label>
+              <textarea
+                name="detailedDescription"
+                value={formData.detailedDescription}
+                onChange={handleChange}
+                rows={4}
+                placeholder="Comprehensive course description for the detail page..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Thumbnail URL
+                Course Highlights
               </label>
-              <input
-                type="url"
-                name="thumbnail"
-                value={formData.thumbnail}
+              <textarea
+                name="highlights"
+                value={formData.highlights}
                 onChange={handleChange}
+                rows={2}
+                placeholder="Key highlights and standout features of this course..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instructor Name
+                Course Thumbnail
               </label>
-              <input
-                type="text"
-                name="instructor"
-                value={formData.instructor}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instructor Image URL
-              </label>
-              <input
-                type="url"
-                name="instructorImage"
-                value={formData.instructorImage}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              <FileUpload
+                onUpload={handleFileUpload("thumbnail")}
+                onRemove={handleFileRemove("thumbnail")}
+                currentFile={formData.thumbnail}
+                accept="image/*"
+                type="image"
+                label="Upload Course Thumbnail"
+                folder="courses/thumbnails"
+                maxSizeMB={5}
               />
             </div>
 

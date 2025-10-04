@@ -50,20 +50,27 @@ export class CourseService {
     return await firestoreService.create(COLLECTIONS.COURSES, {
       title: courseData.title,
       description: courseData.description,
-      instructor: courseData.instructor,
+      detailedDescription:
+        courseData.detailedDescription || courseData.description,
+      highlights: courseData.highlights || "",
+      instructor: courseData.instructor || "",
       category: courseData.category,
       level: courseData.level,
       duration: courseData.duration,
+      language: courseData.language || "English",
       price: courseData.price,
       thumbnail: courseData.thumbnail,
       tags: courseData.tags || [],
       syllabus: courseData.syllabus || [],
       requirements: courseData.requirements || [],
       learningOutcomes: courseData.learningOutcomes || [],
-      published: false,
-      rating: 0,
-      totalReviews: 0,
-      totalEnrollments: 0,
+      published: courseData.published || false,
+      rating: courseData.rating || 0,
+      totalReviews: courseData.totalReviews || 0,
+      reviewCount: courseData.reviewCount || 0,
+      totalEnrollments: courseData.totalEnrollments || 0,
+      createdAt: courseData.createdAt || firestoreService.serverTimestamp(),
+      updatedAt: courseData.updatedAt || firestoreService.serverTimestamp(),
     });
   }
 
@@ -103,9 +110,22 @@ export class CourseService {
   static async deleteCourse(courseId) {
     return await firestoreService.delete(COLLECTIONS.COURSES, courseId);
   }
+
+  static async getCourseLectures(courseId) {
+    // Try without orderBy first to avoid index issues
+    const result = await firestoreService.getAll(COLLECTIONS.LECTURES, {
+      where: [["courseId", "==", courseId]],
+    });
+
+    // If we found lectures, sort them manually by order
+    if (result.success && result.data && result.data.length > 0) {
+      result.data.sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+
+    return result;
+  }
 }
 
-// Enrollment Service
 export class EnrollmentService {
   static async enrollUser(userId, courseId) {
     return await firestoreService.create(COLLECTIONS.ENROLLMENTS, {
@@ -121,14 +141,23 @@ export class EnrollmentService {
   static async getUserEnrollments(userId) {
     return await firestoreService.getAll(COLLECTIONS.ENROLLMENTS, {
       where: [["userId", "==", userId]],
-      orderBy: [["createdAt", "desc"]],
     });
   }
 
   static async getCourseEnrollments(courseId) {
     return await firestoreService.getAll(COLLECTIONS.ENROLLMENTS, {
       where: [["courseId", "==", courseId]],
-      orderBy: [["createdAt", "desc"]],
+    });
+  }
+
+  static async checkUserEnrollment(userId, courseId) {
+    return await firestoreService.getAll(COLLECTIONS.ENROLLMENTS, {
+      where: [
+        ["userId", "==", userId],
+        ["courseId", "==", courseId],
+        ["status", "==", "active"],
+      ],
+      limit: 1,
     });
   }
 

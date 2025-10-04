@@ -1,18 +1,33 @@
-import React from 'react';
+import React from "react";
 
 const formatTime = (s) => {
-  if (isNaN(s)) return '0:00';
+  if (isNaN(s)) return "0:00";
   const minutes = Math.floor(s / 60);
   const seconds = Math.floor(s % 60)
     .toString()
-    .padStart(2, '0');
+    .padStart(2, "0");
   return `${minutes}:${seconds}`;
+};
+
+// Helper function to parse timestamp string (e.g., "1:30", "12:45") to seconds
+const parseTimestamp = (timestamp) => {
+  if (!timestamp) return 0;
+
+  const parts = timestamp.split(":");
+  if (parts.length === 2) {
+    const minutes = parseInt(parts[0]) || 0;
+    const seconds = parseInt(parts[1]) || 0;
+    return minutes * 60 + seconds;
+  }
+
+  return 0;
 };
 
 const VideoPlayer = ({
   src,
   poster,
   title,
+  startTime = null, // New prop for starting at specific timestamp
   onEnded,
   onPrev,
   onNext,
@@ -68,6 +83,16 @@ const VideoPlayer = ({
     setDuration(v.duration || 0);
     setCurrent(0);
     setIsPlaying(!v.paused && !v.ended);
+
+    // Seek to start time if provided
+    if (startTime) {
+      const seekToSeconds = parseTimestamp(startTime);
+      if (seekToSeconds > 0 && seekToSeconds < v.duration) {
+        v.currentTime = seekToSeconds;
+        setCurrent(seekToSeconds);
+      }
+    }
+
     tryAutoPlay();
   };
 
@@ -112,16 +137,16 @@ const VideoPlayer = ({
     const onPauseLocal = () => setIsPlaying(false);
     const onPlayingLocal = () => setIsPlaying(true);
 
-    v.addEventListener('ended', onEndedLocal);
-    v.addEventListener('play', onPlayLocal);
-    v.addEventListener('pause', onPauseLocal);
-    v.addEventListener('playing', onPlayingLocal);
+    v.addEventListener("ended", onEndedLocal);
+    v.addEventListener("play", onPlayLocal);
+    v.addEventListener("pause", onPauseLocal);
+    v.addEventListener("playing", onPlayingLocal);
 
     return () => {
-      v.removeEventListener('ended', onEndedLocal);
-      v.removeEventListener('play', onPlayLocal);
-      v.removeEventListener('pause', onPauseLocal);
-      v.removeEventListener('playing', onPlayingLocal);
+      v.removeEventListener("ended", onEndedLocal);
+      v.removeEventListener("play", onPlayLocal);
+      v.removeEventListener("pause", onPauseLocal);
+      v.removeEventListener("playing", onPlayingLocal);
     };
   }, [onEnded]);
 
@@ -130,8 +155,8 @@ const VideoPlayer = ({
       const container = containerRef.current;
       setIsFullscreen(document.fullscreenElement === container);
     };
-    document.addEventListener('fullscreenchange', onFsChange);
-    return () => document.removeEventListener('fullscreenchange', onFsChange);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
   // On source change, reset UI and mark that we want to autoplay when ready
@@ -140,13 +165,29 @@ const VideoPlayer = ({
     pendingAutoPlayRef.current = true;
   }, [src]);
 
+  // Handle startTime changes (for timestamp navigation)
+  React.useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !startTime || v.readyState < 2) return; // Wait for video to be loaded
+
+    const seekToSeconds = parseTimestamp(startTime);
+    if (
+      seekToSeconds > 0 &&
+      seekToSeconds < v.duration &&
+      Math.abs(v.currentTime - seekToSeconds) > 1
+    ) {
+      v.currentTime = seekToSeconds;
+      setCurrent(seekToSeconds);
+    }
+  }, [startTime]);
+
   return (
     <div
       ref={containerRef}
       className={`${
         isFullscreen
-          ? 'fixed inset-0 z-[9999] bg-black rounded-none border-0'
-          : 'relative bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200'
+          ? "fixed inset-0 z-[9999] bg-black rounded-none border-0"
+          : "relative bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200"
       }`}
     >
       {/* Video */}
@@ -158,8 +199,8 @@ const VideoPlayer = ({
         autoPlay
         className={`${
           isFullscreen
-            ? 'w-screen h-screen object-contain bg-black'
-            : 'w-full h-[58vh] md:h-[70vh] object-contain bg-black'
+            ? "w-screen h-screen object-contain bg-black"
+            : "w-full h-[58vh] md:h-[70vh] object-contain bg-black"
         }`}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoaded}
@@ -168,9 +209,9 @@ const VideoPlayer = ({
       />
 
       {/* Top gradient and title */}
-      <div className='pointer-events-none absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/70 via-black/20 to-transparent'>
+      <div className="pointer-events-none absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/70 via-black/20 to-transparent">
         {title && (
-          <h2 className='text-white text-xl md:text-2xl font-semibold max-w-[80%] drop-shadow'>
+          <h2 className="text-white text-xl md:text-2xl font-semibold max-w-[80%] drop-shadow">
             {title}
           </h2>
         )}
@@ -178,57 +219,67 @@ const VideoPlayer = ({
 
       {/* Center play/pause */}
       <button
-        type='button'
-        aria-label='toggle play'
+        type="button"
+        aria-label="toggle play"
         onClick={togglePlay}
-        className='absolute inset-0 m-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center text-white border border-white/40'
+        className="absolute inset-0 m-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center text-white border border-white/40"
         style={{
-          display: 'flex',
-          pointerEvents: 'auto',
-          transform: 'translateY(0)',
+          display: "flex",
+          pointerEvents: "auto",
+          transform: "translateY(0)",
         }}
       >
         {isPlaying ? (
-          <svg width='22' height='22' viewBox='0 0 24 24' fill='currentColor'>
-            <path d='M6 5h4v14H6zM14 5h4v14h-4z' />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
           </svg>
         ) : (
-          <svg width='22' height='22' viewBox='0 0 24 24' fill='currentColor'>
-            <path d='M8 5v14l11-7z' />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
           </svg>
         )}
       </button>
 
       {/* Bottom Controls */}
-      <div className='absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent'>
-        <div className='flex items-center gap-4'>
+      <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div className="flex items-center gap-4">
           {/* Prev */}
           <button
             className={`w-10 h-10 rounded-full flex items-center justify-center ${
               canPrev
-                ? 'bg-white/15 hover:bg-white/25 text-white'
-                : 'bg-white/10 text-white/40 cursor-not-allowed'
+                ? "bg-white/15 hover:bg-white/25 text-white"
+                : "bg-white/10 text-white/40 cursor-not-allowed"
             }`}
             onClick={canPrev ? onPrev : undefined}
-            aria-label='Previous'
+            aria-label="Previous"
           >
-            <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
-              <path d='M10 12l8 6V6l-8 6zM6 6h2v12H6z' />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 12l8 6V6l-8 6zM6 6h2v12H6z" />
             </svg>
           </button>
 
           {/* Play/Pause */}
           <button
-            className='w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center'
+            className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
             onClick={togglePlay}
           >
             {isPlaying ? (
-              <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
-                <path d='M6 5h4v14H6zM14 5h4v14h-4z' />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
               </svg>
             ) : (
-              <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
-                <path d='M8 5v14l11-7z' />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M8 5v14l11-7z" />
               </svg>
             )}
           </button>
@@ -237,61 +288,61 @@ const VideoPlayer = ({
           <button
             className={`w-10 h-10 rounded-full flex items-center justify-center ${
               canNext
-                ? 'bg-white/15 hover:bg-white/25 text-white'
-                : 'bg-white/10 text-white/40 cursor-not-allowed'
+                ? "bg-white/15 hover:bg-white/25 text-white"
+                : "bg-white/10 text-white/40 cursor-not-allowed"
             }`}
             onClick={canNext ? onNext : undefined}
-            aria-label='Next'
+            aria-label="Next"
           >
-            <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
-              <path d='M14 12L6 6v12l8-6zm2-6h2v12h-2z' />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 12L6 6v12l8-6zm2-6h2v12h-2z" />
             </svg>
           </button>
 
-          <span className='text-xs text-white/80 w-14'>
+          <span className="text-xs text-white/80 w-14">
             {formatTime(current)}
           </span>
           <input
-            type='range'
+            type="range"
             min={0}
             max={duration || 0}
-            step='0.1'
+            step="0.1"
             value={current}
             onChange={handleSeek}
-            className='flex-1 accent-white'
+            className="flex-1 accent-white"
           />
-          <span className='text-xs text-white/80 w-14 text-right'>
+          <span className="text-xs text-white/80 w-14 text-right">
             {formatTime(duration)}
           </span>
 
-          <div className='hidden md:flex items-center gap-2 pl-2'>
+          <div className="hidden md:flex items-center gap-2 pl-2">
             <svg
-              width='18'
-              height='18'
-              viewBox='0 0 24 24'
-              fill='white'
-              className='opacity-80'
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="white"
+              className="opacity-80"
             >
-              <path d='M3 10v4h4l5 5V5L7 10H3z' />
+              <path d="M3 10v4h4l5 5V5L7 10H3z" />
             </svg>
             <input
-              type='range'
-              min='0'
-              max='1'
-              step='0.05'
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
               value={volume}
               onChange={handleVolume}
-              className='w-24 accent-white'
+              className="w-24 accent-white"
             />
           </div>
 
           <button
-            className='ml-2 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center'
+            className="ml-2 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
             onClick={toggleFullscreen}
-            aria-label='Toggle Fullscreen'
+            aria-label="Toggle Fullscreen"
           >
-            <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>
-              <path d='M7 14H5v5h5v-2H7v-3zm12 3h-3v2h5v-5h-2v3zM7 7h3V5H5v5h2V7zm12 3h2V5h-5v2h3v3z' />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 14H5v5h5v-2H7v-3zm12 3h-3v2h5v-5h-2v3zM7 7h3V5H5v5h2V7zm12 3h2V5h-5v2h3v3z" />
             </svg>
           </button>
         </div>

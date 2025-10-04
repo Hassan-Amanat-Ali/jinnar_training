@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FiBook, FiUsers, FiVideo, FiTrendingUp } from "react-icons/fi";
+import {
+  FiBook,
+  FiUsers,
+  FiVideo,
+  FiTrendingUp,
+  FiPlus,
+  FiEye,
+} from "react-icons/fi";
 import { CourseService, UserService } from "../../services";
 import { firestoreService, COLLECTIONS } from "../../services";
+import AddCourseModal from "./AddCourseModal";
+import AddLectureModal from "./AddLectureModal";
 
-const AdminStats = () => {
+const AdminStats = ({ onNavigate }) => {
   const [stats, setStats] = useState({
     totalCourses: 0,
     totalUsers: 0,
@@ -11,6 +20,9 @@ const AdminStats = () => {
     totalEnrollments: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [showAddLectureModal, setShowAddLectureModal] = useState(false);
+  const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -36,6 +48,11 @@ const AdminStats = () => {
             : 0,
           totalEnrollments,
         });
+
+        // Set courses for the lecture modal
+        if (coursesResult.success) {
+          setCourses(coursesResult.data);
+        }
       } catch (error) {
         console.error("Failed to fetch stats:", error);
       } finally {
@@ -45,6 +62,34 @@ const AdminStats = () => {
 
     fetchStats();
   }, []);
+
+  const handleAddCourseSuccess = () => {
+    setShowAddCourseModal(false);
+    // Refresh stats
+    window.location.reload();
+  };
+
+  const handleAddLectureSuccess = () => {
+    setShowAddLectureModal(false);
+    // Refresh stats
+    window.location.reload();
+  };
+
+  const handleQuickAction = (action) => {
+    switch (action) {
+      case "addCourse":
+        setShowAddCourseModal(true);
+        break;
+      case "addLecture":
+        setShowAddLectureModal(true);
+        break;
+      case "viewUsers":
+        onNavigate("users");
+        break;
+      default:
+        break;
+    }
+  };
 
   const statCards = [
     {
@@ -113,17 +158,45 @@ const AdminStats = () => {
       <div className="mt-8 bg-white rounded-lg shadow p-6">
         <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="btn-base-medium btn-primary">
+          <button
+            onClick={() => handleQuickAction("addCourse")}
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <FiPlus className="w-4 h-4" />
             Add New Course
           </button>
-          <button className="btn-base-medium btn-outline">
+          <button
+            onClick={() => handleQuickAction("addLecture")}
+            className="flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FiVideo className="w-4 h-4" />
             Add New Lecture
           </button>
-          <button className="btn-base-medium btn-outline">
+          <button
+            onClick={() => handleQuickAction("viewUsers")}
+            className="flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FiEye className="w-4 h-4" />
             View All Users
           </button>
         </div>
       </div>
+
+      {/* Modals */}
+      {showAddCourseModal && (
+        <AddCourseModal
+          onClose={() => setShowAddCourseModal(false)}
+          onSuccess={handleAddCourseSuccess}
+        />
+      )}
+
+      {showAddLectureModal && (
+        <AddLectureModal
+          courses={courses}
+          onClose={() => setShowAddLectureModal(false)}
+          onSuccess={handleAddLectureSuccess}
+        />
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ const CourseCard = ({
   onToggleFavorite,
   onEnroll,
   onViewDetails,
+  enrollmentLoading = false,
 }) => {
   const isListView = viewMode === "list";
 
@@ -61,9 +62,12 @@ const CourseCard = ({
             <div className="flex items-center gap-4 mt-auto">
               <button
                 onClick={() => onEnroll(course.id)}
-                className="btn-base-medium btn-primary"
+                disabled={enrollmentLoading}
+                className={`btn-base-medium btn-primary ${
+                  enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Enroll Now
+                {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
               </button>
               <button
                 onClick={() => onViewDetails(course.id)}
@@ -124,9 +128,12 @@ const CourseCard = ({
         <div className="flex items-center gap-3 mt-auto">
           <button
             onClick={() => onEnroll(course.id)}
-            className="btn-base-medium btn-primary flex-1"
+            disabled={enrollmentLoading}
+            className={`btn-base-medium btn-primary flex-1 ${
+              enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Enroll Now
+            {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
           </button>
           <button
             onClick={() => onViewDetails(course.id)}

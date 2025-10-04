@@ -1,48 +1,57 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { ROUTES } from "../../constants/routes";
+import { useAuth } from "../../hooks/useAuth";
+import { EnrollmentService, CourseService } from "../../services";
 
-const baseDescription =
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s when an unknown printer took a galley of type and scrambled it to make a type specimen book.";
-
-const courses = Array.from({ length: 6 }).map((_, i) => ({
-  id: i + 1,
-  title: "Artificial Intelligence (AI) Training Courses",
-  description: baseDescription,
-  image: "/src/assets/images/course-1.png",
-  progressText: "23 of 50 lesson completed",
-}));
-
-const ProgressCard = () => {
+const ProgressCard = ({ stats }) => {
   return (
     <div className="rounded-xl border border-gray-200 shadow-sm p-4 bg-gray-50">
       <div className="flex items-center justify-between text-[12px] text-black/70 mb-2">
         <span className="font-semibold text-black">Your Progress</span>
         <span>
-          3 <span className="text-black/40">of</span> 6{" "}
-          <span className="text-black/60">Courses completed</span>
+          {stats.completed} <span className="text-black/40">of</span>{" "}
+          {stats.total} <span className="text-black/60">Courses completed</span>
         </span>
       </div>
       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full"
-          style={{ width: "50%", backgroundColor: "#2E7D32" }}
+          style={{ width: `${stats.percentage}%`, backgroundColor: "#2E7D32" }}
         />
       </div>
-      <div className="mt-2 text-[11px] text-black/60">50% complete</div>
+      <div className="mt-2 text-[11px] text-black/60">
+        {stats.percentage}% complete
+      </div>
     </div>
   );
 };
 
 const CourseCard = ({ course, onContinue }) => {
   const [expanded, setExpanded] = React.useState(false);
-  const preview = course.description.slice(0, 115);
+  const description =
+    course.description ||
+    course.detailedDescription ||
+    "No description available";
+  const preview = description.slice(0, 115);
+
+  const getProgressText = () => {
+    const totalLessons = course.syllabus?.length || 0;
+    const completedLessons = course.completedLessons?.length || 0;
+
+    if (totalLessons === 0) {
+      return `${Math.round(course.progress || 0)}% completed`;
+    }
+
+    return `${completedLessons} of ${totalLessons} lessons completed`;
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
       <div className="h-44 w-full bg-gray-200">
         <img
-          src={course.image}
+          src={course.thumbnail || course.image || "/placeholder-course.jpg"}
           alt={course.title}
           className="w-full h-full object-cover"
         />
@@ -52,8 +61,8 @@ const CourseCard = ({ course, onContinue }) => {
           {course.title}
         </h3>
         <p className="text-[12px] text-black/70 leading-6 mb-5">
-          {expanded ? course.description : `${preview}`}
-          {!expanded && course.description.length > preview.length && (
+          {expanded ? description : `${preview}`}
+          {!expanded && description.length > preview.length && (
             <>
               ...
               <button
@@ -61,7 +70,7 @@ const CourseCard = ({ course, onContinue }) => {
                 onClick={() => setExpanded(true)}
                 className="text-[#1B4A7B] font-semibold hover:underline ml-1"
               >
-                Sea More
+                See More
               </button>
             </>
           )}
@@ -76,9 +85,7 @@ const CourseCard = ({ course, onContinue }) => {
           )}
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-black/70">
-            {course.progressText}
-          </span>
+          <span className="text-[11px] text-black/70">{getProgressText()}</span>
           <button
             type="button"
             onClick={() => onContinue(course.id)}
@@ -94,8 +101,129 @@ const CourseCard = ({ course, onContinue }) => {
 
 const MyCoursesContent = () => {
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [progressStats, setProgressStats] = useState({
+    completed: 0,
+    total: 0,
+    percentage: 0,
+  });
 
-  const handleContinue = (courseId) => {
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchEnrolledCourses = async () => {
+      try {
+        setLoading(true);
+
+        console.log("Fetching enrollments for user:", currentUser.uid);
+        const enrollmentsResult = await EnrollmentService.getUserEnrollments(
+          currentUser.uid
+        );
+
+        console.log("Enrollments result:", enrollmentsResult);
+
+        if (enrollmentsResult.success && enrollmentsResult.data.length > 0) {
+          console.log("Found enrollments:", enrollmentsResult.data.length);
+
+          const activeEnrollments = enrollmentsResult.data.filter(
+            (enrollment) => enrollment.status === "active"
+          );
+          console.log("Active enrollments:", activeEnrollments.length);
+
+          const coursePromises = activeEnrollments.map(async (enrollment) => {
+            console.log("Fetching course for enrollment:", enrollment.courseId);
+            const courseResult = await CourseService.getCourseById(
+              enrollment.courseId
+            );
+            console.log(
+              "Course result for",
+              enrollment.courseId,
+              ":",
+              courseResult
+            );
+
+            if (courseResult.success && courseResult.data) {
+              return {
+                ...courseResult.data,
+                enrollmentId: enrollment.id,
+                progress: enrollment.progress || 0,
+                completedLessons: enrollment.completedLessons || [],
+                lastAccessedAt: enrollment.lastAccessedAt,
+                enrolledAt: enrollment.createdAt,
+              };
+            }
+            return null;
+          });
+
+          const coursesData = await Promise.all(coursePromises);
+          const validCourses = coursesData.filter((course) => course !== null);
+
+          // Sort by enrollment date (most recent first)
+          validCourses.sort((a, b) => {
+            const dateA = a.enrolledAt?.seconds || 0;
+            const dateB = b.enrolledAt?.seconds || 0;
+            return dateB - dateA;
+          });
+
+          console.log("Valid courses found:", validCourses.length);
+          console.log("Courses data:", validCourses);
+
+          setEnrolledCourses(validCourses);
+
+          const completedCount = validCourses.filter(
+            (course) => course.progress >= 100
+          ).length;
+          const totalCount = validCourses.length;
+          const percentage =
+            totalCount > 0
+              ? Math.round((completedCount / totalCount) * 100)
+              : 0;
+
+          setProgressStats({
+            completed: completedCount,
+            total: totalCount,
+            percentage,
+          });
+        } else {
+          console.log("No enrollments found or fetch failed");
+          console.log("Success:", enrollmentsResult.success);
+          console.log("Data length:", enrollmentsResult.data?.length || 0);
+          setEnrolledCourses([]);
+          setProgressStats({ completed: 0, total: 0, percentage: 0 });
+        }
+      } catch (error) {
+        console.error("Error fetching enrolled courses:", error);
+        toast.error("Failed to load your courses");
+        setEnrolledCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEnrolledCourses();
+  }, [currentUser, isAuthenticated]);
+
+  const handleContinue = async (courseId) => {
+    try {
+      const courseData = enrolledCourses.find(
+        (course) => course.id === courseId
+      );
+      if (courseData?.enrollmentId) {
+        await EnrollmentService.updateProgress(
+          courseData.enrollmentId,
+          courseData.progress,
+          courseData.completedLessons
+        );
+      }
+    } catch {
+      // Silent fail - don't block navigation
+    }
+
     const path = ROUTES.COURSE_DETAIL.replace(":id", String(courseId));
     navigate(path);
   };
@@ -107,26 +235,67 @@ const MyCoursesContent = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-[20px] md:text-[22px] font-semibold text-black">
-        My Courses
+        My Courses {enrolledCourses.length > 0 && `(${enrolledCourses.length})`}
       </h2>
 
-      <ProgressCard />
+      {!isAuthenticated ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-black/60 mb-4">
+            Please log in to view your enrolled courses.
+          </p>
+          <button
+            onClick={() => navigate(ROUTES.LOGIN)}
+            className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary/90"
+          >
+            Log In
+          </button>
+        </div>
+      ) : loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <span className="ml-4 text-gray-600">Loading your courses...</span>
+        </div>
+      ) : enrolledCourses.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-black/60 mb-4">
+            You haven't enrolled in any courses yet.
+          </p>
+          <div className="text-sm text-gray-500 mb-4">
+            Debug: User ID: {currentUser?.uid} | Loading: {loading.toString()} |
+            Auth: {isAuthenticated.toString()}
+          </div>
+          <button
+            onClick={handleExplore}
+            className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary/90"
+          >
+            Explore Courses
+          </button>
+        </div>
+      ) : (
+        <>
+          <ProgressCard stats={progressStats} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-        {courses.map((c) => (
-          <CourseCard key={c.id} course={c} onContinue={handleContinue} />
-        ))}
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {enrolledCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                onContinue={handleContinue}
+              />
+            ))}
+          </div>
 
-      <div className="flex justify-center pt-2">
-        <button
-          type="button"
-          onClick={handleExplore}
-          className="px-6 py-3 rounded-xl border border-gray-300 bg-white shadow-sm text-sm text-black/80 hover:bg-gray-50 min-w-[250px]"
-        >
-          Explore More +
-        </button>
-      </div>
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleExplore}
+              className="px-6 py-3 rounded-xl border border-gray-300 bg-white shadow-sm text-sm text-black/80 hover:bg-gray-50 min-w-[250px]"
+            >
+              Explore More +
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
