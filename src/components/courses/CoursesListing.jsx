@@ -14,12 +14,42 @@ const CoursesListing = ({
   coursesPerPage,
   onToggleFavorite,
   onEnroll,
-  onViewDetails,
   enrollmentLoading = false,
+  selectedCategories = [], // Add selectedCategories prop
+  searchQuery = "", // Add searchQuery prop
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
+  // Generate dynamic heading based on selected categories and search
+  const getHeading = () => {
+    let heading = "";
+
+    // Base heading from categories
+    if (selectedCategories.length === 0) {
+      heading = "All Courses";
+    } else if (selectedCategories.length === 1) {
+      heading = `All Courses in ${selectedCategories[0]}`;
+    } else if (selectedCategories.length === 2) {
+      heading = `All Courses in ${selectedCategories[0]} and ${selectedCategories[1]}`;
+    } else {
+      heading = `All Courses in ${selectedCategories
+        .slice(0, -1)
+        .join(", ")} and ${selectedCategories[selectedCategories.length - 1]}`;
+    }
+
+    // Add search context if there's a search query
+    if (searchQuery.trim()) {
+      heading += ` matching "${searchQuery}"`;
+    }
+
+    return heading;
+  };
+
   const totalCourses = filteredCourses.length;
+  const totalEnrollments = filteredCourses.reduce(
+    (sum, course) => sum + (course.enrolled || 0),
+    0
+  );
   const totalPages = Math.ceil(totalCourses / coursesPerPage);
   const startIndex = (currentPage - 1) * coursesPerPage;
   const endIndex = startIndex + coursesPerPage;
@@ -63,7 +93,7 @@ const CoursesListing = ({
               {totalCourses.toLocaleString()}+ Courses
             </span>
             <span className="mx-2">•</span>
-            <span>{totalCourses > 0 ? "321,000+" : "0"}+ enrolled</span>
+            <span>{totalEnrollments.toLocaleString()}+ enrolled</span>
           </div>
         </div>
 
@@ -138,9 +168,7 @@ const CoursesListing = ({
 
       {/* Section Heading */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-black">
-          All Courses in Artificial Intelligence
-        </h2>
+        <h2 className="text-2xl font-bold text-black">{getHeading()}</h2>
       </div>
 
       {/* Course Cards */}
@@ -159,7 +187,6 @@ const CoursesListing = ({
               viewMode={viewMode}
               onToggleFavorite={onToggleFavorite}
               onEnroll={onEnroll}
-              onViewDetails={onViewDetails}
               enrollmentLoading={enrollmentLoading}
             />
           ))}

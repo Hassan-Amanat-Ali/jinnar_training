@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import { categories, levels, durations } from '../../data/courses';
+import React, { useState, useMemo } from "react";
+import { FiSearch, FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const CoursesFilters = ({
   searchQuery,
@@ -12,12 +11,42 @@ const CoursesFilters = ({
   selectedDurations,
   setSelectedDurations,
   onClearAll,
+  filterCounts = { categories: {}, levels: {}, durations: {} },
+  totalCourses = 0,
 }) => {
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     levels: true,
     durations: true,
   });
+
+  // Convert filterCounts to array format for rendering
+  const categories = useMemo(() => {
+    return Object.entries(filterCounts.categories).map(([name, count]) => ({
+      name,
+      count,
+      checked: selectedCategories.includes(name),
+    }));
+  }, [filterCounts.categories, selectedCategories]);
+
+  const levels = useMemo(() => {
+    return Object.entries(filterCounts.levels).map(([name, count]) => ({
+      name,
+      count,
+      checked: selectedLevels.includes(name),
+    }));
+  }, [filterCounts.levels, selectedLevels]);
+
+  const durations = useMemo(() => {
+    const durationOrder = ["0-3 Hours", "3-6 Hours", "6-12 Hours"];
+    return durationOrder
+      .filter((duration) => filterCounts.durations[duration] > 0)
+      .map((name) => ({
+        name,
+        count: filterCounts.durations[name],
+        checked: selectedDurations.includes(name),
+      }));
+  }, [filterCounts.durations, selectedDurations]);
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -51,59 +80,64 @@ const CoursesFilters = ({
   };
 
   return (
-    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm'>
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
       {/* Header */}
-      <div className='flex items-center justify-between mb-6'>
-        <h3 className='text-lg font-semibold text-black'>Filters</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-black">Filters</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {totalCourses} courses available
+          </p>
+        </div>
         <button
           onClick={onClearAll}
-          className='text-sm text-primary hover:text-primary/80 transition-colors'
+          className="text-sm text-primary hover:text-primary/80 transition-colors"
         >
           Clear all
         </button>
       </div>
 
       {/* Search */}
-      <div className='mb-6'>
-        <div className='relative'>
-          <FiSearch className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
+      <div className="mb-6">
+        <div className="relative">
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
-            type='text'
-            placeholder='Search courses'
+            type="text"
+            placeholder="Search courses"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Categories */}
-      <div className='mb-6'>
+      <div className="mb-6">
         <button
-          onClick={() => toggleSection('categories')}
-          className='flex items-center justify-between w-full text-left font-medium text-black mb-4'
+          onClick={() => toggleSection("categories")}
+          className="flex items-center justify-between w-full text-left font-medium text-black mb-4"
         >
           Categories
           {expandedSections.categories ? <FiChevronUp /> : <FiChevronDown />}
         </button>
 
         {expandedSections.categories && (
-          <div className='space-y-3'>
+          <div className="space-y-3">
             {categories.map((category) => (
               <label
                 key={category.name}
-                className='flex items-center justify-between cursor-pointer'
+                className="flex items-center justify-between cursor-pointer"
               >
-                <div className='flex items-center'>
+                <div className="flex items-center">
                   <input
-                    type='checkbox'
+                    type="checkbox"
                     checked={selectedCategories.includes(category.name)}
                     onChange={() => handleCategoryChange(category.name)}
-                    className='mr-3 rounded border-gray-300 text-primary focus:ring-primary'
+                    className="mr-3 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span className='text-sm text-black/80'>{category.name}</span>
+                  <span className="text-sm text-black/80">{category.name}</span>
                 </div>
-                <span className='text-xs text-gray-500'>
+                <span className="text-xs text-gray-500">
                   ({category.count})
                 </span>
               </label>
@@ -113,32 +147,32 @@ const CoursesFilters = ({
       </div>
 
       {/* Levels */}
-      <div className='mb-6'>
+      <div className="mb-6">
         <button
-          onClick={() => toggleSection('levels')}
-          className='flex items-center justify-between w-full text-left font-medium text-black mb-4'
+          onClick={() => toggleSection("levels")}
+          className="flex items-center justify-between w-full text-left font-medium text-black mb-4"
         >
           Level
           {expandedSections.levels ? <FiChevronUp /> : <FiChevronDown />}
         </button>
 
         {expandedSections.levels && (
-          <div className='space-y-3'>
+          <div className="space-y-3">
             {levels.map((level) => (
               <label
                 key={level.name}
-                className='flex items-center justify-between cursor-pointer'
+                className="flex items-center justify-between cursor-pointer"
               >
-                <div className='flex items-center'>
+                <div className="flex items-center">
                   <input
-                    type='checkbox'
+                    type="checkbox"
                     checked={selectedLevels.includes(level.name)}
                     onChange={() => handleLevelChange(level.name)}
-                    className='mr-3 rounded border-gray-300 text-primary focus:ring-primary'
+                    className="mr-3 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span className='text-sm text-black/80'>{level.name}</span>
+                  <span className="text-sm text-black/80">{level.name}</span>
                 </div>
-                <span className='text-xs text-gray-500'>({level.count})</span>
+                <span className="text-xs text-gray-500">({level.count})</span>
               </label>
             ))}
           </div>
@@ -146,32 +180,32 @@ const CoursesFilters = ({
       </div>
 
       {/* Duration */}
-      <div className='mb-6'>
+      <div className="mb-6">
         <button
-          onClick={() => toggleSection('durations')}
-          className='flex items-center justify-between w-full text-left font-medium text-black mb-4'
+          onClick={() => toggleSection("durations")}
+          className="flex items-center justify-between w-full text-left font-medium text-black mb-4"
         >
           Duration
           {expandedSections.durations ? <FiChevronUp /> : <FiChevronDown />}
         </button>
 
         {expandedSections.durations && (
-          <div className='space-y-3'>
+          <div className="space-y-3">
             {durations.map((duration) => (
               <label
                 key={duration.name}
-                className='flex items-center justify-between cursor-pointer'
+                className="flex items-center justify-between cursor-pointer"
               >
-                <div className='flex items-center'>
+                <div className="flex items-center">
                   <input
-                    type='checkbox'
+                    type="checkbox"
                     checked={selectedDurations.includes(duration.name)}
                     onChange={() => handleDurationChange(duration.name)}
-                    className='mr-3 rounded border-gray-300 text-primary focus:ring-primary'
+                    className="mr-3 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span className='text-sm text-black/80'>{duration.name}</span>
+                  <span className="text-sm text-black/80">{duration.name}</span>
                 </div>
-                <span className='text-xs text-gray-500'>
+                <span className="text-xs text-gray-500">
                   ({duration.count})
                 </span>
               </label>

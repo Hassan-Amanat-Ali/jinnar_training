@@ -2,16 +2,20 @@ import React from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Header, Footer } from "../components/layout";
 import VideoPlayer from "../components/video/VideoPlayer";
+import VideoProgressTracker from "../components/video/VideoProgressTracker";
 import Playlist from "../components/video/Playlist";
-import { CourseService } from "../services";
+import { CourseService, EnrollmentService } from "../services";
+import { useAuth } from "../hooks/useAuth";
 
 const Watch = () => {
   const { id, lectureId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
   const [lectures, setLectures] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [currentId, setCurrentId] = React.useState(lectureId);
+  const videoRef = React.useRef(null);
   const timestamp = searchParams.get("t"); // Get timestamp from URL params
 
   // Memoize current lecture and navigation state to prevent unnecessary re-renders
@@ -84,6 +88,23 @@ const Watch = () => {
       }
     }
   }, [lectures, lectureId, id, navigate]);
+
+  // Handle progress updates from video tracker
+  const handleProgressUpdate = React.useCallback(
+    async (progressUpdate) => {
+      console.log("Progress update:", progressUpdate);
+
+      // Update enrollment progress when lecture is completed
+      if (progressUpdate.completed && currentUser) {
+        try {
+          await EnrollmentService.updateEnrollmentProgress(currentUser.uid, id);
+        } catch (error) {
+          console.error("Error updating enrollment progress:", error);
+        }
+      }
+    },
+    [currentUser, id]
+  );
 
   // Memoize navigation handlers to prevent re-creating on every render
   const goTo = React.useCallback(
@@ -191,6 +212,22 @@ const Watch = () => {
               canPrev={navigationState.canPrev}
               canNext={navigationState.canNext}
             />
+
+            {/* Video Progress Tracker - will find video element in DOM */}
+            {isAuthenticated && currentUser && currentLecture && (
+              <VideoProgressTracker
+                userId={currentUser.uid}
+                courseId={id}
+                lectureId={currentId}
+                videoRef={videoRef}
+                videoDuration={
+                  currentLecture?.duration
+                    ? parseFloat(currentLecture.duration) * 60
+                    : undefined
+                }
+                onProgressUpdate={handleProgressUpdate}
+              />
+            )}
           </div>
           <div className="lg:col-span-1">
             <Playlist

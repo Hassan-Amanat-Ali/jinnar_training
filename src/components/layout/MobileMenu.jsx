@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "../../assets";
-import { GoogleTranslate } from "../common";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { firestoreService } from "../../services";
@@ -105,12 +104,6 @@ const MobileMenuNavigation = ({ navigation, isActiveRoute, onClose }) => (
 const MobileMenuActions = ({ isLoggedIn, currentUser, onClose, ROUTES }) => (
   <div className="p-6 border-t border-black/10 space-y-4">
     {/* Language Selector for Mobile */}
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Choose Language
-      </label>
-      <GoogleTranslate containerId="google_translate_mobile" />
-    </div>
 
     {!isLoggedIn ? (
       <LoggedOutActions onClose={onClose} ROUTES={ROUTES} />
@@ -233,7 +226,7 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
         {userRole === "admin" && (
           <Link
             to={ROUTES.ADMIN_DASHBOARD}
-            className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+            className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
             onClick={onClose}
           >
             Admin Dashboard
@@ -241,28 +234,28 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
         )}
         <Link
           to={ROUTES.EDIT_PROFILE}
-          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
           onClick={onClose}
         >
           Edit Profile
         </Link>
         <Link
           to={ROUTES.MY_COURSES}
-          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
           onClick={onClose}
         >
           My Courses
         </Link>
         <Link
           to={ROUTES.SETTINGS}
-          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+          className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
           onClick={onClose}
         >
           Settings
         </Link>
         <button
           onClick={handleSignOut}
-          className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+          className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg"
         >
           Sign Out
         </button>

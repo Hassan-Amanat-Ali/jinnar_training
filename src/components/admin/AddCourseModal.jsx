@@ -167,11 +167,20 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
                 required
               >
                 <option value="">Select Category</option>
-                <option value="Programming">Programming</option>
-                <option value="Design">Design</option>
-                <option value="Business">Business</option>
-                <option value="Marketing">Marketing</option>
+                <option value="Development">Development</option>
+                <option value="Artificial Intelligence">
+                  Artificial Intelligence
+                </option>
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Web Development">Web Development</option>
                 <option value="Data Science">Data Science</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Cloud Computing">Cloud Computing</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="Blockchain">Blockchain</option>
+                <option value="Mobile Development">Mobile Development</option>
+                <option value="Business">Business</option>
                 <option value="Photography">Photography</option>
                 <option value="Music">Music</option>
                 <option value="Other">Other</option>

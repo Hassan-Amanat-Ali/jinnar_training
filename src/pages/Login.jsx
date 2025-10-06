@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import AuthPageImg from "../assets/images/auth-page-img.png";
 import Input from "../components/ui/Input";
@@ -11,9 +11,13 @@ import FirebaseUtils from "../utils/firebaseUtils";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Get the redirect path from location state or default to home
+  const from = location.state?.from || ROUTES.HOME;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,7 +48,7 @@ const Login = () => {
 
       if (result.success) {
         toast.success(result.message, { position: "top-center" });
-        navigate(ROUTES.EDIT_PROFILE);
+        navigate(from, { replace: true });
       } else {
         toast.error(result.message, { position: "top-center" });
       }
@@ -66,7 +70,7 @@ const Login = () => {
 
       if (result.success) {
         toast.success(result.message, { position: "top-center" });
-        navigate(ROUTES.EDIT_PROFILE);
+        navigate(from, { replace: true });
       } else {
         toast.error(result.message, { position: "top-center" });
       }
@@ -88,7 +92,7 @@ const Login = () => {
 
       if (result.success) {
         toast.success(result.message, { position: "top-center" });
-        navigate(ROUTES.EDIT_PROFILE);
+        navigate(from, { replace: true });
       } else {
         toast.error(result.message, { position: "top-center" });
       }

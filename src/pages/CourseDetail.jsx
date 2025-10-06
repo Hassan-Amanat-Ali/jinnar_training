@@ -13,7 +13,7 @@ import {
   Requirements,
   Description,
   Instructor,
-  StudentFeedback,
+  CourseReviews,
   RelatedCourses,
   YourProgress,
 } from "../components/course-detail";
@@ -25,6 +25,9 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [relatedCourses, setRelatedCourses] = useState([]);
+  const [popularCourses, setPopularCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -89,6 +92,51 @@ const CourseDetail = () => {
 
     fetchCourse();
   }, [id]);
+
+  // Fetch related courses when course data is available
+  useEffect(() => {
+    const fetchRelatedCourses = async () => {
+      if (!course) return;
+
+      try {
+        setCoursesLoading(true);
+
+        // Fetch courses from the same category
+        const categoryResult = await CourseService.getCoursesByCategory(
+          course.category
+        );
+        let categoryCourses = [];
+        if (categoryResult.success && categoryResult.data) {
+          categoryCourses = categoryResult.data
+            .filter((c) => c.id !== course.id) // Exclude current course
+            .slice(0, 6); // Limit to 6 courses
+        }
+
+        // Fetch popular courses (all published courses, sorted by enrollment)
+        const popularResult = await CourseService.getPublishedCourses();
+        let allPopularCourses = [];
+        if (popularResult.success && popularResult.data) {
+          allPopularCourses = popularResult.data
+            .filter((c) => c.id !== course.id) // Exclude current course
+            .sort(
+              (a, b) => (b.totalEnrollments || 0) - (a.totalEnrollments || 0)
+            ) // Sort by enrollment
+            .slice(0, 6); // Limit to 6 courses
+        }
+
+        setRelatedCourses(categoryCourses);
+        setPopularCourses(allPopularCourses);
+      } catch (error) {
+        console.error("Error fetching related courses:", error);
+        setRelatedCourses([]);
+        setPopularCourses([]);
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+
+    fetchRelatedCourses();
+  }, [course]);
 
   const toggleFavorite = () => {
     setIsFavorite((prev) => !prev);
@@ -178,16 +226,18 @@ const CourseDetail = () => {
                   courseDetailData.description
                 }
               />
-              <YourProgress />
+              <YourProgress courseId={id} />
               {/* <Instructor instructor={courseDetailData.instructor} /> */}
-              <StudentFeedback feedback={courseDetailData.studentFeedback} />
+              <CourseReviews courseId={id} />
               <RelatedCourses
                 title="More Courses"
-                courses={courseDetailData.relatedCourses}
+                courses={relatedCourses}
+                loading={coursesLoading}
               />
               <RelatedCourses
                 title="Students also liked"
-                courses={courseDetailData.relatedCourses}
+                courses={popularCourses}
+                loading={coursesLoading}
               />
             </div>
 

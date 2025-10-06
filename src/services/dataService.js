@@ -1,4 +1,5 @@
 import firestoreService from "./firestoreService";
+import { LectureProgressService } from "./lectureProgressService";
 
 // Collection names
 export const COLLECTIONS = {
@@ -83,10 +84,30 @@ export class CourseService {
   }
 
   static async getPublishedCourses() {
-    return await firestoreService.getAll(COLLECTIONS.COURSES, {
-      where: [["published", "==", true]],
-      orderBy: [["createdAt", "desc"]],
-    });
+    try {
+      // Try with orderBy first (requires composite index)
+      return await firestoreService.getAll(COLLECTIONS.COURSES, {
+        where: [["published", "==", true]],
+        orderBy: [["createdAt", "desc"]],
+      });
+    } catch (error) {
+      // If composite index doesn't exist, try without orderBy
+      console.warn("Composite index not found, trying without orderBy:", error);
+      const result = await firestoreService.getAll(COLLECTIONS.COURSES, {
+        where: [["published", "==", true]],
+      });
+
+      // Sort client-side if successful
+      if (result.success && result.data) {
+        result.data.sort((a, b) => {
+          const dateA = a.createdAt?.seconds || 0;
+          const dateB = b.createdAt?.seconds || 0;
+          return dateB - dateA;
+        });
+      }
+
+      return result;
+    }
   }
 
   static async getCoursesByCategory(category) {
@@ -182,45 +203,259 @@ export class EnrollmentService {
       }
     );
   }
+
+  /**
+   * Calculate and update enrollment progress based on lecture completion
+   */
+  static async updateEnrollmentProgress(userId, courseId) {
+    try {
+      // Get user's enrollment
+      const enrollmentResult = await this.checkUserEnrollment(userId, courseId);
+      if (!enrollmentResult.success || enrollmentResult.data.length === 0) {
+        return { success: false, error: "User not enrolled in course" };
+      }
+
+      const enrollment = enrollmentResult.data[0];
+
+      // Get total lectures for the course
+      const lecturesResult = await CourseService.getCourseLectures(courseId);
+      const totalLectures = lecturesResult.success
+        ? lecturesResult.data.length
+        : 0;
+
+      // Calculate progress using LectureProgressService
+      const progressData = await LectureProgressService.calculateCourseProgress(
+        userId,
+        courseId,
+        totalLectures
+      );
+
+      // Update enrollment with calculated progress
+      const updateResult = await firestoreService.update(
+        COLLECTIONS.ENROLLMENTS,
+        enrollment.id,
+        {
+          progress: progressData.overallProgress,
+          completedLessons: progressData.completedLectureIds,
+          totalLessons: progressData.totalLectures,
+          lastAccessedAt: firestoreService.serverTimestamp(),
+          lastWatchedLecture: progressData.lastWatchedLecture,
+        }
+      );
+
+      return {
+        success: updateResult.success,
+        data: {
+          ...progressData,
+          enrollmentId: enrollment.id,
+        },
+        error: updateResult.error,
+      };
+    } catch (error) {
+      console.error("Error updating enrollment progress:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get detailed enrollment with progress data
+   */
+  static async getEnrollmentWithProgress(userId, courseId) {
+    try {
+      const enrollmentResult = await this.checkUserEnrollment(userId, courseId);
+      if (!enrollmentResult.success || enrollmentResult.data.length === 0) {
+        return { success: false, error: "User not enrolled in course" };
+      }
+
+      const enrollment = enrollmentResult.data[0];
+
+      // Get total lectures for the course
+      const lecturesResult = await CourseService.getCourseLectures(courseId);
+      const totalLectures = lecturesResult.success
+        ? lecturesResult.data.length
+        : 0;
+
+      // Get detailed progress data
+      const progressData = await LectureProgressService.calculateCourseProgress(
+        userId,
+        courseId,
+        totalLectures
+      );
+
+      return {
+        success: true,
+        data: {
+          ...enrollment,
+          progressDetails: progressData,
+        },
+      };
+    } catch (error) {
+      console.error("Error getting enrollment with progress:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get next lecture to watch based on progress
+   */
+  static async getNextLecture(userId, courseId) {
+    try {
+      const lecturesResult = await CourseService.getCourseLectures(courseId);
+      if (!lecturesResult.success) {
+        return { success: false, error: "Could not fetch lectures" };
+      }
+
+      const lectures = lecturesResult.data.sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      );
+      const progressData = await LectureProgressService.getCourseProgress(
+        userId,
+        courseId
+      );
+
+      // Find first incomplete lecture
+      const completedLectureIds = progressData
+        .filter((p) => p.completed)
+        .map((p) => p.lectureId);
+
+      const nextLecture = lectures.find(
+        (lecture) => !completedLectureIds.includes(lecture.id)
+      );
+
+      return {
+        success: true,
+        data: nextLecture || lectures[lectures.length - 1], // Return last lecture if all completed
+      };
+    } catch (error) {
+      console.error("Error getting next lecture:", error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Review Service
 export class ReviewService {
   static async createReview(reviewData) {
-    return await firestoreService.create(COLLECTIONS.REVIEWS, {
+    const result = await firestoreService.create(COLLECTIONS.REVIEWS, {
       userId: reviewData.userId,
       courseId: reviewData.courseId,
       rating: reviewData.rating,
       comment: reviewData.comment,
       helpful: 0,
       reported: false,
+      createdAt: firestoreService.serverTimestamp(),
     });
+
+    // Update course rating after creating review
+    if (result.success) {
+      await this.updateCourseRating(reviewData.courseId);
+    }
+
+    return result;
   }
 
   static async getCourseReviews(courseId) {
-    return await firestoreService.getAll(COLLECTIONS.REVIEWS, {
+    // Simple query without orderBy to avoid index issues
+    const result = await firestoreService.getAll(COLLECTIONS.REVIEWS, {
       where: [["courseId", "==", courseId]],
-      orderBy: [["createdAt", "desc"]],
     });
+
+    // Sort client-side by createdAt if successful
+    if (result.success && result.data && result.data.length > 0) {
+      result.data.sort((a, b) => {
+        const dateA = a.createdAt?.seconds || a.createdAt?.getTime() || 0;
+        const dateB = b.createdAt?.seconds || b.createdAt?.getTime() || 0;
+        return dateB - dateA;
+      });
+    }
+
+    return result;
   }
 
   static async getUserReviews(userId) {
-    return await firestoreService.getAll(COLLECTIONS.REVIEWS, {
+    // Simple query without orderBy to avoid index issues
+    const result = await firestoreService.getAll(COLLECTIONS.REVIEWS, {
       where: [["userId", "==", userId]],
-      orderBy: [["createdAt", "desc"]],
     });
+
+    // Sort client-side by createdAt if successful
+    if (result.success && result.data && result.data.length > 0) {
+      result.data.sort((a, b) => {
+        const dateA = a.createdAt?.seconds || a.createdAt?.getTime() || 0;
+        const dateB = b.createdAt?.seconds || b.createdAt?.getTime() || 0;
+        return dateB - dateA;
+      });
+    }
+
+    return result;
   }
 
   static async updateReview(reviewId, updates) {
-    return await firestoreService.update(
+    // Get the review to find the courseId
+    const reviewResult = await firestoreService.getById(
+      COLLECTIONS.REVIEWS,
+      reviewId
+    );
+
+    const result = await firestoreService.update(
       COLLECTIONS.REVIEWS,
       reviewId,
       updates
     );
+
+    // Update course rating after updating review
+    if (result.success && reviewResult.success) {
+      await this.updateCourseRating(reviewResult.data.courseId);
+    }
+
+    return result;
   }
 
   static async deleteReview(reviewId) {
-    return await firestoreService.delete(COLLECTIONS.REVIEWS, reviewId);
+    // Get the review to find the courseId before deleting
+    const reviewResult = await firestoreService.getById(
+      COLLECTIONS.REVIEWS,
+      reviewId
+    );
+
+    const result = await firestoreService.delete(COLLECTIONS.REVIEWS, reviewId);
+
+    // Update course rating after deleting review
+    if (result.success && reviewResult.success) {
+      await this.updateCourseRating(reviewResult.data.courseId);
+    }
+
+    return result;
+  }
+
+  // Helper method to update course rating based on current reviews
+  static async updateCourseRating(courseId) {
+    try {
+      const reviewsResult = await this.getCourseReviews(courseId);
+
+      if (reviewsResult.success) {
+        const reviews = reviewsResult.data;
+        let averageRating = 0;
+        let reviewCount = reviews.length;
+
+        if (reviewCount > 0) {
+          const totalRating = reviews.reduce(
+            (sum, review) => sum + review.rating,
+            0
+          );
+          averageRating = parseFloat((totalRating / reviewCount).toFixed(1));
+        }
+
+        // Update the course with new rating and review count
+        await CourseService.updateCourse(courseId, {
+          rating: averageRating,
+          reviewCount: reviewCount,
+          totalReviews: reviewCount, // For backward compatibility
+        });
+      }
+    } catch (error) {
+      console.error("Error updating course rating:", error);
+    }
   }
 }
 

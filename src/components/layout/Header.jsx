@@ -58,7 +58,7 @@ const Header = ({ floating = false }) => {
             </div>
 
             {/* Right Section - Auth + Mobile Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center lg:space-x-2">
               {/* Google Translate for Mobile */}
 
               <GoogleTranslate containerId="google_translate_header" />

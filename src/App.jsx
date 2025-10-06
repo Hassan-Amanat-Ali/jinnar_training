@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Layout } from "./components/layout";
-import { ScrollToTopOnRouteChange } from "./components/common";
+import { ScrollToTopOnRouteChange, ProtectedRoute } from "./components/common";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ROUTES } from "./constants/routes";
 import {
@@ -55,9 +55,23 @@ function App() {
           {/* Legal with custom layout (floating header) */}
           <Route path={ROUTES.LEGAL} element={<Legal />} />
           <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
-          <Route path={ROUTES.WATCH} element={<Watch />} />
+          <Route
+            path={ROUTES.WATCH}
+            element={
+              <ProtectedRoute>
+                <Watch />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboard />} />
+          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           {/* Main routes with layout */}
           <Route
             path="*"
@@ -73,14 +87,35 @@ function App() {
                   <Route path={ROUTES.BLOG} element={<Blog />} />
 
                   {/* Profile Routes */}
-                  <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
-                  <Route path={ROUTES.MY_COURSES} element={<MyCourses />} />
-                  <Route path={ROUTES.TEAM} element={<Team />} />
+                  <Route
+                    path={ROUTES.EDIT_PROFILE}
+                    element={
+                      <ProtectedRoute>
+                        <EditProfile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.MY_COURSES}
+                    element={
+                      <ProtectedRoute>
+                        <MyCourses />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* <Route path={ROUTES.TEAM} element={<Team />} />
                   <Route
                     path={ROUTES.NOTIFICATION}
                     element={<Notification />}
+                  /> */}
+                  <Route
+                    path={ROUTES.SETTINGS}
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    }
                   />
-                  <Route path={ROUTES.SETTINGS} element={<Settings />} />
 
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />

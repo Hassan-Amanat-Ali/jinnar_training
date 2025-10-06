@@ -10,14 +10,17 @@ import {
   CourseService,
   EnrollmentService,
   NotificationService,
+  favoritesService,
 } from "../../services";
 
 const CoursesContent = () => {
   const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
   const [coursesState, setCoursesState] = useState([]);
+  const [allCourses, setAllCourses] = useState([]); // Store all courses for filter counts
   const [loading, setLoading] = useState(true);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
+  const [totalCourses, setTotalCourses] = useState(0);
 
   // State for filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,7 +68,7 @@ const CoursesContent = () => {
             originalPrice: course.price ? course.price * 1.3 : 0,
             rating: course.rating || 0,
             instructor: course.instructor || "Instructor",
-            isFavorite: false,
+            isFavorite: false, // Will be updated after fetching user favorites
             detailedDescription: course.detailedDescription,
             highlights: course.highlights,
             requirements: course.requirements || [],
@@ -76,20 +79,90 @@ const CoursesContent = () => {
             createdAt: course.createdAt,
             updatedAt: course.updatedAt,
           }));
+
           setCoursesState(transformedCourses);
+          setAllCourses(transformedCourses); // Store all courses for filter calculations
+          setTotalCourses(transformedCourses.length);
+
+          // Fetch user favorites if authenticated
+          if (isAuthenticated && currentUser) {
+            await fetchUserFavorites(transformedCourses);
+          }
         } else {
           setCoursesState(dummyCourses);
+          setAllCourses(dummyCourses);
+          setTotalCourses(dummyCourses.length);
         }
       } catch {
         toast.error("Failed to load courses, showing sample data");
         setCoursesState(dummyCourses);
+        setAllCourses(dummyCourses);
+        setTotalCourses(dummyCourses.length);
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchUserFavorites = async (courses) => {
+      try {
+        const favoritesResult = await favoritesService.getUserFavorites(
+          currentUser.uid
+        );
+
+        if (favoritesResult.success) {
+          const favoriteIds = favoritesResult.data.map((fav) => fav.courseId);
+
+          const coursesWithFavorites = courses.map((course) => ({
+            ...course,
+            isFavorite: favoriteIds.includes(course.id),
+          }));
+
+          setCoursesState(coursesWithFavorites);
+          setAllCourses(coursesWithFavorites);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user favorites:", error);
+      }
+    };
+
     fetchCourses();
-  }, []);
+  }, [isAuthenticated, currentUser]);
+
+  // Calculate dynamic filter counts
+  const filterCounts = useMemo(() => {
+    const categories = {};
+    const levels = {};
+    const durations = {};
+
+    allCourses.forEach((course) => {
+      // Category counts
+      if (course.category) {
+        categories[course.category] = (categories[course.category] || 0) + 1;
+      }
+
+      // Level counts
+      if (course.level) {
+        levels[course.level] = (levels[course.level] || 0) + 1;
+      }
+
+      // Duration counts
+      const durationHours = parseInt(course.duration) || 0;
+      let durationCategory = "";
+      if (durationHours <= 3) {
+        durationCategory = "0-3 Hours";
+      } else if (durationHours <= 6) {
+        durationCategory = "3-6 Hours";
+      } else {
+        durationCategory = "6-12 Hours";
+      }
+
+      if (durationCategory) {
+        durations[durationCategory] = (durations[durationCategory] || 0) + 1;
+      }
+    });
+
+    return { categories, levels, durations };
+  }, [allCourses]);
 
   // Filter and sort courses
   const filteredCourses = useMemo(() => {
@@ -206,24 +279,91 @@ const CoursesContent = () => {
     setCurrentPage(1);
   };
 
-  const handleToggleFavorite = (courseId) => {
-    setCoursesState((prevCourses) => {
-      const updatedCourses = prevCourses.map((course) =>
-        course.id === courseId
-          ? { ...course, isFavorite: !course.isFavorite }
-          : course
-      );
-      return updatedCourses;
-    });
+  const handleToggleFavorite = async (courseId) => {
+    if (!isAuthenticated) {
+      toast.info("Please log in to add favorites", {
+        position: "top-center",
+      });
+      navigate(ROUTES.LOGIN);
+      return;
+    }
 
-    const course = coursesState.find((c) => c.id === courseId);
-    if (course) {
-      toast.success(
-        course.isFavorite
-          ? "Course removed from favorites!"
-          : "Course added to favorites!",
-        { position: "top-center" }
-      );
+    try {
+      const course = coursesState.find((c) => c.id === courseId);
+      if (!course) return;
+
+      const wasIsFavorite = course.isFavorite;
+
+      // Optimistically update UI
+      setCoursesState((prevCourses) => {
+        const updatedCourses = prevCourses.map((course) =>
+          course.id === courseId
+            ? { ...course, isFavorite: !course.isFavorite }
+            : course
+        );
+        return updatedCourses;
+      });
+
+      // Update allCourses state as well for filter consistency
+      setAllCourses((prevCourses) => {
+        const updatedCourses = prevCourses.map((course) =>
+          course.id === courseId
+            ? { ...course, isFavorite: !course.isFavorite }
+            : course
+        );
+        return updatedCourses;
+      });
+
+      // Update database
+      let result;
+      if (wasIsFavorite) {
+        result = await favoritesService.removeFromFavorites(
+          currentUser.uid,
+          courseId
+        );
+      } else {
+        result = await favoritesService.addToFavorites(
+          currentUser.uid,
+          courseId
+        );
+      }
+
+      if (result.success) {
+        toast.success(
+          wasIsFavorite
+            ? "Course removed from favorites!"
+            : "Course added to favorites!",
+          { position: "top-center" }
+        );
+      } else {
+        // Revert optimistic update on failure
+        setCoursesState((prevCourses) => {
+          const revertedCourses = prevCourses.map((course) =>
+            course.id === courseId
+              ? { ...course, isFavorite: wasIsFavorite }
+              : course
+          );
+          return revertedCourses;
+        });
+
+        setAllCourses((prevCourses) => {
+          const revertedCourses = prevCourses.map((course) =>
+            course.id === courseId
+              ? { ...course, isFavorite: wasIsFavorite }
+              : course
+          );
+          return revertedCourses;
+        });
+
+        toast.error("Failed to update favorites. Please try again.", {
+          position: "top-center",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("An error occurred. Please try again.", {
+        position: "top-center",
+      });
     }
   };
 
@@ -297,10 +437,6 @@ const CoursesContent = () => {
     }
   };
 
-  const handleViewDetails = (courseId) => {
-    navigate(`/courses/${courseId}`);
-  };
-
   return (
     <section className="py-16 lg:py-20 bg-gray-50">
       <div className="section-container">
@@ -323,6 +459,8 @@ const CoursesContent = () => {
                 selectedDurations={selectedDurations}
                 setSelectedDurations={setSelectedDurations}
                 onClearAll={handleClearAll}
+                filterCounts={filterCounts}
+                totalCourses={totalCourses}
               />
             </div>
 
@@ -338,8 +476,10 @@ const CoursesContent = () => {
                 coursesPerPage={coursesPerPage}
                 onToggleFavorite={handleToggleFavorite}
                 onEnroll={handleEnroll}
-                onViewDetails={handleViewDetails}
                 enrollmentLoading={enrollmentLoading}
+                totalCourses={filteredCourses.length} // Pass filtered total
+                selectedCategories={selectedCategories} // Pass selected categories for heading
+                searchQuery={searchQuery} // Pass search query for heading
               />
             </div>
           </div>

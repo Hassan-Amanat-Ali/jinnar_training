@@ -179,7 +179,7 @@ const Footer = () => {
               </p>
 
               {/* Newsletter Signup */}
-              <form
+              {/* <form
                 onSubmit={handleNewsletterSubmit}
                 className="flex-col md:flex-row flex gap-2 mb-6"
               >
@@ -197,7 +197,7 @@ const Footer = () => {
                   type="submit"
                   disabled={isSubscribing}
                 />
-              </form>
+              </form> */}
 
               {/* Social Icons */}
               <div className="flex gap-3">

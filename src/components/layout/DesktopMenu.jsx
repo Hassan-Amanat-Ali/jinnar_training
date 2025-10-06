@@ -173,12 +173,12 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
 
         {/* Dropdown Menu */}
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 min-w-64 max-w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-            <div className="px-4 py-2 border-b border-gray-100">
-              <p className="text-sm font-medium text-gray-900 truncate">
+          <div className="absolute right-0 mt-2 min-w-48 max-w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+            <div className="px-3 py-1.5 border-b border-gray-100">
+              <p className="text-xs font-medium text-gray-900 truncate">
                 {getUserDisplayName()}
               </p>
-              <p className="text-xs text-gray-500 truncate break-all">
+              <p className="text-[10px] text-gray-500 truncate break-all">
                 {currentUser?.email}
               </p>
             </div>
@@ -186,7 +186,7 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
             {userRole === "admin" && (
               <Link
                 to={ROUTES.ADMIN_DASHBOARD}
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+                className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Admin Dashboard
@@ -195,7 +195,7 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
 
             <Link
               to={ROUTES.EDIT_PROFILE}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
               onClick={() => setIsDropdownOpen(false)}
             >
               Edit Profile
@@ -203,23 +203,23 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
 
             <Link
               to={ROUTES.MY_COURSES}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
               onClick={() => setIsDropdownOpen(false)}
             >
               My Courses
             </Link>
 
-            <Link
+            {/* <Link
               to={ROUTES.NOTIFICATION}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
               onClick={() => setIsDropdownOpen(false)}
             >
               Notifications
-            </Link>
+            </Link> */}
 
             <Link
               to={ROUTES.SETTINGS}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+              className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
               onClick={() => setIsDropdownOpen(false)}
             >
               Settings
@@ -228,7 +228,7 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
             <div className="border-t border-gray-100">
               <button
                 onClick={handleSignOut}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 whitespace-nowrap"
+                className="block w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 whitespace-nowrap"
               >
                 Sign Out
               </button>

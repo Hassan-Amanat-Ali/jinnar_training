@@ -67,8 +67,8 @@ const ProfileSidebar = () => {
   const navigationItems = [
     { name: "Edit Profile", path: ROUTES.EDIT_PROFILE },
     { name: "Courses", path: ROUTES.MY_COURSES },
-    { name: "Team", path: ROUTES.TEAM },
-    { name: "Notifications", path: ROUTES.NOTIFICATION },
+    // { name: "Team", path: ROUTES.TEAM },
+    // { name: "Notifications", path: ROUTES.NOTIFICATION },
     { name: "Settings", path: ROUTES.SETTINGS },
   ];
 

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FiBook, FiHeart, FiUser } from "react-icons/fi";
 import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../hooks/useAuth";
 import { EnrollmentService, CourseService } from "../../services";
+import { LectureProgressService } from "../../services/lectureProgressService";
+import { TabsComponent } from "../ui";
+import FavoritesContent from "./FavoritesContent";
 
 const ProgressCard = ({ stats }) => {
   return (
@@ -30,22 +34,61 @@ const ProgressCard = ({ stats }) => {
 
 const CourseCard = ({ course, onContinue }) => {
   const [expanded, setExpanded] = React.useState(false);
+  const [realTimeProgress, setRealTimeProgress] = React.useState(null);
+
   const description =
     course.description ||
     course.detailedDescription ||
     "No description available";
   const preview = description.slice(0, 115);
 
-  const getProgressText = () => {
-    const totalLessons = course.syllabus?.length || 0;
-    const completedLessons = course.completedLessons?.length || 0;
+  // Use real-time progress if available, otherwise fallback to enrollment progress
+  const currentProgress = realTimeProgress || {
+    overallProgress: course.progress || 0,
+    completedLectures: course.completedLessons?.length || 0,
+    totalLectures: course.syllabus?.length || 0,
+  };
 
-    if (totalLessons === 0) {
-      return `${Math.round(course.progress || 0)}% completed`;
+  const getProgressText = () => {
+    const { completedLectures, totalLectures, overallProgress } =
+      currentProgress;
+
+    if (totalLectures === 0) {
+      return `${Math.round(overallProgress)}% completed`;
     }
 
-    return `${completedLessons} of ${totalLessons} lessons completed`;
+    return `${completedLectures} of ${totalLectures} lessons completed`;
   };
+
+  // Fetch real-time progress when component mounts
+  React.useEffect(() => {
+    const fetchRealTimeProgress = async () => {
+      if (!course.userId || !course.id) return;
+
+      try {
+        // Get total lectures for the course
+        const lecturesResult = await CourseService.getCourseLectures(course.id);
+        const totalLectures = lecturesResult.success
+          ? lecturesResult.data.length
+          : 0;
+
+        // Get detailed progress data
+        const progressData =
+          await LectureProgressService.calculateCourseProgress(
+            course.userId,
+            course.id,
+            totalLectures
+          );
+
+        setRealTimeProgress(progressData);
+      } catch (error) {
+        console.error("Error fetching real-time progress:", error);
+        // Keep using enrollment progress as fallback
+      }
+    };
+
+    fetchRealTimeProgress();
+  }, [course.id, course.userId]);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
@@ -84,6 +127,25 @@ const CourseCard = ({ course, onContinue }) => {
             </button>
           )}
         </p>
+
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] text-black/70 font-medium">
+              Progress
+            </span>
+            <span className="text-[11px] text-black/60">
+              {Math.round(currentProgress.overallProgress)}%
+            </span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${currentProgress.overallProgress}%` }}
+            />
+          </div>
+        </div>
+
         <div className="flex items-center justify-between">
           <span className="text-[11px] text-black/70">{getProgressText()}</span>
           <button
@@ -109,6 +171,7 @@ const MyCoursesContent = () => {
     total: 0,
     percentage: 0,
   });
+  const [activeTab, setActiveTab] = useState("my-courses");
 
   useEffect(() => {
     if (!isAuthenticated || !currentUser) {
@@ -148,14 +211,50 @@ const MyCoursesContent = () => {
             );
 
             if (courseResult.success && courseResult.data) {
-              return {
-                ...courseResult.data,
-                enrollmentId: enrollment.id,
-                progress: enrollment.progress || 0,
-                completedLessons: enrollment.completedLessons || [],
-                lastAccessedAt: enrollment.lastAccessedAt,
-                enrolledAt: enrollment.createdAt,
-              };
+              // Get real-time progress for this course
+              try {
+                const lecturesResult = await CourseService.getCourseLectures(
+                  enrollment.courseId
+                );
+                const totalLectures = lecturesResult.success
+                  ? lecturesResult.data.length
+                  : 0;
+
+                const progressData =
+                  await LectureProgressService.calculateCourseProgress(
+                    currentUser.uid,
+                    enrollment.courseId,
+                    totalLectures
+                  );
+
+                return {
+                  ...courseResult.data,
+                  userId: currentUser.uid, // Add userId for CourseCard progress tracking
+                  enrollmentId: enrollment.id,
+                  progress: progressData.overallProgress,
+                  completedLessons: progressData.completedLectureIds,
+                  totalLessons: progressData.totalLectures,
+                  lastAccessedAt: enrollment.lastAccessedAt,
+                  enrolledAt: enrollment.createdAt,
+                  progressDetails: progressData,
+                };
+              } catch (progressError) {
+                console.warn(
+                  "Error fetching progress for course:",
+                  enrollment.courseId,
+                  progressError
+                );
+                // Fallback to enrollment data
+                return {
+                  ...courseResult.data,
+                  userId: currentUser.uid,
+                  enrollmentId: enrollment.id,
+                  progress: enrollment.progress || 0,
+                  completedLessons: enrollment.completedLessons || [],
+                  lastAccessedAt: enrollment.lastAccessedAt,
+                  enrolledAt: enrollment.createdAt,
+                };
+              }
             }
             return null;
           });
@@ -175,19 +274,25 @@ const MyCoursesContent = () => {
 
           setEnrolledCourses(validCourses);
 
+          // Calculate overall progress stats using real-time data
           const completedCount = validCourses.filter(
-            (course) => course.progress >= 100
+            (course) => (course.progress || 0) >= 100
           ).length;
           const totalCount = validCourses.length;
-          const percentage =
+
+          // Calculate average progress across all courses
+          const averageProgress =
             totalCount > 0
-              ? Math.round((completedCount / totalCount) * 100)
+              ? validCourses.reduce(
+                  (sum, course) => sum + (course.progress || 0),
+                  0
+                ) / totalCount
               : 0;
 
           setProgressStats({
             completed: completedCount,
             total: totalCount,
-            percentage,
+            percentage: Math.round(averageProgress),
           });
         } else {
           console.log("No enrollments found or fetch failed");
@@ -213,14 +318,16 @@ const MyCoursesContent = () => {
       const courseData = enrolledCourses.find(
         (course) => course.id === courseId
       );
-      if (courseData?.enrollmentId) {
-        await EnrollmentService.updateProgress(
-          courseData.enrollmentId,
-          courseData.progress,
-          courseData.completedLessons
+
+      if (courseData?.enrollmentId && currentUser?.uid) {
+        // Update enrollment progress using our comprehensive tracking system
+        await EnrollmentService.updateEnrollmentProgress(
+          currentUser.uid,
+          courseId
         );
       }
-    } catch {
+    } catch (error) {
+      console.error("Error updating progress:", error);
       // Silent fail - don't block navigation
     }
 
@@ -232,14 +339,25 @@ const MyCoursesContent = () => {
     navigate(ROUTES.COURSES);
   };
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-[20px] md:text-[22px] font-semibold text-black">
-        My Courses {enrolledCourses.length > 0 && `(${enrolledCourses.length})`}
-      </h2>
+  const tabs = [
+    {
+      id: "my-courses",
+      label: "My Courses",
+      icon: FiBook,
+      count: enrolledCourses.length,
+    },
+    {
+      id: "favorites",
+      label: "Favorites",
+      icon: FiHeart,
+    },
+  ];
 
-      {!isAuthenticated ? (
+  const renderMyCoursesContent = () => {
+    if (!isAuthenticated) {
+      return (
         <div className="text-center py-12">
+          <FiUser className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <p className="text-lg text-black/60 mb-4">
             Please log in to view your enrolled courses.
           </p>
@@ -250,20 +368,25 @@ const MyCoursesContent = () => {
             Log In
           </button>
         </div>
-      ) : loading ? (
+      );
+    }
+
+    if (loading) {
+      return (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <span className="ml-4 text-gray-600">Loading your courses...</span>
         </div>
-      ) : enrolledCourses.length === 0 ? (
+      );
+    }
+
+    if (enrolledCourses.length === 0) {
+      return (
         <div className="text-center py-12">
+          <FiBook className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <p className="text-lg text-black/60 mb-4">
             You haven't enrolled in any courses yet.
           </p>
-          <div className="text-sm text-gray-500 mb-4">
-            Debug: User ID: {currentUser?.uid} | Loading: {loading.toString()} |
-            Auth: {isAuthenticated.toString()}
-          </div>
           <button
             onClick={handleExplore}
             className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary/90"
@@ -271,31 +394,48 @@ const MyCoursesContent = () => {
             Explore Courses
           </button>
         </div>
-      ) : (
-        <>
-          <ProgressCard stats={progressStats} />
+      );
+    }
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {enrolledCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                onContinue={handleContinue}
-              />
-            ))}
-          </div>
+    return (
+      <>
+        <ProgressCard stats={progressStats} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-5">
+          {enrolledCourses.map((course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              onContinue={handleContinue}
+            />
+          ))}
+        </div>
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={handleExplore}
+            className="px-6 py-3 rounded-xl border border-gray-300 bg-white shadow-sm text-sm text-black/80 hover:bg-gray-50 min-w-[250px]"
+          >
+            Explore More +
+          </button>
+        </div>
+      </>
+    );
+  };
 
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={handleExplore}
-              className="px-6 py-3 rounded-xl border border-gray-300 bg-white shadow-sm text-sm text-black/80 hover:bg-gray-50 min-w-[250px]"
-            >
-              Explore More +
-            </button>
-          </div>
-        </>
-      )}
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <TabsComponent
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        title="Learning Dashboard"
+        description="Manage your courses and favorites"
+      />
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {activeTab === "my-courses" && renderMyCoursesContent()}
+        {activeTab === "favorites" && <FavoritesContent />}
+      </div>
     </div>
   );
 };

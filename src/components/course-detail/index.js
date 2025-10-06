@@ -8,5 +8,6 @@ export { default as Requirements } from "./Requirements";
 export { default as Description } from "./Description";
 export { default as Instructor } from "./Instructor";
 export { default as StudentFeedback } from "./StudentFeedback";
+export { default as CourseReviews } from "./CourseReviews";
 export { default as RelatedCourses } from "./RelatedCourses";
 export { default as YourProgress } from "./YourProgress";

@@ -1,13 +1,14 @@
 import React from "react";
 import { FiClock, FiUsers, FiHeart } from "react-icons/fi";
 import { FaStar, FaHeart } from "react-icons/fa";
+import { Button } from "../ui";
+import { ROUTES } from "../../constants/routes";
 
 const CourseCard = ({
   course,
   viewMode,
   onToggleFavorite,
   onEnroll,
-  onViewDetails,
   enrollmentLoading = false,
 }) => {
   const isListView = viewMode === "list";
@@ -63,18 +64,18 @@ const CourseCard = ({
               <button
                 onClick={() => onEnroll(course.id)}
                 disabled={enrollmentLoading}
-                className={`btn-base-medium btn-primary ${
+                className={`btn-base-medium btn-primary whitespace-nowrap  ${
                   enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
                 {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
               </button>
-              <button
-                onClick={() => onViewDetails(course.id)}
+              <Button
+                href={ROUTES.COURSE_DETAIL.replace(":id", course.id)}
                 className="btn-base-medium btn-outline"
               >
                 View Details
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -125,22 +126,20 @@ const CourseCard = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-auto">
-          <button
+        <div className="flex items-center gap-3 mt-auto whitespace-nowrap">
+          <Button
+            text={enrollmentLoading ? "Enrolling..." : "Enroll Now"}
             onClick={() => onEnroll(course.id)}
-            disabled={enrollmentLoading}
             className={`btn-base-medium btn-primary flex-1 ${
               enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
-          >
-            {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
-          </button>
-          <button
-            onClick={() => onViewDetails(course.id)}
+            disabled={enrollmentLoading}
+          />
+          <Button
+            text="View Details"
+            href={ROUTES.COURSE_DETAIL.replace(":id", String(course.id))}
             className="btn-base-medium btn-outline flex-1 whitespace-nowrap"
-          >
-            View Details
-          </button>
+          />
         </div>
       </div>
     </div>
