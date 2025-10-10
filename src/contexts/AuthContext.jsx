@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import authService from "../services/authService";
 
 // Create Auth Context
@@ -72,6 +72,27 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
+};
+
+// Custom hook to use the AuthContext
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return {
+    user: context.currentUser,
+    loading: context.loading,
+    signUp: context.signUp,
+    signIn: context.signIn,
+    signInWithGoogle: context.signInWithGoogle,
+    signInWithGithub: context.signInWithGithub,
+    signOut: context.signOut,
+    resetPassword: context.resetPassword,
+    updateProfile: context.updateProfile,
+    updatePassword: context.updatePassword,
+    isAuthenticated: context.isAuthenticated,
+  };
 };
 
 export default AuthContext;

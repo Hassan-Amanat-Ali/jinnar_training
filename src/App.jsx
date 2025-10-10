@@ -103,11 +103,11 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route path={ROUTES.TEAM} element={<Team />} />
+                  {/* <Route path={ROUTES.TEAM} element={<Team />} /> */}
                   <Route
                     path={ROUTES.NOTIFICATION}
                     element={<Notification />}
-                  /> */}
+                  />
                   <Route
                     path={ROUTES.SETTINGS}
                     element={

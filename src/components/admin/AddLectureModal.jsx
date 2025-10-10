@@ -4,8 +4,11 @@ import { firestoreService, COLLECTIONS } from "../../services";
 import { toast } from "react-toastify";
 import FileUpload from "../ui/FileUpload";
 import MultiFileUpload from "../ui/MultiFileUpload";
+import NotificationService from "../../services/notificationService";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AddLectureModal = ({ courses, onClose, onSuccess }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
@@ -121,6 +124,21 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
       );
 
       if (result.success) {
+        // Get course title for notification
+        const selectedCourse = courses.find((c) => c.id === formData.courseId);
+        const courseTitle = selectedCourse?.title || "Unknown Course";
+
+        // Create notification when lecture is created
+        await NotificationService.notifyLectureCreated(
+          {
+            id: result.id,
+            title: lectureData.title,
+            courseId: lectureData.courseId,
+          },
+          courseTitle,
+          user?.uid
+        );
+
         toast.success("Lecture created successfully!");
         onSuccess();
       } else {

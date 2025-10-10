@@ -7,6 +7,9 @@ export { default as favoritesService } from "./favoritesService";
 // Progress Tracking Service Export
 export { LectureProgressService } from "./lectureProgressService";
 
+// Real-time Notification Service Export
+export { default as notificationService } from "./notificationService";
+
 // Cloudinary Service Export
 export { default as cloudinaryService } from "./cloudinaryService";
 

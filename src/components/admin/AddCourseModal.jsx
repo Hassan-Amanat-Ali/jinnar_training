@@ -3,8 +3,11 @@ import { FiX } from "react-icons/fi";
 import { CourseService } from "../../services";
 import { toast } from "react-toastify";
 import FileUpload from "../ui/FileUpload";
+import NotificationService from "../../services/notificationService";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AddCourseModal = ({ onClose, onSuccess }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -90,6 +93,12 @@ const AddCourseModal = ({ onClose, onSuccess }) => {
       const result = await CourseService.createCourse(courseData);
 
       if (result.success) {
+        // Create notification when course is created
+        await NotificationService.notifyCourseCreated(
+          { id: result.id, title: courseData.title },
+          user?.uid
+        );
+
         toast.success("Course created successfully!");
         onSuccess();
       } else {

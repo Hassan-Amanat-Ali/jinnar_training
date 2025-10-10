@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { firestoreService } from "../../services";
+import { NotificationBell } from "../common";
 
 const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
   <DesktopActions
@@ -144,6 +145,14 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
 
   return (
     <div className="flex items-center space-x-4">
+      {/* Notification Bell */}
+      <Link
+        to={ROUTES.NOTIFICATION}
+        className="p-2 text-black/60 hover:text-primary transition-colors"
+      >
+        <NotificationBell />
+      </Link>
+
       {/* User Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
         <button
@@ -209,13 +218,13 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
               My Courses
             </Link>
 
-            {/* <Link
+            <Link
               to={ROUTES.NOTIFICATION}
               className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 whitespace-nowrap"
               onClick={() => setIsDropdownOpen(false)}
             >
               Notifications
-            </Link> */}
+            </Link>
 
             <Link
               to={ROUTES.SETTINGS}

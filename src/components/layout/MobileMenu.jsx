@@ -247,6 +247,13 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
           My Courses
         </Link>
         <Link
+          to={ROUTES.NOTIFICATION}
+          className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
+          onClick={onClose}
+        >
+          Notifications
+        </Link>
+        <Link
           to={ROUTES.SETTINGS}
           className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg"
           onClick={onClose}

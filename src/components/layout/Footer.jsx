@@ -101,13 +101,13 @@ const Footer = () => {
   const resourcesLinks = [
     { name: "Privacy Policy", href: ROUTES.PRIVACY_POLICY },
     { name: "Terms of Service", href: ROUTES.TERMS_OF_SERVICE },
-    { name: "Refunds", href: ROUTES.REFUNDS },
+    // { name: "Refunds", href: ROUTES.REFUNDS },
     { name: "Legal", href: ROUTES.LEGAL },
   ];
 
   const companyLinks = [
     { name: "About Us", href: ROUTES.ABOUT },
-    { name: "Teams", href: ROUTES.TEAM },
+    // { name: "Teams", href: ROUTES.TEAM },
     { name: "My Courses", href: ROUTES.MY_COURSES },
     { name: "Notifications", href: ROUTES.NOTIFICATION },
     { name: "Contact Us", href: ROUTES.CONTACT },

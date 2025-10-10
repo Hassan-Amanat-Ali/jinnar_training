@@ -1,5 +1,5 @@
-import React from 'react';
-import { Hero, Skills, Impact, Professors, Welcome } from '../components/about';
+import React from "react";
+import { Hero, Skills, Impact, Professors, Welcome } from "../components/about";
 
 const About = () => {
   return (
@@ -7,7 +7,7 @@ const About = () => {
       <Hero />
       <Skills />
       <Impact />
-      <Professors />
+      {/* <Professors /> */}
       <Welcome />
     </div>
   );
