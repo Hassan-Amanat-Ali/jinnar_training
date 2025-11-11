@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui";
 import { Logo, FooterBg } from "../../assets";
@@ -109,7 +108,6 @@ const Footer = () => {
     { name: "About Us", href: ROUTES.ABOUT },
     // { name: "Teams", href: ROUTES.TEAM },
     { name: "My Courses", href: ROUTES.MY_COURSES },
-    { name: "Notifications", href: ROUTES.NOTIFICATION },
     { name: "Contact Us", href: ROUTES.CONTACT },
   ];
 
@@ -140,12 +138,12 @@ const Footer = () => {
 
             {/* Right Side - CTA Button */}
             <div className="flex-shrink-0">
-              <Link to={ROUTES.COURSES}>
+              <a href={ROUTES.COURSES}>
                 <Button
                   text="Start Now"
                   className="btn-base-large btn-gray text-black bg-white px-8 py-4 text-lg font-medium"
                 />
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -227,12 +225,12 @@ const Footer = () => {
                   <ul className="space-y-4">
                     {exploreLinks.map((item, index) => (
                       <li key={index}>
-                        <Link
-                          to={item.href}
+                        <a
+                          href={item.href}
                           className="text-black/70 hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {item.name}
-                        </Link>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -246,12 +244,12 @@ const Footer = () => {
                   <ul className="space-y-4">
                     {resourcesLinks.map((item, index) => (
                       <li key={index}>
-                        <Link
-                          to={item.href}
+                        <a
+                          href={item.href}
                           className="text-black/70 hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {item.name}
-                        </Link>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -265,12 +263,12 @@ const Footer = () => {
                   <ul className="space-y-4">
                     {companyLinks.map((item, index) => (
                       <li key={index}>
-                        <Link
-                          to={item.href}
+                        <a
+                          href={item.href}
                           className="text-black/70 hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {item.name}
-                        </Link>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -285,13 +283,13 @@ const Footer = () => {
               {/* Legal Links */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                 {resourcesLinks.map((link, index) => (
-                  <Link
+                  <a
                     key={index}
-                    to={link.href}
+                    href={link.href}
                     className="text-sm text-black/60 hover:text-primary transition-colors duration-200"
                   >
                     {link.name}
-                  </Link>
+                  </a>
                 ))}
               </div>
 

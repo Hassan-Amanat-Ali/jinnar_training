@@ -1,12 +1,18 @@
-# Enable URL rewriting
 <IfModule mod_rewrite.c>
+  Options -MultiViews
   RewriteEngine On
 
-  # Allow direct access to existing files and directories
+  # If your app is in a subfolder, set the base to that path, e.g. /mysite/
+  RewriteBase /
+
+  # Serve existing files/directories as-is
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Redirect all other requests to the SPA entry point
+  # All other requests go to the SPA entry point
   RewriteRule ^ index.html [L]
 </IfModule>
+
+# Ensure index.html is treated as the default document
+DirectoryIndex index.html
