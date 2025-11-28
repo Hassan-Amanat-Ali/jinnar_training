@@ -27,6 +27,7 @@ export const ROUTES = {
   TERMS_OF_SERVICE: "/terms-of-service",
   REFUNDS: "/refunds",
   LEGAL: "/legal",
+  FAQ: "/faq",
   // Add more routes as needed
 };
 
@@ -56,4 +57,5 @@ export const PUBLIC_ROUTES = [
   ROUTES.TERMS_OF_SERVICE,
   ROUTES.REFUNDS,
   ROUTES.LEGAL,
+  ROUTES.FAQ,
 ];
