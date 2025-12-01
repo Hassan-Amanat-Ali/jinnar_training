@@ -28,6 +28,7 @@ export const ROUTES = {
   REFUNDS: "/refunds",
   LEGAL: "/legal",
   FAQ: "/faq",
+  JINNAR_COURSES: "/jinnar-courses",
   // Add more routes as needed
 };
 
@@ -58,4 +59,5 @@ export const PUBLIC_ROUTES = [
   ROUTES.REFUNDS,
   ROUTES.LEGAL,
   ROUTES.FAQ,
+  ROUTES.JINNAR_COURSES,
 ];

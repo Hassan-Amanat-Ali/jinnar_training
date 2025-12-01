@@ -11,6 +11,7 @@ import DesktopMenu from "./DesktopMenu";
 const NAVIGATION = [
   { name: "Home", href: ROUTES.HOME },
   { name: "Courses", href: ROUTES.COURSES },
+  { name: "Jinnar Training", href: ROUTES.JINNAR_COURSES },
   { name: "About Us", href: ROUTES.ABOUT },
   { name: "FAQs", href: ROUTES.FAQ },
   { name: "Contact Us", href: ROUTES.CONTACT },

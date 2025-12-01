@@ -20,6 +20,7 @@ import {
   Refunds,
   Legal,
   FAQ,
+  JinnarCourses,
   // Profile Pages
   EditProfile,
   MyCourses,
@@ -58,6 +59,9 @@ function App() {
 
           {/* FAQ with custom layout (floating header) */}
           <Route path={ROUTES.FAQ} element={<FAQ />} />
+
+          {/* JinnarCourses Page */}
+          <Route path={ROUTES.JINNAR_COURSES} element={<JinnarCourses />} />
 
           <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
           <Route

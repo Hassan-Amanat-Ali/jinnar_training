@@ -13,6 +13,7 @@ export { default as TermsOfService } from "./TermsOfService";
 export { default as Refunds } from "./Refunds";
 export { default as Legal } from "./Legal";
 export { default as FAQ } from "./FAQ";
+export { default as JinnarCourses } from "./JinnarCourses";
 export { default as AdminDashboard } from "./AdminDashboard";
 
 // Profile Pages
