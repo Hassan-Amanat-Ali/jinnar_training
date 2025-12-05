@@ -12,7 +12,8 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
@@ -222,7 +223,35 @@ class AuthService {
 
   // Auth state listener
   onAuthStateChange(callback) {
-    return onAuthStateChanged(this.auth, callback);
+    return onAuthStateChanged(this.auth, async (user) => {
+      if (user) {
+        // Fetch additional user data from Firestore
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            // Merge Firebase Auth user with Firestore data
+            const userData = userDoc.data();
+            const enrichedUser = {
+              ...user,
+              role: userData.role || "user",
+              ...userData,
+            };
+            callback(enrichedUser);
+          } else {
+            // User document doesn't exist, return auth user with default role
+            callback({ ...user, role: "user" });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Fallback to auth user with default role
+          callback({ ...user, role: "user" });
+        }
+      } else {
+        callback(null);
+      }
+    });
   }
 
   // Get user-friendly error messages

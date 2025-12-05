@@ -15,13 +15,20 @@ const CoursesListing = ({
   onToggleFavorite,
   onEnroll,
   enrollmentLoading = false,
-  selectedCategories = [], // Add selectedCategories prop
-  searchQuery = "", // Add searchQuery prop
+  selectedCategories = [],
+  searchQuery = "",
+  isAdmin = false,
+  coursesHeading = null, // Custom heading override
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
   // Generate dynamic heading based on selected categories and search
   const getHeading = () => {
+    // Use custom heading if provided (for role-based headings)
+    if (coursesHeading) {
+      return coursesHeading;
+    }
+
     let heading = "";
 
     // Base heading from categories

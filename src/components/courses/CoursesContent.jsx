@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import CoursesFilters from "./CoursesFilters";
 import CoursesListing from "./CoursesListing";
 import { courses as dummyCourses } from "../../data/courses";
+import { jinnarCoursesData } from "../../data/jinnarCourses";
 import {
   CourseService,
   EnrollmentService,
@@ -34,70 +35,81 @@ const CoursesContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 9;
 
+  // Employee-only course titles
+  const employeeOnlyCourses = [
+    "Time Management for Support & Admin Teams",
+    "Tier 2 Training Program",
+    "Tier 3 Training Program",
+    "Jinnar Employees Training Programs",
+  ];
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
 
-        let result = await CourseService.getPublishedCourses();
+        // Check if user is admin
+        const isAdmin = currentUser?.role === "admin";
 
-        if (!result.success || !result.data || result.data.length === 0) {
-          const allCoursesResult = await CourseService.getAllCourses();
+        // Transform Jinnar courses
+        const transformedJinnarCourses = jinnarCoursesData.map((course) => ({
+          id: `jinnar-${course.id}`,
+          title: course.title,
+          description: course.description,
+          image: course.thumbnail,
+          duration: "Self-paced",
+          enrolled: 0,
+          category: course.category,
+          level: "All Levels",
+          price: 0,
+          language: "English",
+          originalPrice: 0,
+          rating: 4.5,
+          instructor: "Jinnar Training",
+          isFavorite: false,
+          detailedDescription: course.description,
+          highlights: [],
+          requirements: [],
+          learningOutcomes: [],
+          tags: ["Document", "Training", "Free"],
+          published: true,
+          reviewCount: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isJinnarCourse: true,
+          filePath: course.filePath,
+          fileName: course.fileName,
+        }));
 
-          if (
-            allCoursesResult.success &&
-            allCoursesResult.data &&
-            allCoursesResult.data.length > 0
-          ) {
-            result = allCoursesResult;
-          }
-        }
-
-        if (result.success && result.data && result.data.length > 0) {
-          const transformedCourses = result.data.map((course) => ({
-            id: course.id,
-            title: course.title,
-            description: course.description,
-            image: course.thumbnail || "/placeholder-course.jpg",
-            duration: course.duration || "0 Hours",
-            enrolled: course.totalEnrollments || 0,
-            category: course.category,
-            level: course.level,
-            price: course.price || 0,
-            language: course.language || "English",
-            originalPrice: course.price ? course.price * 1.3 : 0,
-            rating: course.rating || 0,
-            instructor: course.instructor || "Instructor",
-            isFavorite: false, // Will be updated after fetching user favorites
-            detailedDescription: course.detailedDescription,
-            highlights: course.highlights,
-            requirements: course.requirements || [],
-            learningOutcomes: course.learningOutcomes || [],
-            tags: course.tags || [],
-            published: course.published,
-            reviewCount: course.reviewCount || 0,
-            createdAt: course.createdAt,
-            updatedAt: course.updatedAt,
-          }));
-
-          setCoursesState(transformedCourses);
-          setAllCourses(transformedCourses); // Store all courses for filter calculations
-          setTotalCourses(transformedCourses.length);
-
-          // Fetch user favorites if authenticated
-          if (isAuthenticated && currentUser) {
-            await fetchUserFavorites(transformedCourses);
-          }
+        // Filter Jinnar courses based on user role
+        let filteredJinnarCourses;
+        if (isAdmin) {
+          // Admin sees all Jinnar courses
+          filteredJinnarCourses = transformedJinnarCourses;
         } else {
-          setCoursesState(dummyCourses);
-          setAllCourses(dummyCourses);
-          setTotalCourses(dummyCourses.length);
+          // Non-admin users see only public Jinnar courses (exclude employee-only)
+          filteredJinnarCourses = transformedJinnarCourses.filter(
+            (course) => !employeeOnlyCourses.includes(course.title)
+          );
         }
-      } catch {
-        toast.error("Failed to load courses, showing sample data");
-        setCoursesState(dummyCourses);
-        setAllCourses(dummyCourses);
-        setTotalCourses(dummyCourses.length);
+
+        // Show only Jinnar courses
+        const allCombinedCourses = filteredJinnarCourses;
+
+        setCoursesState(allCombinedCourses);
+        setAllCourses(allCombinedCourses);
+        setTotalCourses(allCombinedCourses.length);
+
+        // Fetch user favorites if authenticated
+        if (isAuthenticated && currentUser) {
+          await fetchUserFavorites(allCombinedCourses);
+        }
+      } catch (error) {
+        console.error("Failed to load courses:", error);
+        toast.error("Failed to load courses");
+        setCoursesState([]);
+        setAllCourses([]);
+        setTotalCourses(0);
       } finally {
         setLoading(false);
       }
@@ -368,6 +380,33 @@ const CoursesContent = () => {
   };
 
   const handleEnroll = async (courseId) => {
+    const course = coursesState.find((c) => c.id === courseId);
+
+    // Handle Jinnar courses differently
+    if (course?.isJinnarCourse) {
+      if (!isAuthenticated) {
+        toast.info("Please log in to access training documents", {
+          position: "top-center",
+        });
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+
+      // Open document for logged-in users
+      if (course.filePath) {
+        window.open(course.filePath, "_blank");
+        toast.success(`Opening ${course.title}`, {
+          position: "top-center",
+        });
+      } else {
+        toast.error("Document not available", {
+          position: "top-center",
+        });
+      }
+      return;
+    }
+
+    // Handle regular video courses
     if (!isAuthenticated) {
       toast.info("Please log in to enroll in courses", {
         position: "top-center",
@@ -398,8 +437,6 @@ const CoursesContent = () => {
       console.log("Enrollment result:", enrollmentResult);
 
       if (enrollmentResult.success) {
-        const course = coursesState.find((c) => c.id === courseId);
-
         await CourseService.updateCourse(courseId, {
           totalEnrollments: (course?.enrolled || 0) + 1,
         });
@@ -477,9 +514,15 @@ const CoursesContent = () => {
                 onToggleFavorite={handleToggleFavorite}
                 onEnroll={handleEnroll}
                 enrollmentLoading={enrollmentLoading}
-                totalCourses={filteredCourses.length} // Pass filtered total
-                selectedCategories={selectedCategories} // Pass selected categories for heading
-                searchQuery={searchQuery} // Pass search query for heading
+                totalCourses={filteredCourses.length}
+                selectedCategories={selectedCategories}
+                searchQuery={searchQuery}
+                isAdmin={currentUser?.role === "admin"}
+                coursesHeading={
+                  currentUser?.role === "admin"
+                    ? "Employee Courses"
+                    : "Public Courses"
+                }
               />
             </div>
           </div>

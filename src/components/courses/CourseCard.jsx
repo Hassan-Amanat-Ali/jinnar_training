@@ -60,22 +60,55 @@ const CourseCard = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-auto">
-              <button
-                onClick={() => onEnroll(course.id)}
-                disabled={enrollmentLoading}
-                className={`btn-base-medium btn-primary whitespace-nowrap  ${
-                  enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
-              </button>
-              <Button
-                href={ROUTES.COURSE_DETAIL.replace(":id", course.id)}
-                className="btn-base-medium btn-outline"
-              >
-                View Details
-              </Button>
+            <div className="flex items-center gap-2 mt-auto">
+              {course.isJinnarCourse ? (
+                <>
+                  <button
+                    onClick={() => onEnroll(course.id)}
+                    disabled={enrollmentLoading}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap ${
+                      enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {enrollmentLoading ? "Loading..." : "View"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!course.filePath || !course.fileName) {
+                        console.error("File path or name missing");
+                        return;
+                      }
+                      const link = document.createElement("a");
+                      link.href = course.filePath;
+                      link.download = course.fileName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                  >
+                    Download
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => onEnroll(course.id)}
+                    disabled={enrollmentLoading}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap ${
+                      enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {enrollmentLoading ? "Enrolling..." : "Enroll"}
+                  </button>
+                  <Button
+                    href={ROUTES.COURSE_DETAIL.replace(":id", course.id)}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                  >
+                    Details
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -126,20 +159,51 @@ const CourseCard = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-auto whitespace-nowrap">
-          <Button
-            text={enrollmentLoading ? "Enrolling..." : "Enroll Now"}
-            onClick={() => onEnroll(course.id)}
-            className={`btn-base-medium btn-primary flex-1 ${
-              enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={enrollmentLoading}
-          />
-          <Button
-            text="View Details"
-            href={ROUTES.COURSE_DETAIL.replace(":id", String(course.id))}
-            className="btn-base-medium btn-outline flex-1 whitespace-nowrap"
-          />
+        <div className="flex items-center gap-2 mt-auto whitespace-nowrap">
+          {course.isJinnarCourse ? (
+            <>
+              <Button
+                text={enrollmentLoading ? "Loading..." : "View"}
+                onClick={() => onEnroll(course.id)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-1 ${
+                  enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={enrollmentLoading}
+              />
+              <Button
+                text="Download"
+                onClick={() => {
+                  if (!course.filePath || !course.fileName) {
+                    console.error("File path or name missing");
+                    return;
+                  }
+                  const link = document.createElement("a");
+                  link.href = course.filePath;
+                  link.download = course.fileName;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1 whitespace-nowrap"
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                text={enrollmentLoading ? "Enrolling..." : "Enroll"}
+                onClick={() => onEnroll(course.id)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-1 ${
+                  enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={enrollmentLoading}
+              />
+              <Button
+                text="Details"
+                href={ROUTES.COURSE_DETAIL.replace(":id", String(course.id))}
+                className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1 whitespace-nowrap"
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
