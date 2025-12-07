@@ -3,7 +3,8 @@ import { Card, Button, CourseSkeleton, CategoryFilterSkeleton } from "../ui";
 import { FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
-import { CourseService } from "../../services";
+import { jinnarCoursesData } from "../../data/jinnarCourses";
+import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
 const CoursesShowcase = () => {
@@ -13,6 +14,15 @@ const CoursesShowcase = () => {
   const [loading, setLoading] = useState(true);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
+
+  // Employee-only course titles
+  const employeeOnlyCourses = [
+    "Time Management for Support & Admin Teams",
+    "Tier 2 Training Program",
+    "Tier 3 Training Program",
+    "Jinnar Employees Training Programs",
+  ];
 
   // Fetch courses and generate categories
   useEffect(() => {
@@ -20,43 +30,51 @@ const CoursesShowcase = () => {
       try {
         setLoading(true);
 
-        // Try to get published courses first
-        let result = await CourseService.getPublishedCourses();
+        // Check if user has employee or admin role
+        const userRole = currentUser?.role || "user";
+        const hasEmployeeAccess =
+          userRole === "employee" || userRole === "admin";
 
-        // If that fails due to index issues, try getting all courses and filter client-side
-        if (!result.success && result.error?.includes("failed-precondition")) {
-          console.warn(
-            "Published courses query failed, trying all courses:",
-            result.error
-          );
-          result = await CourseService.getAllCourses();
+        // Transform Jinnar courses
+        const transformedJinnarCourses = jinnarCoursesData.map((course) => ({
+          id: `jinnar-${course.id}`,
+          title: course.title,
+          description: course.description,
+          thumbnail: course.thumbnail,
+          duration: "Self-paced",
+          totalEnrollments: 0,
+          category: course.category,
+          rating: 4.5,
+          isJinnarCourse: true,
+          filePath: course.filePath,
+          fileName: course.fileName,
+        }));
 
-          if (result.success) {
-            // Filter published courses client-side
-            result.data = result.data.filter(
-              (course) => course.published === true
-            );
-          }
-        }
-
-        if (result.success) {
-          setCourses(result.data);
-
-          // Generate dynamic categories from actual courses
-          const categorySet = new Set();
-          result.data.forEach((course) => {
-            if (course.category) {
-              categorySet.add(course.category);
-            }
-          });
-
-          // Convert to array and sort
-          const dynamicCategories = Array.from(categorySet).sort();
-          setCategories(dynamicCategories);
+        // Filter Jinnar courses based on user role
+        let filteredJinnarCourses;
+        if (hasEmployeeAccess) {
+          // Employees and Admins see all Jinnar courses
+          filteredJinnarCourses = transformedJinnarCourses;
         } else {
-          console.error("Failed to fetch courses:", result.error);
-          toast.error("Failed to load courses. Please try again.");
+          // Regular users see only public Jinnar courses (exclude employee-only)
+          filteredJinnarCourses = transformedJinnarCourses.filter(
+            (course) => !employeeOnlyCourses.includes(course.title)
+          );
         }
+
+        setCourses(filteredJinnarCourses);
+
+        // Generate dynamic categories from actual courses
+        const categorySet = new Set();
+        filteredJinnarCourses.forEach((course) => {
+          if (course.category) {
+            categorySet.add(course.category);
+          }
+        });
+
+        // Convert to array and sort
+        const dynamicCategories = Array.from(categorySet).sort();
+        setCategories(dynamicCategories);
       } catch (error) {
         console.error("Error fetching courses:", error);
         toast.error("Failed to load courses. Please try again.");
@@ -66,7 +84,7 @@ const CoursesShowcase = () => {
     };
 
     fetchCoursesAndCategories();
-  }, []);
+  }, [currentUser]);
 
   // Handle category filter with loading effect
   const handleCategoryChange = async (category) => {
@@ -82,13 +100,41 @@ const CoursesShowcase = () => {
   // Filter courses based on active category
   const filteredCourses =
     activeCategory === "All"
-      ? courses
-      : courses.filter((course) => course.category === activeCategory);
+      ? courses.slice(0, 6)
+      : courses
+          .filter((course) => course.category === activeCategory)
+          .slice(0, 6);
 
   const handleEnroll = (id) => {
-    // For now, navigate to details page; replace with checkout later
-    const path = ROUTES.COURSE_DETAIL.replace(":id", String(id));
-    navigate(path);
+    // Navigate to courses page to view/download documents
+    navigate(ROUTES.COURSES);
+  };
+
+  const handleDownload = (course) => {
+    if (!isAuthenticated) {
+      toast.info("Please log in to download training documents", {
+        position: "top-center",
+      });
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
+    // Download document for logged-in users
+    if (course.filePath && course.fileName) {
+      const link = document.createElement("a");
+      link.href = course.filePath;
+      link.download = course.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Downloading ${course.title}`, {
+        position: "top-center",
+      });
+    } else {
+      toast.error("Document not available", {
+        position: "top-center",
+      });
+    }
   };
 
   // Format enrollment count for display
@@ -162,21 +208,11 @@ const CoursesShowcase = () => {
             // Display actual courses
             filteredCourses.map((course) => {
               const actionButtons = (
-                <>
-                  <Button
-                    text="Enroll Now"
-                    className="btn-base-medium btn-primary flex-1"
-                    onClick={() => handleEnroll(course.id)}
-                  />
-                  <Button
-                    text="View Details"
-                    className="btn-base-medium btn-outline flex-1"
-                    href={ROUTES.COURSE_DETAIL.replace(
-                      ":id",
-                      String(course.id)
-                    )}
-                  />
-                </>
+                <Button
+                  text="Download"
+                  className="btn-base-medium btn-primary w-full"
+                  onClick={() => handleDownload(course)}
+                />
               );
 
               return (

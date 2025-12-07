@@ -14,6 +14,7 @@ const CoursesListing = ({
   coursesPerPage,
   onToggleFavorite,
   onEnroll,
+  onDownload,
   enrollmentLoading = false,
   selectedCategories = [],
   searchQuery = "",
@@ -194,6 +195,7 @@ const CoursesListing = ({
               viewMode={viewMode}
               onToggleFavorite={onToggleFavorite}
               onEnroll={onEnroll}
+              onDownload={onDownload}
               enrollmentLoading={enrollmentLoading}
             />
           ))}

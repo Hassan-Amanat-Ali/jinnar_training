@@ -73,14 +73,6 @@ function App() {
             }
           />
 
-          <Route
-            path={ROUTES.ADMIN_DASHBOARD}
-            element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
           {/* Main routes with layout */}
           <Route
             path="*"
@@ -101,6 +93,15 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <EditProfile />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path={ROUTES.ADMIN_DASHBOARD}
+                    element={
+                      <ProtectedRoute adminOnly={true}>
+                        <AdminDashboard />
                       </ProtectedRoute>
                     }
                   />

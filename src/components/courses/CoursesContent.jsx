@@ -476,6 +476,33 @@ const CoursesContent = () => {
     }
   };
 
+  const handleDownload = async (course) => {
+    if (!isAuthenticated) {
+      toast.info("Please log in to download training documents", {
+        position: "top-center",
+      });
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
+    // Download document for logged-in users
+    if (course.filePath && course.fileName) {
+      const link = document.createElement("a");
+      link.href = course.filePath;
+      link.download = course.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Downloading ${course.title}`, {
+        position: "top-center",
+      });
+    } else {
+      toast.error("Document not available", {
+        position: "top-center",
+      });
+    }
+  };
+
   return (
     <section className="py-16 lg:py-20 bg-gray-50">
       <div className="section-container">
@@ -515,6 +542,7 @@ const CoursesContent = () => {
                 coursesPerPage={coursesPerPage}
                 onToggleFavorite={handleToggleFavorite}
                 onEnroll={handleEnroll}
+                onDownload={handleDownload}
                 enrollmentLoading={enrollmentLoading}
                 totalCourses={filteredCourses.length}
                 selectedCategories={selectedCategories}

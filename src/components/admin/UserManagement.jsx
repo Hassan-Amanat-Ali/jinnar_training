@@ -20,6 +20,29 @@ const UserManagement = () => {
     return photoURL;
   };
 
+  // Generate a consistent color for avatar based on user name
+  const getAvatarColor = (name) => {
+    const colors = [
+      "0D8ABC",
+      "3498db",
+      "9b59b6",
+      "e74c3c",
+      "f39c12",
+      "1abc9c",
+      "2ecc71",
+      "34495e",
+      "16a085",
+      "27ae60",
+      "2980b9",
+      "8e44ad",
+      "c0392b",
+      "d35400",
+      "7f8c8d",
+    ];
+    const index = (name?.charCodeAt(0) || 0) % colors.length;
+    return colors[index];
+  };
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -111,29 +134,51 @@ const UserManagement = () => {
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <img
-                        src={
-                          optimizePhotoURL(user.photoURL) ||
-                          "https://ui-avatars.com/api/?name=" +
-                            encodeURIComponent(
+                      {optimizePhotoURL(user.photoURL) ? (
+                        <img
+                          src={optimizePhotoURL(user.photoURL)}
+                          alt={user.displayName || "User"}
+                          className="w-10 h-10 rounded-full mr-3 object-cover"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            // If Google photo fails, show avatar with initials
+                            const name =
+                              user.displayName || user.email || "User";
+                            const initials = name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2);
+                            const parent = e.target.parentElement;
+                            e.target.style.display = "none";
+                            const fallback = document.createElement("div");
+                            fallback.className =
+                              "w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-sm";
+                            fallback.style.backgroundColor = `#${getAvatarColor(
+                              name
+                            )}`;
+                            fallback.textContent = initials;
+                            parent.insertBefore(fallback, e.target);
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-sm"
+                          style={{
+                            backgroundColor: `#${getAvatarColor(
                               user.displayName || user.email || "User"
-                            ) +
-                            "&background=random"
-                        }
-                        alt={user.displayName || "User"}
-                        className="w-10 h-10 rounded-full mr-3 object-cover"
-                        crossOrigin="anonymous"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          // Fallback to UI Avatars if image fails to load
-                          e.target.src =
-                            "https://ui-avatars.com/api/?name=" +
-                            encodeURIComponent(
-                              user.displayName || user.email || "User"
-                            ) +
-                            "&background=random";
-                        }}
-                      />
+                            )}`,
+                          }}
+                        >
+                          {(user.displayName || user.email || "User")
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </div>
+                      )}
                       <div>
                         <div className="text-sm font-medium text-gray-900">
                           {user.displayName || "No Name"}

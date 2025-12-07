@@ -10,6 +10,7 @@ const CourseCard = ({
   onToggleFavorite,
   onEnroll,
   enrollmentLoading = false,
+  onDownload,
 }) => {
   const isListView = viewMode === "list";
 
@@ -73,18 +74,7 @@ const CourseCard = ({
                     {enrollmentLoading ? "Loading..." : "View"}
                   </button>
                   <button
-                    onClick={() => {
-                      if (!course.filePath || !course.fileName) {
-                        console.error("File path or name missing");
-                        return;
-                      }
-                      const link = document.createElement("a");
-                      link.href = course.filePath;
-                      link.download = course.fileName;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
+                    onClick={() => onDownload && onDownload(course)}
                     className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
                   >
                     Download
@@ -172,18 +162,7 @@ const CourseCard = ({
               />
               <Button
                 text="Download"
-                onClick={() => {
-                  if (!course.filePath || !course.fileName) {
-                    console.error("File path or name missing");
-                    return;
-                  }
-                  const link = document.createElement("a");
-                  link.href = course.filePath;
-                  link.download = course.fileName;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
+                onClick={() => onDownload && onDownload(course)}
                 className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1 whitespace-nowrap"
               />
             </>
