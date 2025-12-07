@@ -48,8 +48,10 @@ const CoursesContent = () => {
       try {
         setLoading(true);
 
-        // Check if user is admin
-        const isAdmin = currentUser?.role === "admin";
+        // Check if user has employee or admin role
+        const userRole = currentUser?.role || "user";
+        const hasEmployeeAccess =
+          userRole === "employee" || userRole === "admin";
 
         // Transform Jinnar courses
         const transformedJinnarCourses = jinnarCoursesData.map((course) => ({
@@ -83,11 +85,11 @@ const CoursesContent = () => {
 
         // Filter Jinnar courses based on user role
         let filteredJinnarCourses;
-        if (isAdmin) {
-          // Admin sees all Jinnar courses
+        if (hasEmployeeAccess) {
+          // Employees and Admins see all Jinnar courses
           filteredJinnarCourses = transformedJinnarCourses;
         } else {
-          // Non-admin users see only public Jinnar courses (exclude employee-only)
+          // Regular users see only public Jinnar courses (exclude employee-only)
           filteredJinnarCourses = transformedJinnarCourses.filter(
             (course) => !employeeOnlyCourses.includes(course.title)
           );
@@ -519,7 +521,8 @@ const CoursesContent = () => {
                 searchQuery={searchQuery}
                 isAdmin={currentUser?.role === "admin"}
                 coursesHeading={
-                  currentUser?.role === "admin"
+                  currentUser?.role === "admin" ||
+                  currentUser?.role === "employee"
                     ? "Employee Courses"
                     : "Public Courses"
                 }

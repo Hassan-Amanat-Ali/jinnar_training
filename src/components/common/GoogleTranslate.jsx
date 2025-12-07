@@ -25,7 +25,8 @@ const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
           new window.google.translate.TranslateElement(
             {
               pageLanguage: "en",
-              includedLanguages: "en,sw,fr",
+              includedLanguages:
+                "en,af,am,ar,bem,bm,ha,ig,ln,mg,ny,rw,sn,so,st,sw,ti,tn,ts,tw,wo,xh,yo,zu,fr,pt",
               autoDisplay: false,
             },
             targetId
@@ -41,12 +42,38 @@ const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
 
     const filterLanguages = () => {
       const select = document.querySelector(".goog-te-combo");
+      const africanLanguages = [
+        "en",
+        "af",
+        "am",
+        "ar",
+        "bem",
+        "bm",
+        "ha",
+        "ig",
+        "ln",
+        "mg",
+        "ny",
+        "rw",
+        "sn",
+        "so",
+        "st",
+        "sw",
+        "ti",
+        "tn",
+        "ts",
+        "tw",
+        "wo",
+        "xh",
+        "yo",
+        "zu",
+        "fr",
+        "pt",
+      ];
+
       if (select && select.options) {
         Array.from(select.options).forEach((option) => {
-          if (
-            !["en", "sw", "fr"].includes(option.value) &&
-            option.value !== ""
-          ) {
+          if (!africanLanguages.includes(option.value) && option.value !== "") {
             option.remove();
           }
         });

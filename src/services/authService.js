@@ -12,7 +12,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 
 // Google Auth Provider
@@ -40,7 +40,7 @@ class AuthService {
   }
 
   // Sign up with email and password
-  async signUp(email, password, displayName = "") {
+  async signUp(email, password, displayName = "", userRole = "user") {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         this.auth,
@@ -54,6 +54,18 @@ class AuthService {
           displayName: displayName,
         });
       }
+
+      // Create user document in Firestore with role
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName:
+          displayName || userCredential.user.email?.split("@")[0] || "User",
+        role: userRole, // Default role is 'user', can be 'user', 'employee', or 'admin'
+        photoURL: userCredential.user.photoURL || null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
 
       return {
         success: true,
@@ -95,6 +107,27 @@ class AuthService {
   async signInWithGoogle() {
     try {
       const result = await signInWithPopup(this.auth, googleProvider);
+
+      // Check if user document exists, create if it doesn't
+      const userDocRef = doc(db, "users", result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Create user document with default 'user' role
+        await setDoc(userDocRef, {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName:
+            result.user.displayName ||
+            result.user.email?.split("@")[0] ||
+            "User",
+          role: "user", // Default role for new Google sign-ins
+          photoURL: result.user.photoURL || null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+
       return {
         success: true,
         user: result.user,
@@ -113,6 +146,27 @@ class AuthService {
   async signInWithGithub() {
     try {
       const result = await signInWithPopup(this.auth, githubProvider);
+
+      // Check if user document exists, create if it doesn't
+      const userDocRef = doc(db, "users", result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Create user document with default 'user' role
+        await setDoc(userDocRef, {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName:
+            result.user.displayName ||
+            result.user.email?.split("@")[0] ||
+            "User",
+          role: "user", // Default role for new GitHub sign-ins
+          photoURL: result.user.photoURL || null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+
       return {
         success: true,
         user: result.user,

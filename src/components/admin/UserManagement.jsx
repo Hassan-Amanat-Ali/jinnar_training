@@ -38,8 +38,11 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId, currentRole) => {
-    const newRole = currentRole === "admin" ? "student" : "admin";
+  const handleRoleChange = async (userId, newRole, currentRole) => {
+    if (newRole === currentRole) {
+      return; // No change needed
+    }
+
     const confirmMessage = `Are you sure you want to change this user's role to ${newRole}?`;
 
     if (!window.confirm(confirmMessage)) {
@@ -161,6 +164,8 @@ const UserManagement = () => {
                     <div className="flex items-center gap-2">
                       {user.role === "admin" ? (
                         <FiShield className="text-red-600" />
+                      ) : user.role === "employee" ? (
+                        <FiUser className="text-blue-600" />
                       ) : (
                         <FiUser className="text-gray-600" />
                       )}
@@ -168,24 +173,33 @@ const UserManagement = () => {
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.role === "admin"
                             ? "bg-red-100 text-red-800"
+                            : user.role === "employee"
+                            ? "bg-blue-100 text-blue-800"
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {user.role || "student"}
+                        {user.role || "user"}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleRoleChange(user.id, user.role)}
-                      className={`px-3 py-1 rounded text-white text-xs font-medium ${
+                    <select
+                      value={user.role || "user"}
+                      onChange={(e) =>
+                        handleRoleChange(user.id, e.target.value, user.role)
+                      }
+                      className={`px-3 py-1.5 rounded border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary ${
                         user.role === "admin"
-                          ? "bg-gray-600 hover:bg-gray-700"
-                          : "bg-primary hover:bg-primary-dark"
+                          ? "border-red-300 text-red-800 bg-red-50"
+                          : user.role === "employee"
+                          ? "border-blue-300 text-blue-800 bg-blue-50"
+                          : "border-gray-300 text-gray-800 bg-gray-50"
                       }`}
                     >
-                      {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-                    </button>
+                      <option value="user">User</option>
+                      <option value="employee">Employee</option>
+                      <option value="admin">Admin</option>
+                    </select>
                   </td>
                 </tr>
               ))}
