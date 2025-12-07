@@ -9,7 +9,7 @@ const ContactInfo = () => {
       title: "Knowledgebase",
       description: "Browse through all of our knowledge base articles.",
       linkText: "Visit guides & tutorials.",
-      href: "#",
+      href: "/jinnar-courses",
     },
     {
       id: 2,
@@ -18,7 +18,7 @@ const ContactInfo = () => {
       description:
         "Explore our FAQ for quick, clear answers to common queries.",
       linkText: "Visit FAQ",
-      href: "#",
+      href: "/faq",
     },
     {
       id: 3,
