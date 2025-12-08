@@ -5,7 +5,6 @@ const FAQHero = () => {
     <section className="relative overflow-hidden py-16 sm:py-20">
       <div className="absolute inset-0 bg-primary rounded-b-[60px] sm:rounded-b-[80px] md:rounded-b-[100px] lg:rounded-b-[250px]"></div>
 
-      {/* Content */}
       <div className="section-container relative z-10 h-full flex items-center justify-center px-4 sm:px-6">
         <div className="mx-auto text-center pt-20 sm:pt-24 lg:pt-32">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4">
