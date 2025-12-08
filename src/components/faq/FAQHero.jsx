@@ -14,7 +14,6 @@ const FAQHero = () => {
             Everything you need to know about Training.Jinnar
           </p>
 
-          {/* Introduction text */}
           <div className="max-w-3xl mx-auto">
             <p className="text-white/95 leading-relaxed text-sm sm:text-base mb-2">
               Get answers to common questions about our{" "}
