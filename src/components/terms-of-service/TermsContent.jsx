@@ -315,8 +315,8 @@ const TermsContent = () => {
           type: 'paragraph',
           text: 'For questions about these Terms & Conditions, please contact us at:',
         },
-        { type: 'paragraph', text: 'Email: support@trainingjinnar.com' },
-        { type: 'paragraph', text: 'Website: https://trainingjinnar.com' },
+        { type: 'paragraph', text: 'Email: support@training.jinnar.com' },
+        { type: 'paragraph', text: 'Website: https://training.jinnar.com' },
       ],
     },
   ];
@@ -355,21 +355,21 @@ const TermsContent = () => {
               <p>
                 <strong>Email:</strong>{' '}
                 <a
-                  href='mailto:support@trainingjinnar.com'
+                  href='mailto:support@training.jinnar.com'
                   className='text-primary hover:text-primary/80 transition-colors underline'
                 >
-                  support@trainingjinnar.com
+                  support@training.jinnar.com
                 </a>
               </p>
               <p>
                 <strong>Website:</strong>{' '}
                 <a
-                  href='https://trainingjinnar.com'
+                  href='https://training.jinnar.com'
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-primary hover:text-primary/80 transition-colors underline'
                 >
-                  https://trainingjinnar.com
+                  https://training.jinnar.com
                 </a>
               </p>
             </div>

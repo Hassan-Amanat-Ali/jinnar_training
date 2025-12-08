@@ -11,7 +11,6 @@ import DesktopMenu from "./DesktopMenu";
 const NAVIGATION = [
   { name: "Home", href: ROUTES.HOME },
   { name: "Courses", href: ROUTES.COURSES },
-  { name: "Jinnar Training", href: ROUTES.JINNAR_COURSES },
   { name: "About Us", href: ROUTES.ABOUT },
   { name: "FAQs", href: ROUTES.FAQ },
   { name: "Contact Us", href: ROUTES.CONTACT },
@@ -31,26 +30,22 @@ const Header = ({ floating = false }) => {
 
   return (
     <header
-      className={`${
-        floating
-          ? "absolute top-0 left-0 right-0 z-50"
-          : "sticky top-0 z-50 bg-white/95 backdrop-blur-md"
-      } py-3`}
+      className={`py-3 relative z-50`}
     >
       <div className="section-container">
-        <nav className="rounded-full sticky border border-gray-200 px-6 bg-white max-w-[1600px] mx-auto">
+        <nav className="rounded-full  border border-gray-200 px-6 bg-white max-w-[1600px] mx-auto">
           <div className="flex items-center h-16">
             <LogoSection />
 
             {/* Centered Navigation */}
             <div className="flex-1 flex justify-center">
               <div className="hidden lg:block">
-                <div className="flex items-center space-x-8">
+                <div className="flex items-center space-x-4 xl:space-x-8">
                   {NAVIGATION.map((item) => (
                     <a
                       key={item.name}
                       href={item.href}
-                      className={`text-base font-medium transition-colors ${
+                      className={`text-sm xl:text-base font-medium transition-colors whitespace-nowrap ${
                         isActiveRoute(item.href)
                           ? "text-primary"
                           : "text-black/80 hover:text-primary"
@@ -64,10 +59,11 @@ const Header = ({ floating = false }) => {
             </div>
 
             {/* Right Section - Auth + Mobile Menu */}
-            <div className="flex items-center lg:space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-2">
               {/* Google Translate for Mobile */}
-
-              <GoogleTranslate containerId="google_translate_header" />
+              <div className="scale-90 sm:scale-100 origin-right">
+                <GoogleTranslate containerId="google_translate_header" />
+              </div>
 
               <DesktopMenu
                 navigation={NAVIGATION}
@@ -114,11 +110,11 @@ const MobileMenuButton = ({ isOpen, onToggle }) => (
   <div className="lg:hidden">
     <button
       onClick={onToggle}
-      className="inline-flex items-center justify-center p-2 rounded-md text-black/60 hover:text-primary hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+      className="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-black/60 hover:text-primary hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
       aria-label="Toggle mobile menu"
     >
       <svg
-        className="block h-6 w-6"
+        className="block h-5 w-5 sm:h-6 sm:w-6"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

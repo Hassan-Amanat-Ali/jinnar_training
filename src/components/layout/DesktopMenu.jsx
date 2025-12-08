@@ -26,12 +26,12 @@ const DesktopActions = ({ isLoggedIn, currentUser, ROUTES }) => (
 const DesktopAuthButtons = ({ ROUTES }) => (
   <div className="bg-[#D9D9D9]/35 rounded-full p-1">
     <Link to={ROUTES.LOGIN}>
-      <button className="text-black/70 hover:text-black font-medium px-6 py-4 rounded-full transition-colors hover:bg-white">
+      <button className="text-black/70 hover:text-black font-medium px-4 py-2 rounded-full transition-colors hover:bg-white text-sm">
         Log In
       </button>
     </Link>
     <Link to={ROUTES.SIGNUP}>
-      <button className="bg-primary hover:bg-primary/90 text-white px-6 py-4 rounded-full font-medium transition-all duration-200 shadow-sm cursor-pointer">
+      <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full font-medium transition-all duration-200 shadow-sm cursor-pointer text-sm">
         Create Account
       </button>
     </Link>

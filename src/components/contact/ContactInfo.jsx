@@ -3,14 +3,14 @@ import { FiHelpCircle, FiMessageCircle, FiMail } from "react-icons/fi";
 
 const ContactInfo = () => {
   const contactSections = [
-    {
-      id: 1,
-      icon: FiHelpCircle,
-      title: "Knowledgebase",
-      description: "Browse through all of our knowledge base articles.",
-      linkText: "Visit guides & tutorials.",
-      href: "/jinnar-courses",
-    },
+    // {
+    //   id: 1,
+    //   icon: FiHelpCircle,
+    //   title: "Knowledgebase",
+    //   description: "Browse through all of our knowledge base articles.",
+    //   linkText: "Visit guides & tutorials.",
+    //   href: "/jinnar-courses",
+    // },
     {
       id: 2,
       icon: FiMessageCircle,

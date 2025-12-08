@@ -101,7 +101,7 @@ const Footer = () => {
     { name: "Privacy Policy", href: ROUTES.PRIVACY_POLICY },
     { name: "Terms of Service", href: ROUTES.TERMS_OF_SERVICE },
     // { name: "Refunds", href: ROUTES.REFUNDS },
-    { name: "Legal", href: ROUTES.LEGAL },
+
   ];
 
   const companyLinks = [

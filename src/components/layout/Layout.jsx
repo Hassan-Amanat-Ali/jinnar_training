@@ -4,7 +4,7 @@ import { ScrollToTop } from '../ui';
 
 const Layout = ({ children, showHeader = true, showFooter = true }) => {
   return (
-    <div className='min-h-screen flex flex-col'>
+    <div className='min-h-screen flex flex-col relative'>
       {showHeader && <Header />}
 
       <main className='flex-grow'>{children}</main>

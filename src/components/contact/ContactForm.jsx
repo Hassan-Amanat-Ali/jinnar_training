@@ -112,7 +112,7 @@ const ContactForm = () => {
       );
 
       const response = await fetch(
-        "https://formsubmit.co/ajax/mugheesurrehman06@gmail.com",
+        "https://formsubmit.co/ajax/support@training.jinnar.com",
         {
           method: "POST",
           body: submitData,

@@ -7,6 +7,14 @@ import { jinnarCoursesData } from "../../data/jinnarCourses";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
+// Employee-only course titles
+const employeeOnlyCourses = [
+  "Time Management for Support & Admin Teams",
+  "Tier 2 Training Program",
+  "Tier 3 Training Program",
+  "Jinnar Employees Training Programs",
+];
+
 const CoursesShowcase = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [courses, setCourses] = useState([]);
@@ -15,14 +23,6 @@ const CoursesShowcase = () => {
   const [categoryLoading, setCategoryLoading] = useState(false);
   const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
-
-  // Employee-only course titles
-  const employeeOnlyCourses = [
-    "Time Management for Support & Admin Teams",
-    "Tier 2 Training Program",
-    "Tier 3 Training Program",
-    "Jinnar Employees Training Programs",
-  ];
 
   // Fetch courses and generate categories
   useEffect(() => {
@@ -105,11 +105,6 @@ const CoursesShowcase = () => {
           .filter((course) => course.category === activeCategory)
           .slice(0, 6);
 
-  const handleEnroll = (id) => {
-    // Navigate to courses page to view/download documents
-    navigate(ROUTES.COURSES);
-  };
-
   const handleDownload = (course) => {
     if (!isAuthenticated) {
       toast.info("Please log in to download training documents", {
@@ -137,11 +132,6 @@ const CoursesShowcase = () => {
     }
   };
 
-  // Format enrollment count for display
-  const formatEnrollmentCount = (count) => {
-    if (!count || count === 0) return "0";
-    return count.toLocaleString();
-  };
 
   return (
     <section className="py-20 bg-secondary/10">
@@ -225,9 +215,6 @@ const CoursesShowcase = () => {
                   }
                   title={course.title}
                   description={course.description}
-                  duration={course.duration || "Self-paced"}
-                  students={formatEnrollmentCount(course.totalEnrollments)}
-                  rating={course.rating}
                   actionButtons={actionButtons}
                   className="hover:shadow-xl transition-all duration-300 w-full max-w-[350px] lg:max-w-[420px]"
                 />

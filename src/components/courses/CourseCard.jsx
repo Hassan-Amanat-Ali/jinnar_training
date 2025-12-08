@@ -1,6 +1,6 @@
 import React from "react";
-import { FiClock, FiUsers, FiHeart } from "react-icons/fi";
-import { FaStar, FaHeart } from "react-icons/fa";
+import { FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import { Button } from "../ui";
 import { ROUTES } from "../../constants/routes";
 
@@ -50,16 +50,6 @@ const CourseCard = ({
               {course.description}
             </p>
 
-            <div className="flex items-center gap-6 mb-4">
-              <div className="flex items-center gap-2 text-sm text-black/60">
-                <FiClock className="text-primary" />
-                <span>{course.duration}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-black/60">
-                <FiUsers className="text-primary" />
-                <span>{course.enrolled.toLocaleString()}</span>
-              </div>
-            </div>
 
             <div className="flex items-center gap-2 mt-auto">
               {course.isJinnarCourse ? (
@@ -138,16 +128,6 @@ const CourseCard = ({
           {course.description}
         </p>
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex items-center gap-2 text-sm text-black/60">
-            <FiClock className="text-primary" />
-            <span>{course.duration}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-black/60">
-            <FiUsers className="text-primary" />
-            <span>{course.enrolled.toLocaleString()}</span>
-          </div>
-        </div>
 
         <div className="flex items-center gap-2 mt-auto whitespace-nowrap">
           {course.isJinnarCourse ? (

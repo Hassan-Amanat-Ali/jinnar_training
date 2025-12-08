@@ -5,7 +5,6 @@ import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../hooks/useAuth";
 import CoursesFilters from "./CoursesFilters";
 import CoursesListing from "./CoursesListing";
-import { courses as dummyCourses } from "../../data/courses";
 import { jinnarCoursesData } from "../../data/jinnarCourses";
 import {
   CourseService,
@@ -19,6 +18,8 @@ const CoursesContent = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const [coursesState, setCoursesState] = useState([]);
   const [allCourses, setAllCourses] = useState([]); // Store all courses for filter counts
+  const [publicCourses, setPublicCourses] = useState([]);
+  const [employeeCourses, setEmployeeCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   const [totalCourses, setTotalCourses] = useState(0);
@@ -83,20 +84,28 @@ const CoursesContent = () => {
           fileName: course.fileName,
         }));
 
-        // Filter Jinnar courses based on user role
-        let filteredJinnarCourses;
-        if (hasEmployeeAccess) {
-          // Employees and Admins see all Jinnar courses
-          filteredJinnarCourses = transformedJinnarCourses;
-        } else {
-          // Regular users see only public Jinnar courses (exclude employee-only)
-          filteredJinnarCourses = transformedJinnarCourses.filter(
-            (course) => !employeeOnlyCourses.includes(course.title)
-          );
-        }
+        // Separate public and employee courses
+        const publicCoursesData = transformedJinnarCourses.filter(
+          (course) => !employeeOnlyCourses.includes(course.title)
+        );
 
-        // Show only Jinnar courses
-        const allCombinedCourses = filteredJinnarCourses;
+        const employeeCoursesData = transformedJinnarCourses.filter(
+          (course) => employeeOnlyCourses.includes(course.title)
+        );
+
+        // Combine courses based on user role
+        let allCombinedCourses;
+        if (hasEmployeeAccess) {
+          // Employees and Admins see all courses
+          allCombinedCourses = transformedJinnarCourses;
+          setPublicCourses(publicCoursesData);
+          setEmployeeCourses(employeeCoursesData);
+        } else {
+          // Regular users see only public courses
+          allCombinedCourses = publicCoursesData;
+          setPublicCourses(publicCoursesData);
+          setEmployeeCourses([]);
+        }
 
         setCoursesState(allCombinedCourses);
         setAllCourses(allCombinedCourses);
@@ -178,9 +187,9 @@ const CoursesContent = () => {
     return { categories, levels, durations };
   }, [allCourses]);
 
-  // Filter and sort courses
-  const filteredCourses = useMemo(() => {
-    let filtered = [...coursesState];
+  // Helper function to apply filters and sorting
+  const applyFiltersAndSort = (courses) => {
+    let filtered = [...courses];
 
     // Search filter
     if (searchQuery.trim()) {
@@ -250,6 +259,35 @@ const CoursesContent = () => {
     }
 
     return filtered;
+  };
+
+  // Filter public courses
+  const filteredPublicCourses = useMemo(() => {
+    return applyFiltersAndSort(publicCourses);
+  }, [
+    publicCourses,
+    searchQuery,
+    selectedCategories,
+    selectedLevels,
+    selectedDurations,
+    sortBy,
+  ]);
+
+  // Filter employee courses
+  const filteredEmployeeCourses = useMemo(() => {
+    return applyFiltersAndSort(employeeCourses);
+  }, [
+    employeeCourses,
+    searchQuery,
+    selectedCategories,
+    selectedLevels,
+    selectedDurations,
+    sortBy,
+  ]);
+
+  // Combined filtered courses for backward compatibility
+  const filteredCourses = useMemo(() => {
+    return applyFiltersAndSort(coursesState);
   }, [
     coursesState,
     searchQuery,
@@ -531,30 +569,101 @@ const CoursesContent = () => {
             </div>
 
             <div className="lg:col-span-3">
-              <CoursesListing
-                filteredCourses={filteredCourses}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                coursesPerPage={coursesPerPage}
-                onToggleFavorite={handleToggleFavorite}
-                onEnroll={handleEnroll}
-                onDownload={handleDownload}
-                enrollmentLoading={enrollmentLoading}
-                totalCourses={filteredCourses.length}
-                selectedCategories={selectedCategories}
-                searchQuery={searchQuery}
-                isAdmin={currentUser?.role === "admin"}
-                coursesHeading={
-                  currentUser?.role === "admin" ||
-                  currentUser?.role === "employee"
-                    ? "Employee Courses"
-                    : "Public Courses"
-                }
-              />
+              {/* Show separate sections for admin/employee users */}
+              {(currentUser?.role === "admin" || currentUser?.role === "employee") ? (
+                <div className="space-y-12">
+                  {/* Employee Courses Section - Show First */}
+                  {filteredEmployeeCourses.length > 0 && (
+                    <div>
+                      <div className="mb-6">
+                        <h2 className="text-2xl md:text-3xl font-bold text-black/90 mb-2">
+                          Employee-Only Courses
+                        </h2>
+                        <p className="text-sm text-black/60">
+                          Exclusive training materials for Jinnar employees and administrators
+                        </p>
+                      </div>
+                      <CoursesListing
+                        filteredCourses={filteredEmployeeCourses}
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        coursesPerPage={coursesPerPage}
+                        onToggleFavorite={handleToggleFavorite}
+                        onEnroll={handleEnroll}
+                        onDownload={handleDownload}
+                        enrollmentLoading={enrollmentLoading}
+                        selectedCategories={selectedCategories}
+                        searchQuery={searchQuery}
+                        isAdmin={currentUser?.role === "admin"}
+                        coursesHeading={null}
+                      />
+                    </div>
+                  )}
+
+                  {/* Public Courses Section - Show Second */}
+                  {filteredPublicCourses.length > 0 && (
+                    <div>
+                      <div className="mb-6 pt-8 border-t border-black/10">
+                        <h2 className="text-2xl md:text-3xl font-bold text-black/90 mb-2">
+                          Public Courses
+                        </h2>
+                        <p className="text-sm text-black/60">
+                          Courses available to all users
+                        </p>
+                      </div>
+                      <CoursesListing
+                        filteredCourses={filteredPublicCourses}
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        coursesPerPage={coursesPerPage}
+                        onToggleFavorite={handleToggleFavorite}
+                        onEnroll={handleEnroll}
+                        onDownload={handleDownload}
+                        enrollmentLoading={enrollmentLoading}
+                        selectedCategories={selectedCategories}
+                        searchQuery={searchQuery}
+                        isAdmin={currentUser?.role === "admin"}
+                        coursesHeading={null}
+                      />
+                    </div>
+                  )}
+
+                  {/* No courses found message */}
+                  {filteredPublicCourses.length === 0 && filteredEmployeeCourses.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-lg text-black/60">No courses found matching your filters.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Regular users see only public courses */
+                <CoursesListing
+                  filteredCourses={filteredCourses}
+                  viewMode={viewMode}
+                  setViewMode={setViewMode}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  coursesPerPage={coursesPerPage}
+                  onToggleFavorite={handleToggleFavorite}
+                  onEnroll={handleEnroll}
+                  onDownload={handleDownload}
+                  enrollmentLoading={enrollmentLoading}
+                  selectedCategories={selectedCategories}
+                  searchQuery={searchQuery}
+                  isAdmin={false}
+                  coursesHeading={null}
+                />
+              )}
             </div>
           </div>
         )}
