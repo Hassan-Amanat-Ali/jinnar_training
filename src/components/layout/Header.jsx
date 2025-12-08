@@ -31,11 +31,15 @@ const Header = ({ floating = false }) => {
 
   return (
     <header
-      className={`${floating ? "absolute top-0 left-0 right-0 z-50" : ""} py-4`}
+      className={`${
+        floating
+          ? "absolute top-0 left-0 right-0 z-50"
+          : "sticky top-0 z-50 bg-white/95 backdrop-blur-md"
+      } py-3`}
     >
       <div className="section-container">
-        <nav className="rounded-full shadow-lg border border-muted px-6 bg-white">
-          <div className="flex items-center h-20">
+        <nav className="rounded-full sticky border border-gray-200 px-6 bg-white max-w-[1600px] mx-auto">
+          <div className="flex items-center h-16">
             <LogoSection />
 
             {/* Centered Navigation */}
@@ -101,7 +105,7 @@ const Header = ({ floating = false }) => {
 const LogoSection = () => (
   <div className="flex-shrink-0">
     <a href={ROUTES.HOME} className="flex items-center">
-      <img src={Logo} alt="Training Jinnar" className="h-12 md:h-16 w-auto" />
+      <img src={Logo} alt="Training Jinnar" className="h-10 md:h-12 w-auto" />
     </a>
   </div>
 );

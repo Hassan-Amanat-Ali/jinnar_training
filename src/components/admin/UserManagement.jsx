@@ -1,11 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { FiShield, FiUser } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from "react";
+import { FiShield, FiUser, FiChevronDown, FiCheck } from "react-icons/fi";
 import { UserService, COLLECTIONS, firestoreService } from "../../services";
 import { toast } from "react-toastify";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Optimize profile picture URL for Google photos
   const optimizePhotoURL = (photoURL) => {
@@ -63,12 +77,14 @@ const UserManagement = () => {
 
   const handleRoleChange = async (userId, newRole, currentRole) => {
     if (newRole === currentRole) {
+      setOpenDropdown(null);
       return; // No change needed
     }
 
     const confirmMessage = `Are you sure you want to change this user's role to ${newRole}?`;
 
     if (!window.confirm(confirmMessage)) {
+      setOpenDropdown(null);
       return;
     }
 
@@ -76,6 +92,7 @@ const UserManagement = () => {
       const result = await UserService.updateUser(userId, { role: newRole });
       if (result.success) {
         toast.success(`User role updated to ${newRole}`);
+        setOpenDropdown(null);
         fetchUsers();
       } else {
         toast.error("Failed to update user role");
@@ -83,6 +100,36 @@ const UserManagement = () => {
     } catch {
       toast.error("Error updating user role");
     }
+  };
+
+  const getRoleConfig = (role) => {
+    const configs = {
+      admin: {
+        label: "Admin",
+        icon: FiShield,
+        bgColor: "bg-red-50",
+        textColor: "text-red-800",
+        borderColor: "border-red-200",
+        hoverBg: "hover:bg-red-100",
+      },
+      employee: {
+        label: "Employee",
+        icon: FiUser,
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-200",
+        hoverBg: "hover:bg-blue-100",
+      },
+      user: {
+        label: "User",
+        icon: FiUser,
+        bgColor: "bg-gray-50",
+        textColor: "text-gray-800",
+        borderColor: "border-gray-200",
+        hoverBg: "hover:bg-gray-100",
+      },
+    };
+    return configs[role] || configs.user;
   };
 
   if (loading) {
@@ -96,160 +143,221 @@ const UserManagement = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">User Management</h2>
-        <div className="text-sm text-gray-600">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold">User Management</h2>
+        <div className="text-xs sm:text-sm text-gray-600">
           Total Users: <span className="font-semibold">{users.length}</span>
         </div>
       </div>
 
       {users.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-600">No users found</p>
+        <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+          <p className="text-gray-600 text-sm sm:text-base">No users found</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Provider
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email Verified
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {optimizePhotoURL(user.photoURL) ? (
-                        <img
-                          src={optimizePhotoURL(user.photoURL)}
-                          alt={user.displayName || "User"}
-                          className="w-10 h-10 rounded-full mr-3 object-cover"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            // If Google photo fails, show avatar with initials
-                            const name =
-                              user.displayName || user.email || "User";
-                            const initials = name
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Provider
+                  </th>
+                  <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email Verified
+                  </th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex items-center">
+                        {optimizePhotoURL(user.photoURL) ? (
+                          <img
+                            src={optimizePhotoURL(user.photoURL)}
+                            alt={user.displayName || "User"}
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 object-cover flex-shrink-0"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              // If Google photo fails, show avatar with initials
+                              const name =
+                                user.displayName || user.email || "User";
+                              const initials = name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()
+                                .slice(0, 2);
+                              const parent = e.target.parentElement;
+                              e.target.style.display = "none";
+                              const fallback = document.createElement("div");
+                              fallback.className =
+                                "w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0";
+                              fallback.style.backgroundColor = `#${getAvatarColor(
+                                name
+                              )}`;
+                              fallback.textContent = initials;
+                              parent.insertBefore(fallback, e.target);
+                            }}
+                          />
+                        ) : (
+                          <div
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0"
+                            style={{
+                              backgroundColor: `#${getAvatarColor(
+                                user.displayName || user.email || "User"
+                              )}`,
+                            }}
+                          >
+                            {(user.displayName || user.email || "User")
                               .split(" ")
                               .map((n) => n[0])
                               .join("")
                               .toUpperCase()
-                              .slice(0, 2);
-                            const parent = e.target.parentElement;
-                            e.target.style.display = "none";
-                            const fallback = document.createElement("div");
-                            fallback.className =
-                              "w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-sm";
-                            fallback.style.backgroundColor = `#${getAvatarColor(
-                              name
-                            )}`;
-                            fallback.textContent = initials;
-                            parent.insertBefore(fallback, e.target);
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className="w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-sm"
-                          style={{
-                            backgroundColor: `#${getAvatarColor(
-                              user.displayName || user.email || "User"
-                            )}`,
-                          }}
-                        >
-                          {(user.displayName || user.email || "User")
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                            .slice(0, 2)}
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.displayName || "No Name"}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {user.email}
+                              .slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                            {user.displayName || "No Name"}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {user.email}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {user.provider || "email"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.emailVerified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {user.emailVerified ? "Verified" : "Not Verified"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      {user.role === "admin" ? (
-                        <FiShield className="text-red-600" />
-                      ) : user.role === "employee" ? (
-                        <FiUser className="text-blue-600" />
-                      ) : (
-                        <FiUser className="text-gray-600" />
-                      )}
+                    </td>
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4">
+                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">
+                        {user.provider || "email"}
+                      </span>
+                    </td>
+                    <td className="hidden lg:table-cell px-3 sm:px-6 py-4">
                       <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.role === "admin"
-                            ? "bg-red-100 text-red-800"
-                            : user.role === "employee"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${
+                          user.emailVerified
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {user.role || "user"}
+                        {user.emailVerified ? "Verified" : "Not Verified"}
                       </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm font-medium">
-                    <select
-                      value={user.role || "user"}
-                      onChange={(e) =>
-                        handleRoleChange(user.id, e.target.value, user.role)
-                      }
-                      className={`px-3 py-1.5 rounded border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary ${
-                        user.role === "admin"
-                          ? "border-red-300 text-red-800 bg-red-50"
-                          : user.role === "employee"
-                          ? "border-blue-300 text-blue-800 bg-blue-50"
-                          : "border-gray-300 text-gray-800 bg-gray-50"
-                      }`}
-                    >
-                      <option value="user">User</option>
-                      <option value="employee">Employee</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        {user.role === "admin" ? (
+                          <FiShield className="text-red-600 w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        ) : user.role === "employee" ? (
+                          <FiUser className="text-blue-600 w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        ) : (
+                          <FiUser className="text-gray-600 w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        )}
+                        <span
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${
+                            user.role === "admin"
+                              ? "bg-red-100 text-red-800"
+                              : user.role === "employee"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {user.role || "user"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 text-right text-sm font-medium">
+                      <div
+                        className="relative"
+                        ref={openDropdown === user.id ? dropdownRef : null}
+                      >
+                        <button
+                          onClick={() =>
+                            setOpenDropdown(
+                              openDropdown === user.id ? null : user.id
+                            )
+                          }
+                          className={`w-full sm:w-auto inline-flex items-center justify-between gap-2 px-3 sm:px-4 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
+                            getRoleConfig(user.role || "user").bgColor
+                          } ${getRoleConfig(user.role || "user").textColor} ${
+                            getRoleConfig(user.role || "user").borderColor
+                          } ${getRoleConfig(user.role || "user").hoverBg}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {React.createElement(
+                              getRoleConfig(user.role || "user").icon,
+                              {
+                                className:
+                                  "w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0",
+                              }
+                            )}
+                            <span className="capitalize">
+                              {user.role || "user"}
+                            </span>
+                          </div>
+                          <FiChevronDown
+                            className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
+                              openDropdown === user.id ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+
+                        {/* Custom Dropdown Menu */}
+                        {openDropdown === user.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-fadeIn">
+                            {["user", "employee", "admin"].map((role) => {
+                              const config = getRoleConfig(role);
+                              const isSelected = (user.role || "user") === role;
+                              return (
+                                <button
+                                  key={role}
+                                  onClick={() =>
+                                    handleRoleChange(user.id, role, user.role)
+                                  }
+                                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                                    isSelected
+                                      ? `${config.bgColor} ${config.textColor}`
+                                      : "text-gray-700 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {React.createElement(config.icon, {
+                                      className: `w-4 h-4 ${
+                                        isSelected
+                                          ? config.textColor
+                                          : "text-gray-400"
+                                      }`,
+                                    })}
+                                    <span className="font-medium capitalize">
+                                      {config.label}
+                                    </span>
+                                  </div>
+                                  {isSelected && (
+                                    <FiCheck
+                                      className={`w-4 h-4 ${config.textColor}`}
+                                    />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -1,11 +1,16 @@
-/* Hide Google branding */
+/* Hide Google branding and "Select Language" text */
 .goog-logo-link,
-.goog-te-gadget span {
+.goog-te-gadget span,
+.goog-te-gadget > span > span {
   display: none !important;
 }
 .goog-te-gadget {
   font-size: 0 !important; /* hide default text */
   color: transparent !important;
+}
+.goog-te-gadget::before {
+  content: "";
+  display: none !important;
 }
 .VIpgJd-ZVi9od-ORHb-OEVmcd {
   display: none;
@@ -15,13 +20,15 @@ body {
   position: static !important;
 }
 
-/* Wrapper */
-.translate-wrapper {
+/* Custom Wrapper */
+.translate-wrapper-custom {
   display: inline-block;
   position: relative;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
+}
+
+/* Hide the original wrapper when using custom dropdown */
+.translate-wrapper {
+  display: none !important;
 }
 
 /* Style the actual dropdown to match professional design */

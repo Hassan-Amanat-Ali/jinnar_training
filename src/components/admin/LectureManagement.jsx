@@ -96,13 +96,15 @@ const LectureManagement = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Lecture Management</h2>
-        <div className="flex items-center gap-4">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
+          Lecture Management
+        </h2>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={filterCourse}
             onChange={(e) => setFilterCourse(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base flex-1 sm:flex-initial"
           >
             <option value="">All Courses</option>
             {courses.map((course) => (
@@ -113,79 +115,80 @@ const LectureManagement = () => {
           </select>
           <button
             onClick={() => setShowAddModal(true)}
-            className="btn-base-medium btn-primary flex items-center gap-2"
+            className="btn-base-medium btn-primary flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
           >
-            <FiPlus /> Add New Lecture
+            <FiPlus /> <span>Add New Lecture</span>
           </button>
         </div>
       </div>
 
       {lectures.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-600 mb-4">
+        <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+          <p className="text-gray-600 mb-4 text-sm sm:text-base">
             {filterCourse
               ? "No lectures found for this course"
               : "No lectures found"}
           </p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="btn-base-medium btn-primary"
+            className="btn-base-medium btn-primary text-sm sm:text-base"
           >
             Create Your First Lecture
           </button>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lecture
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Course
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {lectures.map((lecture) => (
-                <tr key={lecture.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-16 w-20 relative bg-gray-200 rounded-lg overflow-hidden">
-                        {lecture.thumbnail ? (
-                          <div className="relative w-full h-full">
-                            <img
-                              src={lecture.thumbnail}
-                              alt={lecture.title}
-                              className="w-full h-full object-cover rounded-lg"
-                              style={{ display: "block" }}
-                              onLoad={(e) => {
-                                console.log(
-                                  "✅ Thumbnail loaded successfully:",
-                                  lecture.thumbnail
-                                );
-                                // Ensure the image is visible
-                                e.target.style.opacity = "1";
-                              }}
-                              onError={(e) => {
-                                console.error(
-                                  "❌ Thumbnail failed to load:",
-                                  lecture.thumbnail
-                                );
-                                // Hide the broken image and show fallback
-                                e.target.style.display = "none";
-                                const parent = e.target.parentElement;
-                                parent.innerHTML = `
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Lecture
+                  </th>
+                  <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Course
+                  </th>
+                  <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order
+                  </th>
+                  <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {lectures.map((lecture) => (
+                  <tr key={lecture.id} className="hover:bg-gray-50">
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-12 w-16 sm:h-16 sm:w-20 relative bg-gray-200 rounded-lg overflow-hidden">
+                          {lecture.thumbnail ? (
+                            <div className="relative w-full h-full">
+                              <img
+                                src={lecture.thumbnail}
+                                alt={lecture.title}
+                                className="w-full h-full object-cover rounded-lg"
+                                style={{ display: "block" }}
+                                onLoad={(e) => {
+                                  console.log(
+                                    "✅ Thumbnail loaded successfully:",
+                                    lecture.thumbnail
+                                  );
+                                  // Ensure the image is visible
+                                  e.target.style.opacity = "1";
+                                }}
+                                onError={(e) => {
+                                  console.error(
+                                    "❌ Thumbnail failed to load:",
+                                    lecture.thumbnail
+                                  );
+                                  // Hide the broken image and show fallback
+                                  e.target.style.display = "none";
+                                  const parent = e.target.parentElement;
+                                  parent.innerHTML = `
                                   <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-200 rounded-lg">
                                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
                                       <path d="M8 5v10l8-5z"/>
@@ -193,92 +196,95 @@ const LectureManagement = () => {
                                     <span class="text-xs">Failed</span>
                                   </div>
                                 `;
-                              }}
-                            />
-                            {/* Play overlay */}
-                            <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center rounded-lg">
-                              <FiPlay className="text-white text-lg drop-shadow-md" />
+                                }}
+                              />
+                              {/* Play overlay */}
+                              <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center rounded-lg">
+                                <FiPlay className="text-white text-lg drop-shadow-md" />
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          /* No thumbnail available */
-                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-200 rounded-lg">
-                            <FiPlay className="text-2xl mb-1" />
-                            <span className="text-xs">No Thumb</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {lecture.title}
-                        </div>
-                        {lecture.subtitle && (
-                          <div className="text-sm text-gray-500">
-                            {lecture.subtitle}
-                          </div>
-                        )}
-
-                        {/* Show learning points count if available */}
-                        {lecture.learningPoints &&
-                          lecture.learningPoints.length > 0 && (
-                            <div className="text-xs text-emerald-600 mt-1">
-                              {lecture.learningPoints.length} learning point
-                              {lecture.learningPoints.length !== 1 ? "s" : ""}
+                          ) : (
+                            /* No thumbnail available */
+                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-200 rounded-lg">
+                              <FiPlay className="text-2xl mb-1" />
+                              <span className="text-xs">No Thumb</span>
                             </div>
                           )}
+                        </div>
+                        <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                            {lecture.title}
+                          </div>
+                          {lecture.subtitle && (
+                            <div className="text-xs text-gray-500 truncate hidden sm:block">
+                              {lecture.subtitle}
+                            </div>
+                          )}
+
+                          {/* Show learning points count if available */}
+                          {lecture.learningPoints &&
+                            lecture.learningPoints.length > 0 && (
+                              <div className="text-xs text-emerald-600 mt-1">
+                                {lecture.learningPoints.length} point
+                                {lecture.learningPoints.length !== 1 ? "s" : ""}
+                              </div>
+                            )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {getCourseName(lecture.courseId)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {lecture.duration || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {lecture.order !== undefined ? lecture.order : "N/A"}
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
-                      {/* Preview button */}
-                      <button
-                        onClick={() => {
-                          if (lecture.videoUrl) {
-                            window.open(
-                              `/courses/${lecture.courseId}/watch/${lecture.id}`,
-                              "_blank"
-                            );
-                          } else {
-                            toast.error(
-                              "No video URL available for this lecture"
-                            );
-                          }
-                        }}
-                        className="text-green-600 hover:text-green-900"
-                        title="Preview Lecture"
-                      >
-                        <FiPlay />
-                      </button>
-                      <button
-                        onClick={() => handleEdit(lecture)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Edit"
-                      >
-                        <FiEdit2 />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(lecture.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Delete"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-900">
+                      <div className="truncate max-w-xs">
+                        {getCourseName(lecture.courseId)}
+                      </div>
+                    </td>
+                    <td className="hidden lg:table-cell px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-900">
+                      {lecture.duration || "N/A"}
+                    </td>
+                    <td className="hidden sm:table-cell px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-900">
+                      {lecture.order !== undefined ? lecture.order : "N/A"}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2 sm:gap-3">
+                        {/* Preview button */}
+                        <button
+                          onClick={() => {
+                            if (lecture.videoUrl) {
+                              window.open(
+                                `/courses/${lecture.courseId}/watch/${lecture.id}`,
+                                "_blank"
+                              );
+                            } else {
+                              toast.error(
+                                "No video URL available for this lecture"
+                              );
+                            }
+                          }}
+                          className="text-green-600 hover:text-green-900 p-1"
+                          title="Preview Lecture"
+                        >
+                          <FiPlay className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(lecture)}
+                          className="text-blue-600 hover:text-blue-900 p-1"
+                          title="Edit"
+                        >
+                          <FiEdit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(lecture.id)}
+                          className="text-red-600 hover:text-red-900 p-1"
+                          title="Delete"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

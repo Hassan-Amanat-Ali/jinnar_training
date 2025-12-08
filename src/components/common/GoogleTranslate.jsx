@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { FiGlobe, FiChevronDown, FiCheck } from "react-icons/fi";
 import "./style.css";
 
 const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
@@ -7,6 +8,89 @@ const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
   const initializationRef = useRef(false);
   const timeoutRef = useRef(null);
   const observerRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState("en");
+  const dropdownRef = useRef(null);
+
+  const languages = [
+    { code: "en", name: "English", flag: "🇬🇧" },
+    { code: "af", name: "Afrikaans", flag: "🇿🇦" },
+    { code: "am", name: "Amharic", flag: "🇪🇹" },
+    { code: "ar", name: "Arabic", flag: "🇸🇦" },
+    { code: "bem", name: "Bemba", flag: "🇿🇲" },
+    { code: "bm", name: "Bambara", flag: "🇲🇱" },
+    { code: "ha", name: "Hausa", flag: "🇳🇬" },
+    { code: "ig", name: "Igbo", flag: "🇳🇬" },
+    { code: "ln", name: "Lingala", flag: "🇨🇩" },
+    { code: "mg", name: "Malagasy", flag: "🇲🇬" },
+    { code: "ny", name: "Chichewa", flag: "🇲🇼" },
+    { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
+    { code: "sn", name: "Shona", flag: "🇿🇼" },
+    { code: "so", name: "Somali", flag: "🇸🇴" },
+    { code: "st", name: "Sesotho", flag: "🇱🇸" },
+    { code: "sw", name: "Swahili", flag: "🇰🇪" },
+    { code: "ti", name: "Tigrinya", flag: "🇪🇷" },
+    { code: "tn", name: "Setswana", flag: "🇧🇼" },
+    { code: "ts", name: "Tsonga", flag: "🇿🇦" },
+    { code: "tw", name: "Twi", flag: "🇬🇭" },
+    { code: "wo", name: "Wolof", flag: "🇸🇳" },
+    { code: "xh", name: "Xhosa", flag: "🇿🇦" },
+    { code: "yo", name: "Yoruba", flag: "🇳🇬" },
+    { code: "zu", name: "Zulu", flag: "🇿🇦" },
+    { code: "fr", name: "French", flag: "🇫🇷" },
+    { code: "pt", name: "Portuguese", flag: "🇵🇹" },
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Sync selected language with Google Translate's current state
+  useEffect(() => {
+    const syncLanguage = setInterval(() => {
+      const select = document.querySelector(".goog-te-combo");
+      if (select && select.value && select.value !== selectedLang) {
+        setSelectedLang(select.value);
+      }
+    }, 500);
+
+    return () => clearInterval(syncLanguage);
+  }, [selectedLang]);
+
+  const handleLanguageChange = (langCode) => {
+    setSelectedLang(langCode);
+    setIsOpen(false);
+
+    // Wait for Google Translate to be ready
+    const changeLanguage = () => {
+      const select = document.querySelector(".goog-te-combo");
+      if (select) {
+        select.value = langCode;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        // Also trigger using the native event
+        const event = new Event("change");
+        select.dispatchEvent(event);
+        // Force the change using setTimeout to ensure it's processed
+        setTimeout(() => {
+          select.value = langCode;
+          select.dispatchEvent(new Event("change"));
+        }, 100);
+      } else {
+        // If select not found, try again after a delay
+        setTimeout(changeLanguage, 200);
+      }
+    };
+
+    changeLanguage();
+  };
 
   useEffect(() => {
     const ensureInitialized = (targetId) => {
@@ -232,8 +316,76 @@ const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
   }, []);
 
   return (
-    <div className="translate-wrapper">
-      <div id={containerId}></div>
+    <div className="translate-wrapper-custom">
+      {/* Hidden but functional Google Translate Element */}
+      <div
+        id={containerId}
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      ></div>
+
+      {/* Custom Dropdown */}
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 shadow-sm"
+        >
+          <FiGlobe className="w-3.5 h-3.5 text-gray-600" />
+          <span className="text-xs font-medium text-gray-700">
+            {languages.find((lang) => lang.code === selectedLang)?.flag}{" "}
+            <span className="hidden sm:inline">
+              {languages.find((lang) => lang.code === selectedLang)?.name}
+            </span>
+          </span>
+          <FiChevronDown
+            className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {/* Dropdown Menu */}
+        {isOpen && (
+          <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-80 overflow-y-auto animate-fadeIn">
+            <div className="px-3 py-2 border-b border-gray-100">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Select Language
+              </p>
+            </div>
+            {languages.map((lang) => {
+              const isSelected = selectedLang === lang.code;
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
+                    isSelected
+                      ? "bg-primary/5 text-primary"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-base">{lang.flag}</span>
+                    <span
+                      className={`font-medium ${
+                        isSelected ? "font-semibold" : ""
+                      }`}
+                    >
+                      {lang.name}
+                    </span>
+                  </div>
+                  {isSelected && <FiCheck className="w-4 h-4 text-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
