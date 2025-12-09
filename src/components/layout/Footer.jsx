@@ -95,6 +95,7 @@ const Footer = () => {
     { name: "Home", href: ROUTES.HOME },
     { name: "Courses", href: ROUTES.COURSES },
     { name: "Blog", href: ROUTES.BLOG },
+    { name: "FAQ", href: ROUTES.FAQ },
   ];
 
   const resourcesLinks = [

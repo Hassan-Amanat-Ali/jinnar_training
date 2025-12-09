@@ -13,32 +13,43 @@ const GoogleTranslate = ({ containerId = "google_translate_element" }) => {
   const dropdownRef = useRef(null);
 
   const languages = [
+    // Major Continental Languages (75%+ coverage)
     { code: "en", name: "English", flag: "🇬🇧" },
-    { code: "af", name: "Afrikaans", flag: "🇿🇦" },
-    { code: "am", name: "Amharic", flag: "🇪🇹" },
     { code: "ar", name: "Arabic", flag: "🇸🇦" },
-    { code: "bem", name: "Bemba", flag: "🇿🇲" },
-    { code: "bm", name: "Bambara", flag: "🇲🇱" },
-    { code: "ha", name: "Hausa", flag: "🇳🇬" },
-    { code: "ig", name: "Igbo", flag: "🇳🇬" },
-    { code: "ln", name: "Lingala", flag: "🇨🇩" },
-    { code: "mg", name: "Malagasy", flag: "🇲🇬" },
-    { code: "ny", name: "Chichewa", flag: "🇲🇼" },
-    { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
-    { code: "sn", name: "Shona", flag: "🇿🇼" },
-    { code: "so", name: "Somali", flag: "🇸🇴" },
-    { code: "st", name: "Sesotho", flag: "🇱🇸" },
-    { code: "sw", name: "Swahili", flag: "🇰🇪" },
-    { code: "ti", name: "Tigrinya", flag: "🇪🇷" },
-    { code: "tn", name: "Setswana", flag: "🇧🇼" },
-    { code: "ts", name: "Tsonga", flag: "🇿🇦" },
-    { code: "tw", name: "Twi", flag: "🇬🇭" },
-    { code: "wo", name: "Wolof", flag: "🇸🇳" },
-    { code: "xh", name: "Xhosa", flag: "🇿🇦" },
-    { code: "yo", name: "Yoruba", flag: "🇳🇬" },
-    { code: "zu", name: "Zulu", flag: "🇿🇦" },
     { code: "fr", name: "French", flag: "🇫🇷" },
     { code: "pt", name: "Portuguese", flag: "🇵🇹" },
+    { code: "sw", name: "Swahili", flag: "🇰🇪" },
+
+    // East African Languages
+    { code: "am", name: "Amharic", flag: "🇪🇹" },
+    { code: "ti", name: "Tigrinya", flag: "🇪🇷" },
+    { code: "so", name: "Somali", flag: "🇸🇴" },
+    { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
+
+    // West African Languages
+    { code: "ha", name: "Hausa", flag: "🇳🇬" },
+    { code: "yo", name: "Yoruba", flag: "🇳🇬" },
+    { code: "ig", name: "Igbo", flag: "🇳🇬" },
+    { code: "tw", name: "Twi", flag: "🇬🇭" },
+    { code: "bm", name: "Bambara", flag: "🇲🇱" },
+    { code: "wo", name: "Wolof", flag: "🇸🇳" },
+
+    // Southern African Languages
+    { code: "zu", name: "Zulu", flag: "🇿🇦" },
+    { code: "xh", name: "Xhosa", flag: "🇿🇦" },
+    { code: "af", name: "Afrikaans", flag: "🇿🇦" },
+    { code: "ts", name: "Tsonga", flag: "🇿🇦" },
+    { code: "tn", name: "Setswana", flag: "🇧🇼" },
+    { code: "st", name: "Sesotho", flag: "🇱🇸" },
+    { code: "sn", name: "Shona", flag: "🇿🇼" },
+    { code: "ny", name: "Chichewa", flag: "🇲🇼" },
+
+    // Central African Languages
+    { code: "ln", name: "Lingala", flag: "🇨🇩" },
+    { code: "bem", name: "Bemba", flag: "🇿🇲" },
+
+    // Indian Ocean Islands
+    { code: "mg", name: "Malagasy", flag: "🇲🇬" },
   ];
 
   // Close dropdown when clicking outside
