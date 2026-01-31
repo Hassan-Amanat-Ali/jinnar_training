@@ -34,10 +34,11 @@ const ProfileSidebar = () => {
 
   // Get display name
   const getDisplayName = () => {
+    if (profile?.name) return profile.name;
     if (profile?.firstName || profile?.lastName) {
       return `${profile.firstName || ""} ${profile.lastName || ""}`.trim();
     }
-    return currentUser?.displayName || "User";
+    return currentUser?.displayName || currentUser?.name || "User";
   };
 
   // Build a robust, optimized profile picture URL (matches navbar behavior)

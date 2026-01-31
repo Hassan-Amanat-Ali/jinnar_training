@@ -19,21 +19,8 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe; // Cleanup subscription on unmount
   }, []);
 
-  // Auth methods
-  const signUp = async (email, password, displayName = "") => {
-    return await authService.signUp(email, password, displayName);
-  };
-
   const signIn = async (email, password) => {
     return await authService.signIn(email, password);
-  };
-
-  const signInWithGoogle = async () => {
-    return await authService.signInWithGoogle();
-  };
-
-  const signInWithGithub = async () => {
-    return await authService.signInWithGithub();
   };
 
   const signOut = async () => {
@@ -56,10 +43,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     loading,
-    signUp,
     signIn,
-    signInWithGoogle,
-    signInWithGithub,
     signOut,
     resetPassword,
     updateProfile,
@@ -83,10 +67,7 @@ export const useAuth = () => {
   return {
     user: context.currentUser,
     loading: context.loading,
-    signUp: context.signUp,
     signIn: context.signIn,
-    signInWithGoogle: context.signInWithGoogle,
-    signInWithGithub: context.signInWithGithub,
     signOut: context.signOut,
     resetPassword: context.resetPassword,
     updateProfile: context.updateProfile,

@@ -13,7 +13,6 @@ import {
   Portfolio,
   Blog,
   Login,
-  Signup,
   NotFound,
   PrivacyPolicy,
   TermsOfService,
@@ -43,7 +42,6 @@ function App() {
         <Routes>
           {/* Auth routes without layout */}
           <Route path={ROUTES.LOGIN} element={<Login />} />
-          <Route path={ROUTES.SIGNUP} element={<Signup />} />
 
           {/* Privacy Policy with custom layout (floating header) */}
           <Route path={ROUTES.PRIVACY_POLICY} element={<PrivacyPolicy />} />

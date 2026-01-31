@@ -6,7 +6,7 @@ export { default as CourseDetail } from "./CourseDetail";
 export { default as Portfolio } from "./Portfolio";
 export { default as Blog } from "./Blog";
 export { default as Login } from "./Login";
-export { default as Signup } from "./Signup";
+
 export { default as NotFound } from "./NotFound";
 export { default as PrivacyPolicy } from "./PrivacyPolicy";
 export { default as TermsOfService } from "./TermsOfService";
