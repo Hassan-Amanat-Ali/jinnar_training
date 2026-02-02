@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
+import { useAuth } from "../contexts/AuthContext";
 import AuthPageImg from "../assets/images/auth-page-img.png";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import { toast } from "react-toastify";
-import FirebaseUtils from "../utils/firebaseUtils";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,6 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   // Get the redirect path from location state or default to home
   const from = location.state?.from || ROUTES.HOME;
@@ -23,14 +22,7 @@ const Login = () => {
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.warning("Please enter your email address.", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    if (!FirebaseUtils.validateEmail(email)) {
-      toast.warning("Please enter a valid email address.", {
+      toast.warning("Please enter your email or phone.", {
         position: "top-center",
       });
       return;
@@ -44,7 +36,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const result = await FirebaseUtils.completeLogin(email, password);
+      const result = await signIn(email, password);
 
       if (result.success) {
         toast.success(result.message, { position: "top-center" });
@@ -55,50 +47,6 @@ const Login = () => {
     } catch (error) {
       console.error("Login error:", error);
       toast.error("An unexpected error occurred. Please try again.", {
-        position: "top-center",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-
-    try {
-      const result = await FirebaseUtils.completeSocialLogin("google");
-
-      if (result.success) {
-        toast.success(result.message, { position: "top-center" });
-        navigate(from, { replace: true });
-      } else {
-        toast.error(result.message, { position: "top-center" });
-      }
-    } catch (error) {
-      console.error("Google sign-in error:", error);
-      toast.error("Failed to sign in with Google. Please try again.", {
-        position: "top-center",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGithubSignIn = async () => {
-    setLoading(true);
-
-    try {
-      const result = await FirebaseUtils.completeSocialLogin("github");
-
-      if (result.success) {
-        toast.success(result.message, { position: "top-center" });
-        navigate(from, { replace: true });
-      } else {
-        toast.error(result.message, { position: "top-center" });
-      }
-    } catch (error) {
-      console.error("GitHub sign-in error:", error);
-      toast.error("Failed to sign in with GitHub. Please try again.", {
         position: "top-center",
       });
     } finally {
@@ -161,9 +109,9 @@ const Login = () => {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <Input
-              label="Email :"
-              type="email"
-              placeholder="Please enter your email address"
+              label="Email or Phone :"
+              type="text"
+              placeholder="Please enter your email or phone"
               className="h-12 rounded-none focus:ring-0 focus:ring-offset-0 focus:border-none bg-[#D9D9D9]/24 "
               required
               value={email}
@@ -188,43 +136,6 @@ const Login = () => {
               disabled={loading}
             />
           </form>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-6">
-            <div className="h-px bg-gray-200 flex-1" />
-            <span className="text-xs text-black/60">OR</span>
-            <div className="h-px bg-gray-200 flex-1" />
-          </div>
-
-          {/* Social logins */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="w-full h-12 border border-gray-300 bg-white hover:bg-gray-50 rounded-none flex items-center gap-3 justify-start px-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle className="text-xl" />
-              <span>{loading ? "Signing in..." : "Continue with Google"}</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleGithubSignIn}
-              disabled={loading}
-              className="w-full h-12 border border-gray-300 bg-white hover:bg-gray-50 rounded-none flex items-center gap-3 justify-start px-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FaGithub className="text-xl" />
-              <span>{loading ? "Signing in..." : "Continue with GitHub"}</span>
-            </button>
-          </div>
-
-          {/* Account prompt */}
-          <p className="mt-6 text-center text-sm text-black/70">
-            Don't have an account?{" "}
-            <Link to={ROUTES.SIGNUP} className="text-primary hover:underline">
-              Sign Up
-            </Link>
-          </p>
         </div>
       </div>
     </div>

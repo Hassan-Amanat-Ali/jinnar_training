@@ -1,347 +1,189 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  updateProfile,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-// Google Auth Provider
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-});
-// Add scopes to ensure we get profile info and photo
-googleProvider.addScope("profile");
-googleProvider.addScope("email");
-
-// GitHub Auth Provider
-const githubProvider = new GithubAuthProvider();
-
-// Auth Service Class
 class AuthService {
   constructor() {
-    this.auth = auth;
-    this.currentUser = null;
-
-    // Listen for auth state changes
-    onAuthStateChanged(this.auth, (user) => {
-      this.currentUser = user;
-    });
+    this.tokenKey = "jinnar_auth_token";
+    this.userKey = "jinnar_user_data";
+    this.subscribers = [];
   }
 
-  // Sign up with email and password
-  async signUp(email, password, displayName = "", userRole = "user") {
+  getToken() {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  getCurrentUser() {
+    const userStr = localStorage.getItem(this.userKey);
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
-
-      // Update user profile with display name if provided
-      if (displayName) {
-        await updateProfile(userCredential.user, {
-          displayName: displayName,
-        });
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (user && user._id && !user.uid) {
+        user.uid = user._id; // Backward compatibility for existing sessions
+        user.id = user._id;
       }
+      return user;
+    } catch (e) {
+      return null;
+    }
+  }
 
-      // Create user document in Firestore with role
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName:
-          displayName || userCredential.user.email?.split("@")[0] || "User",
-        role: userRole, // Default role is 'user', can be 'user', 'employee', or 'admin'
-        photoURL: userCredential.user.photoURL || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+  isAuthenticated() {
+    return !!this.getToken();
+  }
+
+  async signIn(identifier, password) {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
       });
 
-      return {
-        success: true,
-        user: userCredential.user,
-        message: "Account created successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
+      const data = await response.json();
 
-  // Sign in with email and password
-  async signIn(email, password) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
-      return {
-        success: true,
-        user: userCredential.user,
-        message: "Logged in successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Sign in with Google
-  async signInWithGoogle() {
-    try {
-      const result = await signInWithPopup(this.auth, googleProvider);
-
-      // Check if user document exists, create if it doesn't
-      const userDocRef = doc(db, "users", result.user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Create user document with default 'user' role
-        await setDoc(userDocRef, {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName:
-            result.user.displayName ||
-            result.user.email?.split("@")[0] ||
-            "User",
-          role: "user", // Default role for new Google sign-ins
-          photoURL: result.user.photoURL || null,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
       }
 
-      return {
-        success: true,
-        user: result.user,
-        message: "Signed in with Google successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
+      // Save token
+      localStorage.setItem(this.tokenKey, data.token);
 
-  // Sign in with GitHub
-  async signInWithGithub() {
-    try {
-      const result = await signInWithPopup(this.auth, githubProvider);
+      // Fetch full user profile
+      const user = await this.fetchUserProfile(data.token);
 
-      // Check if user document exists, create if it doesn't
-      const userDocRef = doc(db, "users", result.user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Create user document with default 'user' role
-        await setDoc(userDocRef, {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName:
-            result.user.displayName ||
-            result.user.email?.split("@")[0] ||
-            "User",
-          role: "user", // Default role for new GitHub sign-ins
-          photoURL: result.user.photoURL || null,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      }
-
-      return {
-        success: true,
-        user: result.user,
-        message: "Signed in with GitHub successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Sign out
-  async signOut() {
-    try {
-      await signOut(this.auth);
-      return {
-        success: true,
-        message: "Signed out successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Send password reset email
-  async resetPassword(email) {
-    try {
-      await sendPasswordResetEmail(this.auth, email);
-      return {
-        success: true,
-        message: "Password reset email sent!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Update user profile
-  async updateUserProfile(updates) {
-    try {
-      if (!this.currentUser) {
-        throw new Error("No user is currently signed in");
-      }
-
-      await updateProfile(this.currentUser, updates);
-      return {
-        success: true,
-        message: "Profile updated successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Update password
-  async updateUserPassword(currentPassword, newPassword) {
-    try {
-      if (!this.currentUser) {
-        throw new Error("No user is currently signed in");
-      }
-
-      // Re-authenticate user before updating password
-      const credential = EmailAuthProvider.credential(
-        this.currentUser.email,
-        currentPassword
-      );
-      await reauthenticateWithCredential(this.currentUser, credential);
-
-      // Update password
-      await updatePassword(this.currentUser, newPassword);
-      return {
-        success: true,
-        message: "Password updated successfully!",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.code,
-        message: this.getErrorMessage(error.code),
-      };
-    }
-  }
-
-  // Get current user
-  getCurrentUser() {
-    return this.currentUser;
-  }
-
-  // Check if user is authenticated
-  isAuthenticated() {
-    return !!this.currentUser;
-  }
-
-  // Auth state listener
-  onAuthStateChange(callback) {
-    return onAuthStateChanged(this.auth, async (user) => {
       if (user) {
-        // Fetch additional user data from Firestore
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (userDoc.exists()) {
-            // Merge Firebase Auth user with Firestore data
-            const userData = userDoc.data();
-            const enrichedUser = {
-              ...user,
-              role: userData.role || "user",
-              ...userData,
-            };
-            callback(enrichedUser);
-          } else {
-            // User document doesn't exist, return auth user with default role
-            callback({ ...user, role: "user" });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Fallback to auth user with default role
-          callback({ ...user, role: "user" });
-        }
+        localStorage.setItem(this.userKey, JSON.stringify(user));
+        this.notifySubscribers(user);
+        return { success: true, user, message: "Logged in successfully!" };
       } else {
-        callback(null);
+        throw new Error("Failed to fetch user profile");
       }
-    });
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        message: error.message,
+      };
+    }
   }
 
-  // Get user-friendly error messages
-  getErrorMessage(errorCode) {
-    const errorMessages = {
-      "auth/user-not-found": "No account found with this email address.",
-      "auth/wrong-password": "Incorrect password. Please try again.",
-      "auth/email-already-in-use": "An account with this email already exists.",
-      "auth/weak-password": "Password should be at least 6 characters long.",
-      "auth/invalid-email": "Please enter a valid email address.",
-      "auth/user-disabled": "This account has been disabled.",
-      "auth/too-many-requests":
-        "Too many failed attempts. Please try again later.",
-      "auth/network-request-failed":
-        "Network error. Please check your connection.",
-      "auth/popup-closed-by-user":
-        "Sign-in popup was closed before completion.",
-      "auth/cancelled-popup-request":
-        "Only one popup request is allowed at a time.",
-      "auth/popup-blocked": "Popup was blocked by the browser.",
-      "auth/invalid-credential": "Invalid credentials provided.",
-      "auth/account-exists-with-different-credential":
-        "An account already exists with the same email but different sign-in credentials.",
-      "auth/requires-recent-login":
-        "This operation requires recent authentication. Please sign in again.",
-      "auth/invalid-action-code": "The action code is invalid or has expired.",
-      "auth/expired-action-code": "The action code has expired.",
-    };
+  async fetchUserProfile(token) {
+    try {
+      const response = await fetch(`${API_URL}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const user = data.profile || data;
+        if (user && user._id) {
+          user.uid = user._id;
+          user.id = user._id;
+        }
+        return user;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+  }
 
-    return (
-      errorMessages[errorCode] ||
-      "An unexpected error occurred. Please try again."
-    );
+  async signOut() {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this.notifySubscribers(null);
+    return { success: true, message: "Signed out successfully!" };
+  }
+
+  onAuthStateChange(callback) {
+    this.subscribers.push(callback);
+
+    // Check if we have a token and try to validate it/load user
+    const token = this.getToken();
+    const user = this.getCurrentUser();
+
+    if (token && user) {
+      callback(user);
+    } else if (token && !user) {
+      // Token exists but no user data, try to fetch
+      this.fetchUserProfile(token).then((fetchedUser) => {
+        if (fetchedUser) {
+          localStorage.setItem(this.userKey, JSON.stringify(fetchedUser));
+          callback(fetchedUser);
+        } else {
+          // Token invalid
+          this.signOut();
+          callback(null);
+        }
+      });
+    } else {
+      callback(null);
+    }
+
+    return () => {
+      this.subscribers = this.subscribers.filter((cb) => cb !== callback);
+    };
+  }
+
+  notifySubscribers(user) {
+    this.subscribers.forEach((cb) => cb(user));
+  }
+
+  async resetPassword(identifier) {
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send reset email");
+      }
+      return { success: true, message: data.message };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
+  // Legacy methods stubbed or mapped
+  async updateUserProfile(updates) {
+    const token = this.getToken();
+    if (!token) return { success: false, message: "Not authenticated" };
+
+    try {
+      const response = await fetch(`${API_URL}/user/update`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Update failed");
+
+      // Update local user data
+      const freshUser = await this.fetchUserProfile(token);
+      if (freshUser) {
+        localStorage.setItem(this.userKey, JSON.stringify(freshUser));
+        this.notifySubscribers(freshUser);
+      }
+
+      return { success: true, message: "Profile updated successfully!" };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async updateUserPassword(currentPassword, newPassword) {
+    return {
+      success: false,
+      message: "Password update not implemented yet via this API.",
+    };
   }
 }
 
-// Create and export a singleton instance
 const authService = new AuthService();
 export default authService;

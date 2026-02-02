@@ -29,36 +29,61 @@ export const useNotifications = () => {
 
     setLoading(true);
 
-    // Subscribe to notifications
-    const unsubscribeNotifications =
-      NotificationService.subscribeToUserNotifications(
-        user.uid,
-        (notificationData) => {
-          setNotifications(notificationData);
-          setLoading(false);
-        }
-      );
+    const fetchNotifications = async () => {
+      setLoading(true);
+      const result = await NotificationService.getUserNotifications(user.uid);
 
-    // Subscribe to notification stats
-    const unsubscribeStats = NotificationService.subscribeToNotificationStats(
-      user.uid,
-      (statsData) => {
-        setStats(statsData);
+      if (result.success && result.data) {
+        // Assuming dataService returns {success:true, data: []}
+        const rawNotifications = result.data;
+
+        // Format notifications
+        const formatted = rawNotifications.map((n) => ({
+          id: n._id,
+          title: n.title || "Notification",
+          body: n.content || n.body || "",
+          time: NotificationService.formatTimeAgo(n.createdAt),
+          unread: !n.isRead, // Backend uses isRead (true/false)
+          metadata: n.relatedId
+            ? {
+                type: n.type,
+                id: n.relatedId,
+                model: n.relatedModel,
+              }
+            : n.metadata || {},
+          // Keep original fields just in case
+          ...n,
+        }));
+
+        setNotifications(formatted);
+
+        // Calculate stats
+        const newStats = NotificationService.calculateStats(formatted);
+        setStats(newStats);
       }
-    );
-
-    // Cleanup subscriptions
-    return () => {
-      unsubscribeNotifications();
-      unsubscribeStats();
+      setLoading(false);
     };
+
+    fetchNotifications();
+
+    // Optional: Poll every minute for updates since we lost real-time
+    const interval = setInterval(fetchNotifications, 60000);
+
+    return () => clearInterval(interval);
   }, [user?.uid]);
 
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
       await NotificationService.markAsRead(notificationId);
-      // The real-time listener will automatically update the state
+      // The real-time listener will automatically update the state -- OLD
+      // Manual update since no real-time
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notificationId ? { ...n, unread: false } : n,
+        ),
+      );
+      setStats((prev) => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }

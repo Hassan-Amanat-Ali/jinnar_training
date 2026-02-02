@@ -34,9 +34,13 @@ const EditProfileForm = () => {
 
         if (result.success && result.data) {
           const profile = result.data;
-          setFirstName(profile.firstName || "");
-          setLastName(profile.lastName || "");
-          setPhone(profile.phone || "");
+
+          // Split name into first and last
+          const nameParts = (profile.name || "").split(" ");
+          setFirstName(nameParts[0] || "");
+          setLastName(nameParts.slice(1).join(" ") || "");
+
+          setPhone(profile.mobileNumber || "");
           setEmail(profile.email || currentUser.email || "");
           setBio(profile.bio || "");
           setAddress(profile.address || "");
@@ -45,7 +49,7 @@ const EditProfileForm = () => {
           // Set country if exists
           if (profile.country) {
             const country = countryOptions.find(
-              (c) => c.value === profile.country
+              (c) => c.value === profile.country,
             );
             setSelectedCountry(country || null);
           }
@@ -173,7 +177,7 @@ const EditProfileForm = () => {
       // Update profile using the profile service
       const result = await profileService.updateCompleteProfile(
         currentUser.uid,
-        profileData
+        profileData,
       );
 
       if (result.success) {

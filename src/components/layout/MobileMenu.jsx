@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Logo } from "../../assets";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
-import { firestoreService } from "../../services";
+import { profileService } from "../../services";
 
 const MobileMenu = ({
   isOpen,
@@ -103,8 +103,6 @@ const MobileMenuNavigation = ({ navigation, isActiveRoute, onClose }) => (
 
 const MobileMenuActions = ({ isLoggedIn, currentUser, onClose, ROUTES }) => (
   <div className="p-4 sm:p-5 border-t border-black/10 space-y-3 sm:space-y-4 bg-white flex-shrink-0">
-    {/* Language Selector for Mobile */}
-
     {!isLoggedIn ? (
       <LoggedOutActions onClose={onClose} ROUTES={ROUTES} />
     ) : (
@@ -124,41 +122,39 @@ const LoggedOutActions = ({ onClose, ROUTES }) => (
         Log In
       </button>
     </Link>
-    <Link to={ROUTES.SIGNUP} onClick={onClose}>
-      <button className="w-full bg-primary hover:bg-primary/90 text-white py-2.5 sm:py-3 px-4 rounded-xl font-medium transition-all duration-200 shadow-sm text-sm sm:text-base active:scale-95">
-        Create Account
-      </button>
-    </Link>
   </div>
 );
 
 const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
   const { signOut } = useAuth();
   const [userRole, setUserRole] = useState(null);
+  const [menuProfile, setMenuProfile] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    if (!currentUser?.uid) {
-      setUserRole(null);
-      return;
-    }
-    const unsubscribe = firestoreService.onDocumentSnapshot(
-      "users",
-      currentUser.uid,
-      (doc) => {
-        if (doc) {
-          let role = doc.role;
-          if (!role && doc.userRole) role = doc.userRole;
-          if (!role && typeof doc.role === "object" && doc.role?.name)
-            role = doc.role.name;
-          setUserRole((role || "student").toString().toLowerCase());
-        } else {
-          setUserRole(null);
-        }
+    const loadMenuProfile = async () => {
+      const userId = currentUser?.uid || currentUser?._id || currentUser?.id;
+      if (!userId) {
+        setUserRole(null);
+        setMenuProfile(null);
+        return;
       }
-    );
-    return () => unsubscribe && unsubscribe();
-  }, [currentUser?.uid]);
+      try {
+        const result = await profileService.getUserProfile(userId);
+        if (result.success && result.data) {
+          const data = result.data;
+          setMenuProfile(data);
+
+          let role = data.role;
+          if (!role && data.userRole) role = data.userRole;
+          setUserRole((role || "student").toString().toLowerCase());
+        }
+      } catch (error) {
+        console.error("Error loading menu profile:", error);
+      }
+    };
+    loadMenuProfile();
+  }, [currentUser]);
 
   const handleSignOut = async () => {
     try {
@@ -178,6 +174,10 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
   };
 
   const getUserDisplayName = () => {
+    if (menuProfile?.name) return menuProfile.name;
+    if (menuProfile?.firstName || menuProfile?.lastName) {
+      return `${menuProfile.firstName || ""} ${menuProfile.lastName || ""}`.trim();
+    }
     if (currentUser?.displayName) {
       return currentUser.displayName;
     }
@@ -197,17 +197,30 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
       .slice(0, 2);
   };
 
+  const getPhotoURL = () => {
+    const url = menuProfile?.profilePicture || currentUser?.photoURL;
+    if (!url) return null;
+    if (url.startsWith("/")) {
+      const API_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const origin = API_URL.replace(/\/api\/?$/, "");
+      return `${origin}${url}`;
+    }
+    return url;
+  };
+
+  const photoURL = getPhotoURL();
+
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* User Profile Section */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="w-full flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-black/5 hover:bg-black/10 rounded-xl transition-colors active:scale-95"
       >
         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-          {currentUser?.photoURL ? (
+          {photoURL ? (
             <img
-              src={currentUser.photoURL}
+              src={photoURL}
               alt="User profile"
               className="w-full h-full object-cover"
             />
@@ -221,7 +234,9 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
           <div className="text-sm sm:text-base font-semibold text-black truncate">
             {getUserDisplayName()}
           </div>
-          <div className="text-xs sm:text-sm text-black/50 truncate">{currentUser?.email}</div>
+          <div className="text-xs sm:text-sm text-black/50 truncate">
+            {currentUser?.email}
+          </div>
         </div>
         <svg
           className={`w-5 h-5 text-black/60 transition-transform duration-200 flex-shrink-0 ${
@@ -240,52 +255,51 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
         </svg>
       </button>
 
-      {/* Quick Actions */}
       {isDropdownOpen && (
         <div className="space-y-1.5 sm:space-y-2">
-        {userRole === "admin" && (
+          {userRole === "admin" && (
+            <Link
+              to={ROUTES.ADMIN_DASHBOARD}
+              className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
+              onClick={onClose}
+            >
+              Admin Dashboard
+            </Link>
+          )}
           <Link
-            to={ROUTES.ADMIN_DASHBOARD}
+            to={ROUTES.EDIT_PROFILE}
             className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
             onClick={onClose}
           >
-            Admin Dashboard
+            Edit Profile
           </Link>
-        )}
-        <Link
-          to={ROUTES.EDIT_PROFILE}
-          className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
-          onClick={onClose}
-        >
-          Edit Profile
-        </Link>
-        <Link
-          to={ROUTES.MY_COURSES}
-          className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
-          onClick={onClose}
-        >
-          My Courses
-        </Link>
-        <Link
-          to={ROUTES.NOTIFICATION}
-          className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
-          onClick={onClose}
-        >
-          Notifications
-        </Link>
-        <Link
-          to={ROUTES.SETTINGS}
-          className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
-          onClick={onClose}
-        >
-          Settings
-        </Link>
-        <button
-          onClick={handleSignOut}
-          className="block w-full text-left px-3 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
-        >
-          Sign Out
-        </button>
+          <Link
+            to={ROUTES.MY_COURSES}
+            className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
+            onClick={onClose}
+          >
+            My Courses
+          </Link>
+          <Link
+            to={ROUTES.NOTIFICATION}
+            className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
+            onClick={onClose}
+          >
+            Notifications
+          </Link>
+          <Link
+            to={ROUTES.SETTINGS}
+            className="block px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active:scale-95"
+            onClick={onClose}
+          >
+            Settings
+          </Link>
+          <button
+            onClick={handleSignOut}
+            className="block w-full text-left px-3 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
+          >
+            Sign Out
+          </button>
         </div>
       )}
     </div>

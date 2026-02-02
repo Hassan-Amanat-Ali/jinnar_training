@@ -13,7 +13,6 @@ import {
   Portfolio,
   Blog,
   Login,
-  Signup,
   NotFound,
   PrivacyPolicy,
   TermsOfService,
@@ -44,7 +43,6 @@ function App() {
         <Routes>
           {/* Auth routes without layout */}
           <Route path={ROUTES.LOGIN} element={<Login />} />
-          <Route path={ROUTES.SIGNUP} element={<Signup />} />
 
           {/* Admin Login - separate from user auth */}
           <Route path="/admin/login" element={<AdminLogin />} />

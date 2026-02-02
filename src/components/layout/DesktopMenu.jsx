@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
-import { firestoreService } from "../../services";
+import { profileService } from "../../services";
 import { NotificationBell } from "../common";
 
 const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
@@ -30,11 +30,6 @@ const DesktopAuthButtons = ({ ROUTES }) => (
         Log In
       </button>
     </Link>
-    <Link to={ROUTES.SIGNUP}>
-      <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full font-medium transition-all duration-200 shadow-sm cursor-pointer text-sm">
-        Create Account
-      </button>
-    </Link>
   </div>
 );
 
@@ -59,48 +54,59 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
     };
   }, []);
 
-  // Reset image error when currentUser changes
   useEffect(() => {
     setImageError(false);
   }, [currentUser?.photoURL, currentUser]);
 
-  // Subscribe to user role changes from Firestore (users collection)
+  const [menuProfile, setMenuProfile] = useState(null);
+
   useEffect(() => {
-    if (!currentUser?.uid) {
-      setUserRole(null);
-      return;
-    }
-    const unsubscribe = firestoreService.onDocumentSnapshot(
-      "users",
-      currentUser.uid,
-      (doc) => {
-        if (doc) {
-          let role = doc.role;
-          if (!role && doc.userRole) role = doc.userRole;
-          if (!role && typeof doc.role === "object" && doc.role?.name)
-            role = doc.role.name;
+    const loadMenuProfile = async () => {
+      const userId = currentUser?.profile?._id;
+
+      if (!userId) {
+        setUserRole(null);
+        setMenuProfile(null);
+        return;
+      }
+      try {
+        const result = await profileService.getUserProfile(userId);
+
+        if (result.success && result.data) {
+          const data = result.data;
+          setMenuProfile(data);
+
+          let role = data.role;
+          if (!role && data.userRole) role = data.userRole;
           setUserRole((role || "student").toString().toLowerCase());
         } else {
-          setUserRole(null);
+          console.error("DesktopMenu: Failed to load profile", result);
         }
+      } catch (error) {
+        console.error("Error loading menu profile:", error);
       }
-    );
-    return () => unsubscribe && unsubscribe();
-  }, [currentUser?.uid]);
+    };
 
-  // Enhanced function to get optimized photo URL
+    loadMenuProfile();
+  }, [currentUser]);
+
   const getOptimizedPhotoURL = () => {
-    if (!currentUser?.photoURL) return null;
+    const photoURL = menuProfile?.profilePicture || currentUser?.photoURL;
+    if (!photoURL) return null;
 
-    let photoURL = currentUser.photoURL;
-
-    // If it's a Google photo, try to optimize it for better loading
-    if (photoURL.includes("googleusercontent.com")) {
-      // Remove size parameter and add our own for consistent sizing
-      photoURL = photoURL.replace(/=s\d+/, "=s96");
+    let optimized = photoURL;
+    if (optimized.includes("googleusercontent.com")) {
+      optimized = optimized.replace(/=s\d+/, "=s96");
+    } else if (optimized.startsWith("/")) {
+      const API_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      // If API_URL ends with /api, we usually want the origin, but if the path is /api/files, we just need the origin.
+      // Assuming API_URL is http://localhost:3000/api
+      const origin = API_URL.replace(/\/api\/?$/, "");
+      optimized = `${origin}${optimized}`;
     }
 
-    return photoURL;
+    return optimized;
   };
 
   const handleSignOut = async () => {
@@ -122,6 +128,11 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
   };
 
   const getUserDisplayName = () => {
+    console.log(menuProfile);
+    if (menuProfile?.name) return menuProfile.name;
+    if (menuProfile?.firstName || menuProfile?.lastName) {
+      return `${menuProfile.firstName || ""} ${menuProfile.lastName || ""}`.trim();
+    }
     if (currentUser?.displayName) {
       return currentUser.displayName;
     }
@@ -145,7 +156,6 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
 
   return (
     <div className="flex items-center space-x-4">
-      {/* Notification Bell */}
       <Link
         to={ROUTES.NOTIFICATION}
         className="p-2 text-black/60 hover:text-primary transition-colors"
@@ -153,7 +163,6 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
         <NotificationBell />
       </Link>
 
-      {/* User Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -180,7 +189,6 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
           )}
         </button>
 
-        {/* Dropdown Menu */}
         {isDropdownOpen && (
           <div className="absolute right-0 mt-2 min-w-48 max-w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
             <div className="px-3 py-1.5 border-b border-gray-100">
