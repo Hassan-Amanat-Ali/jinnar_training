@@ -29,6 +29,7 @@ import {
   Settings,
   AdminDashboard,
 } from "./pages";
+import AdminLogin from "./pages/AdminLogin";
 import Watch from "./pages/Watch";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -44,6 +45,9 @@ function App() {
           {/* Auth routes without layout */}
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.SIGNUP} element={<Signup />} />
+
+          {/* Admin Login - separate from user auth */}
+          <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Privacy Policy with custom layout (floating header) */}
           <Route path={ROUTES.PRIVACY_POLICY} element={<PrivacyPolicy />} />
@@ -97,13 +101,10 @@ function App() {
                     }
                   />
 
+                  {/* Admin Dashboard - uses JWT auth, not Firebase */}
                   <Route
                     path={ROUTES.ADMIN_DASHBOARD}
-                    element={
-                      <ProtectedRoute adminOnly={true}>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    }
+                    element={<AdminDashboard />}
                   />
                   <Route
                     path={ROUTES.MY_COURSES}

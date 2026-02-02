@@ -16,6 +16,7 @@ export const ROUTES = {
   SIGNUP: "/signup",
   DASHBOARD: "/dashboard",
   ADMIN_DASHBOARD: "/admin",
+  ADMIN_LOGIN: "/admin/login",
   PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
   MY_COURSES: "/my-courses",
