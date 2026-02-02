@@ -5,7 +5,6 @@ import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../hooks/useAuth";
 import CoursesFilters from "./CoursesFilters";
 import CoursesListing from "./CoursesListing";
-import { jinnarCoursesData } from "../../data/jinnarCourses";
 import {
   CourseService,
   EnrollmentService,
@@ -18,9 +17,8 @@ const CoursesContent = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const [coursesState, setCoursesState] = useState([]);
   const [allCourses, setAllCourses] = useState([]); // Store all courses for filter counts
-  const [publicCourses, setPublicCourses] = useState([]);
-  const [employeeCourses, setEmployeeCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Initial page load
+  const [coursesLoading, setCoursesLoading] = useState(false); // Tab change loading
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   const [totalCourses, setTotalCourses] = useState(0);
 
@@ -36,84 +34,83 @@ const CoursesContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 9;
 
-  // Employee-only course titles
-  const employeeOnlyCourses = [
-    "Time Management for Support & Admin Teams",
-    "Tier 2 Training Program",
-    "Tier 3 Training Program",
-    "Jinnar Employees Training Programs",
-  ];
+  // State for course type tabs
+  const [activeTab, setActiveTab] = useState("all"); // all, video, pdf
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        setLoading(true);
-
-        // Check if user has employee or admin role
-        const userRole = currentUser?.role || "user";
-        const hasEmployeeAccess =
-          userRole === "employee" || userRole === "admin";
-
-        // Transform Jinnar courses
-        const transformedJinnarCourses = jinnarCoursesData.map((course) => ({
-          id: `jinnar-${course.id}`,
-          title: course.title,
-          description: course.description,
-          image: course.thumbnail,
-          duration: "Self-paced",
-          enrolled: 0,
-          category: course.category,
-          level: "All Levels",
-          price: 0,
-          language: "English",
-          originalPrice: 0,
-          rating: 4.5,
-          instructor: "Jinnar Training",
-          isFavorite: false,
-          detailedDescription: course.description,
-          highlights: [],
-          requirements: [],
-          learningOutcomes: [],
-          tags: ["Document", "Training", "Free"],
-          published: true,
-          reviewCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          isJinnarCourse: true,
-          filePath: course.filePath,
-          fileName: course.fileName,
-        }));
-
-        // Separate public and employee courses
-        const publicCoursesData = transformedJinnarCourses.filter(
-          (course) => !employeeOnlyCourses.includes(course.title)
-        );
-
-        const employeeCoursesData = transformedJinnarCourses.filter(
-          (course) => employeeOnlyCourses.includes(course.title)
-        );
-
-        // Combine courses based on user role
-        let allCombinedCourses;
-        if (hasEmployeeAccess) {
-          // Employees and Admins see all courses
-          allCombinedCourses = transformedJinnarCourses;
-          setPublicCourses(publicCoursesData);
-          setEmployeeCourses(employeeCoursesData);
+        // Use coursesLoading for tab changes, loading for initial load
+        if (loading) {
+          setLoading(true);
         } else {
-          // Regular users see only public courses
-          allCombinedCourses = publicCoursesData;
-          setPublicCourses(publicCoursesData);
-          setEmployeeCourses([]);
+          setCoursesLoading(true);
         }
 
-        setCoursesState(allCombinedCourses);
-        setAllCourses(allCombinedCourses);
-        setTotalCourses(allCombinedCourses.length);
+        // Fetch courses from API based on active tab
+        const options = {
+          limit: 100, // Fetch more courses for client-side filtering
+        };
 
-        // Fetch user favorites if authenticated
-        if (isAuthenticated && currentUser) {
-          await fetchUserFavorites(allCombinedCourses);
+        // Add courseType filter based on active tab
+        if (activeTab === "video") {
+          options.courseType = "video";
+        } else if (activeTab === "pdf") {
+          options.courseType = "pdf";
+        }
+
+        const result = await CourseService.getAllCourses(options);
+
+        if (result.success) {
+          const apiCourses = result.data || [];
+
+          // Transform API courses to match frontend format
+          const transformedCourses = apiCourses.map((course) => ({
+            id: course._id,
+            title: course.title,
+            description: course.description,
+            image: course.thumbnail?.startsWith("http")
+              ? course.thumbnail
+              : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.thumbnail}`,
+            duration: course.duration || "Self-paced",
+            enrolled: course.totalEnrollments || course.enrollmentCount || 0,
+            category: course.category?.name || "Uncategorized",
+            level: course.level || "All Levels",
+            price: course.price || 0,
+            language: course.language || "English",
+            originalPrice: course.discountPrice || 0,
+            rating: course.rating || 0,
+            instructor: course.instructor?.name || "Jinnar Training",
+            isFavorite: false,
+            detailedDescription:
+              course.detailedDescription || course.description,
+            highlights: course.highlights || [],
+            requirements: course.requirements || [],
+            learningOutcomes: course.learningOutcomes || [],
+            tags: course.tags || [],
+            published: course.published || course.isPublished,
+            reviewCount: course.reviewCount || 0,
+            createdAt: course.createdAt,
+            updatedAt: course.updatedAt,
+            courseType: course.courseType || "video",
+            pdfUrl: course.pdfUrl,
+            targetAudience: course.targetAudience || "General",
+          }));
+
+          setCoursesState(transformedCourses);
+          setAllCourses(transformedCourses);
+          setTotalCourses(transformedCourses.length);
+
+          // Fetch user favorites if authenticated
+          if (isAuthenticated && currentUser) {
+            await fetchUserFavorites(transformedCourses);
+          }
+        } else {
+          console.error("Failed to load courses:", result.error);
+          toast.error(result.error || "Failed to load courses");
+          setCoursesState([]);
+          setAllCourses([]);
+          setTotalCourses(0);
         }
       } catch (error) {
         console.error("Failed to load courses:", error);
@@ -123,13 +120,14 @@ const CoursesContent = () => {
         setTotalCourses(0);
       } finally {
         setLoading(false);
+        setCoursesLoading(false);
       }
     };
 
     const fetchUserFavorites = async (courses) => {
       try {
         const favoritesResult = await favoritesService.getUserFavorites(
-          currentUser.uid
+          currentUser.uid,
         );
 
         if (favoritesResult.success) {
@@ -149,7 +147,7 @@ const CoursesContent = () => {
     };
 
     fetchCourses();
-  }, [isAuthenticated, currentUser]);
+  }, [isAuthenticated, currentUser, activeTab]);
 
   // Calculate dynamic filter counts
   const filterCounts = useMemo(() => {
@@ -199,21 +197,21 @@ const CoursesContent = () => {
           course.description
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
-          course.category.toLowerCase().includes(searchQuery.toLowerCase())
+          course.category.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     // Category filter
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((course) =>
-        selectedCategories.includes(course.category)
+        selectedCategories.includes(course.category),
       );
     }
 
     // Level filter
     if (selectedLevels.length > 0) {
       filtered = filtered.filter((course) =>
-        selectedLevels.includes(course.level)
+        selectedLevels.includes(course.level),
       );
     }
 
@@ -261,31 +259,7 @@ const CoursesContent = () => {
     return filtered;
   };
 
-  // Filter public courses
-  const filteredPublicCourses = useMemo(() => {
-    return applyFiltersAndSort(publicCourses);
-  }, [
-    publicCourses,
-    searchQuery,
-    selectedCategories,
-    selectedLevels,
-    selectedDurations,
-    sortBy,
-  ]);
-
-  // Filter employee courses
-  const filteredEmployeeCourses = useMemo(() => {
-    return applyFiltersAndSort(employeeCourses);
-  }, [
-    employeeCourses,
-    searchQuery,
-    selectedCategories,
-    selectedLevels,
-    selectedDurations,
-    sortBy,
-  ]);
-
-  // Combined filtered courses for backward compatibility
+  // Combined filtered courses
   const filteredCourses = useMemo(() => {
     return applyFiltersAndSort(coursesState);
   }, [
@@ -351,7 +325,7 @@ const CoursesContent = () => {
         const updatedCourses = prevCourses.map((course) =>
           course.id === courseId
             ? { ...course, isFavorite: !course.isFavorite }
-            : course
+            : course,
         );
         return updatedCourses;
       });
@@ -361,7 +335,7 @@ const CoursesContent = () => {
         const updatedCourses = prevCourses.map((course) =>
           course.id === courseId
             ? { ...course, isFavorite: !course.isFavorite }
-            : course
+            : course,
         );
         return updatedCourses;
       });
@@ -371,12 +345,12 @@ const CoursesContent = () => {
       if (wasIsFavorite) {
         result = await favoritesService.removeFromFavorites(
           currentUser.uid,
-          courseId
+          courseId,
         );
       } else {
         result = await favoritesService.addToFavorites(
           currentUser.uid,
-          courseId
+          courseId,
         );
       }
 
@@ -385,7 +359,7 @@ const CoursesContent = () => {
           wasIsFavorite
             ? "Course removed from favorites!"
             : "Course added to favorites!",
-          { position: "top-center" }
+          { position: "top-center" },
         );
       } else {
         // Revert optimistic update on failure
@@ -393,7 +367,7 @@ const CoursesContent = () => {
           const revertedCourses = prevCourses.map((course) =>
             course.id === courseId
               ? { ...course, isFavorite: wasIsFavorite }
-              : course
+              : course,
           );
           return revertedCourses;
         });
@@ -402,7 +376,7 @@ const CoursesContent = () => {
           const revertedCourses = prevCourses.map((course) =>
             course.id === courseId
               ? { ...course, isFavorite: wasIsFavorite }
-              : course
+              : course,
           );
           return revertedCourses;
         });
@@ -422,24 +396,27 @@ const CoursesContent = () => {
   const handleEnroll = async (courseId) => {
     const course = coursesState.find((c) => c.id === courseId);
 
-    // Handle Jinnar courses differently
-    if (course?.isJinnarCourse) {
+    // Handle PDF courses - just open the PDF
+    if (course?.courseType === "pdf") {
       if (!isAuthenticated) {
-        toast.info("Please log in to access training documents", {
+        toast.info("Please log in to access PDF courses", {
           position: "top-center",
         });
         navigate(ROUTES.LOGIN);
         return;
       }
 
-      // Open document for logged-in users
-      if (course.filePath) {
-        window.open(course.filePath, "_blank");
+      // Open PDF for logged-in users
+      if (course.pdfUrl) {
+        const pdfFullUrl = course.pdfUrl.startsWith("http")
+          ? course.pdfUrl
+          : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.pdfUrl}`;
+        window.open(pdfFullUrl, "_blank");
         toast.success(`Opening ${course.title}`, {
           position: "top-center",
         });
       } else {
-        toast.error("Document not available", {
+        toast.error("PDF not available", {
           position: "top-center",
         });
       }
@@ -460,7 +437,7 @@ const CoursesContent = () => {
 
       const enrollmentCheck = await EnrollmentService.checkUserEnrollment(
         currentUser.uid,
-        courseId
+        courseId,
       );
       if (enrollmentCheck.success && enrollmentCheck.data.length > 0) {
         toast.info("You are already enrolled in this course!", {
@@ -471,7 +448,7 @@ const CoursesContent = () => {
 
       const enrollmentResult = await EnrollmentService.enrollUser(
         currentUser.uid,
-        courseId
+        courseId,
       );
 
       console.log("Enrollment result:", enrollmentResult);
@@ -485,8 +462,8 @@ const CoursesContent = () => {
           prevCourses.map((course) =>
             course.id === courseId
               ? { ...course, enrolled: course.enrolled + 1 }
-              : course
-          )
+              : course,
+          ),
         );
 
         await NotificationService.createNotification({
@@ -516,18 +493,23 @@ const CoursesContent = () => {
 
   const handleDownload = async (course) => {
     if (!isAuthenticated) {
-      toast.info("Please log in to download training documents", {
+      toast.info("Please log in to download courses", {
         position: "top-center",
       });
       navigate(ROUTES.LOGIN);
       return;
     }
 
-    // Download document for logged-in users
-    if (course.filePath && course.fileName) {
+    // Download PDF for logged-in users
+    if (course.courseType === "pdf" && course.pdfUrl) {
+      const pdfFullUrl = course.pdfUrl.startsWith("http")
+        ? course.pdfUrl
+        : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.pdfUrl}`;
+
       const link = document.createElement("a");
-      link.href = course.filePath;
-      link.download = course.fileName;
+      link.href = pdfFullUrl;
+      link.download = course.title + ".pdf";
+      link.target = "_blank";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -535,7 +517,7 @@ const CoursesContent = () => {
         position: "top-center",
       });
     } else {
-      toast.error("Document not available", {
+      toast.error("Download not available for this course", {
         position: "top-center",
       });
     }
@@ -569,82 +551,49 @@ const CoursesContent = () => {
             </div>
 
             <div className="lg:col-span-3">
-              {/* Show separate sections for admin/employee users */}
-              {(currentUser?.role === "admin" || currentUser?.role === "employee") ? (
-                <div className="space-y-12">
-                  {/* Employee Courses Section - Show First */}
-                  {filteredEmployeeCourses.length > 0 && (
-                    <div>
-                      <div className="mb-6">
-                        <h2 className="text-2xl md:text-3xl font-bold text-black/90 mb-2">
-                          Employee-Only Courses
-                        </h2>
-                        <p className="text-sm text-black/60">
-                          Exclusive training materials for Jinnar employees and administrators
-                        </p>
-                      </div>
-                      <CoursesListing
-                        filteredCourses={filteredEmployeeCourses}
-                        viewMode={viewMode}
-                        setViewMode={setViewMode}
-                        sortBy={sortBy}
-                        setSortBy={setSortBy}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        coursesPerPage={coursesPerPage}
-                        onToggleFavorite={handleToggleFavorite}
-                        onEnroll={handleEnroll}
-                        onDownload={handleDownload}
-                        enrollmentLoading={enrollmentLoading}
-                        selectedCategories={selectedCategories}
-                        searchQuery={searchQuery}
-                        isAdmin={currentUser?.role === "admin"}
-                        coursesHeading={null}
-                      />
-                    </div>
-                  )}
+              {/* Tab Navigation */}
+              <div className="mb-6">
+                <div className="flex gap-2 border-b border-gray-200">
+                  <button
+                    onClick={() => setActiveTab("all")}
+                    className={`px-6 py-3 font-medium transition-colors relative ${
+                      activeTab === "all"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    All Courses
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("video")}
+                    className={`px-6 py-3 font-medium transition-colors relative ${
+                      activeTab === "video"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Video Courses
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("pdf")}
+                    className={`px-6 py-3 font-medium transition-colors relative ${
+                      activeTab === "pdf"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    PDF Courses
+                  </button>
+                </div>
+              </div>
 
-                  {/* Public Courses Section - Show Second */}
-                  {filteredPublicCourses.length > 0 && (
-                    <div>
-                      <div className="mb-6 pt-8 border-t border-black/10">
-                        <h2 className="text-2xl md:text-3xl font-bold text-black/90 mb-2">
-                          Public Courses
-                        </h2>
-                        <p className="text-sm text-black/60">
-                          Courses available to all users
-                        </p>
-                      </div>
-                      <CoursesListing
-                        filteredCourses={filteredPublicCourses}
-                        viewMode={viewMode}
-                        setViewMode={setViewMode}
-                        sortBy={sortBy}
-                        setSortBy={setSortBy}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        coursesPerPage={coursesPerPage}
-                        onToggleFavorite={handleToggleFavorite}
-                        onEnroll={handleEnroll}
-                        onDownload={handleDownload}
-                        enrollmentLoading={enrollmentLoading}
-                        selectedCategories={selectedCategories}
-                        searchQuery={searchQuery}
-                        isAdmin={currentUser?.role === "admin"}
-                        coursesHeading={null}
-                      />
-                    </div>
-                  )}
-
-                  {/* No courses found message */}
-                  {filteredPublicCourses.length === 0 && filteredEmployeeCourses.length === 0 && (
-                    <div className="text-center py-12">
-                      <p className="text-lg text-black/60">No courses found matching your filters.</p>
-                    </div>
-                  )}
+              {/* Courses Listing */}
+              {coursesLoading ? (
+                <div className="flex justify-center items-center min-h-[400px] bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                  <span className="ml-4 text-gray-600">Loading courses...</span>
                 </div>
               ) : (
-                /* Regular users see only public courses */
                 <CoursesListing
                   filteredCourses={filteredCourses}
                   viewMode={viewMode}
@@ -660,7 +609,7 @@ const CoursesContent = () => {
                   enrollmentLoading={enrollmentLoading}
                   selectedCategories={selectedCategories}
                   searchQuery={searchQuery}
-                  isAdmin={false}
+                  isAdmin={currentUser?.role === "admin"}
                   coursesHeading={null}
                 />
               )}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiUpload, FiX, FiFile, FiImage, FiVideo } from "react-icons/fi";
-import cloudinaryService from "../../services/cloudinaryService";
+import adminUploadService from "../../services/adminUploadService";
 import { toast } from "react-toastify";
 
 const FileUpload = ({
@@ -37,16 +37,16 @@ const FileUpload = ({
   };
 
   const validateFile = (file) => {
-    switch (type) {
-      case "image":
-        return cloudinaryService.validateImageFile(file, maxSizeMB);
-      case "video":
-        return cloudinaryService.validateVideoFile(file, maxSizeMB);
-      case "document":
-        return cloudinaryService.validateDocumentFile(file, maxSizeMB);
-      default:
-        return { isValid: true };
-    }
+    const uploadType = type === "image" ? "thumbnail" : type;
+    const validation = adminUploadService.validateFile(
+      file,
+      uploadType,
+      maxSizeMB,
+    );
+    return {
+      isValid: validation.valid,
+      message: validation.message,
+    };
   };
 
   const handleFileSelect = async (e) => {
@@ -64,31 +64,30 @@ const FileUpload = ({
     setUploadProgress(0);
 
     try {
-      // Create preview URL for images
+      // Create preview URL for images (client-side preview)
       if (type === "image") {
         const objectUrl = URL.createObjectURL(file);
         setPreviewUrl(objectUrl);
       }
 
-      // Upload to Cloudinary with progress
-      const result = await cloudinaryService.uploadFileWithProgress(
-        file,
-        (progressData) => {
-          setUploadProgress(progressData.progress);
-        },
-        {
-          folder,
-          resource_type: type === "video" ? "video" : "auto",
-          tags: [type, folder],
-        }
-      );
+      // Upload to backend with progress
+      let result;
+      const onProgress = (percent) => setUploadProgress(percent);
+
+      if (type === "video") {
+        result = await adminUploadService.uploadVideo(file, onProgress);
+      } else if (type === "image" || type === "thumbnail") {
+        result = await adminUploadService.uploadThumbnail(file, onProgress);
+      } else {
+        result = await adminUploadService.uploadMaterial(file, onProgress);
+      }
 
       if (result.success) {
         setPreviewUrl(result.url);
         onUpload(result);
         toast.success("File uploaded successfully!");
       } else {
-        throw new Error(result.error || "Upload failed");
+        throw new Error(result.message || "Upload failed");
       }
     } catch (error) {
       console.error("Upload error:", error);

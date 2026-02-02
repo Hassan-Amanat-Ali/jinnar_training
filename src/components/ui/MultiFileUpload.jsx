@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { FiUpload, FiX, FiFile, FiFileText, FiDownload } from "react-icons/fi";
-import cloudinaryService from "../../services/cloudinaryService";
+import adminUploadService from "../../services/adminUploadService";
 import { toast } from "react-toastify";
 
 const MultiFileUpload = ({
@@ -64,32 +64,25 @@ const MultiFileUpload = ({
 
     for (const file of selectedFiles) {
       // Validate file
-      const validation = cloudinaryService.validateDocumentFile(
+      const validation = adminUploadService.validateFile(
         file,
-        maxSizeMB
+        "material",
+        maxSizeMB,
       );
-      if (!validation.isValid) {
+      if (!validation.valid) {
         toast.error(`${file.name}: ${validation.message}`);
         continue;
       }
 
       // Create upload promise
-      const uploadPromise = cloudinaryService.uploadFileWithProgress(
+      const uploadPromise = adminUploadService.uploadMaterial(
         file,
-        (progressData) => {
+        (progress) => {
           setUploadProgress((prev) => ({
             ...prev,
-            [file.name]: progressData.progress,
+            [file.name]: progress,
           }));
         },
-        {
-          folder,
-          resource_type: "auto",
-          tags: ["document", "lecture-resource", folder],
-          public_id: cloudinaryService.generateSafeFileName(
-            file.name.split(".")[0]
-          ),
-        }
       );
 
       uploadPromises.push(
@@ -97,7 +90,7 @@ const MultiFileUpload = ({
           file,
           result,
           originalName: file.name,
-        }))
+        })),
       );
     }
 
@@ -110,15 +103,16 @@ const MultiFileUpload = ({
           const fileData = {
             name: value.originalName,
             url: value.result.url,
-            publicId: value.result.public_id,
-            size: value.result.bytes,
+            // Backend might not return publicId, but path/filename is usually enough
+            publicId: value.result.filename || value.result.url,
+            size: value.file.size,
             type: value.file.type,
             uploadedAt: new Date().toISOString(),
           };
           successfulUploads.push(fileData);
         } else {
           const errorMessage =
-            reason?.message || value?.result?.error || "Upload failed";
+            reason?.message || value?.result?.message || "Upload failed";
           toast.error(`${value?.originalName || "File"}: ${errorMessage}`);
         }
       });
@@ -128,7 +122,7 @@ const MultiFileUpload = ({
         setFiles(updatedFiles);
         onUpload(updatedFiles);
         toast.success(
-          `${successfulUploads.length} file(s) uploaded successfully!`
+          `${successfulUploads.length} file(s) uploaded successfully!`,
         );
       }
     } catch (error) {

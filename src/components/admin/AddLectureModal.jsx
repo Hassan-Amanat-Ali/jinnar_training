@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
-import { firestoreService, COLLECTIONS } from "../../services";
+import { adminLectureService } from "../../services";
 import { toast } from "react-toastify";
 import FileUpload from "../ui/FileUpload";
 import MultiFileUpload from "../ui/MultiFileUpload";
@@ -67,7 +67,7 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
     setFormData((prev) => ({
       ...prev,
       learningPoints: prev.learningPoints.map((point, i) =>
-        i === index ? { ...point, [field]: value } : point
+        i === index ? { ...point, [field]: value } : point,
       ),
     }));
   };
@@ -108,19 +108,22 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
 
     try {
       const lectureData = {
-        ...formData,
+        title: formData.title,
+        subtitle: formData.subtitle,
+        videoUrl: formData.videoUrl,
+        thumbnail: formData.thumbnail,
+        duration: formData.duration || "0:00",
         order: parseInt(formData.order) || 0,
+        description: formData.description,
         resources: formData.resources || [],
         learningPoints: formData.learningPoints.filter(
-          (point) => point.text && point.text.trim() !== ""
+          (point) => point.text && point.text.trim() !== "",
         ),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
 
-      const result = await firestoreService.create(
-        COLLECTIONS.LECTURES,
-        lectureData
+      const result = await adminLectureService.addLecture(
+        formData.courseId,
+        lectureData,
       );
 
       if (result.success) {
@@ -133,16 +136,16 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
           {
             id: result.id,
             title: lectureData.title,
-            courseId: lectureData.courseId,
+            courseId: formData.courseId,
           },
           courseTitle,
-          user?.uid
+          user?.uid || user?._id || user?.id,
         );
 
         toast.success("Lecture created successfully!");
         onSuccess();
       } else {
-        toast.error(result.error || "Failed to create lecture");
+        toast.error(result.message || "Failed to create lecture");
       }
     } finally {
       setLoading(false);
@@ -321,7 +324,7 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
                           handleLearningPointChange(
                             index,
                             "text",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder={`Learning point ${index + 1}`}
@@ -336,7 +339,7 @@ const AddLectureModal = ({ courses, onClose, onSuccess }) => {
                           handleLearningPointChange(
                             index,
                             "timestamp",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="0:00"

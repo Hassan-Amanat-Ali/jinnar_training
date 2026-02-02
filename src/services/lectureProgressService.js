@@ -1,66 +1,33 @@
-import firestoreService from "./firestoreService";
-
-// Collection name for lecture progress tracking
-export const LECTURE_PROGRESS_COLLECTION = "lecture_progress";
+import { EnrollmentService } from "./dataService";
 
 /**
  * LectureProgressService - Production-grade lecture progress tracking
- *
- * This service tracks:
- * - Individual lecture progress (watch time, completion status)
- * - Video watch positions for resume functionality
- * - Completion timestamps for certificates
- * - Detailed analytics for course creators
+ * Uses backend API instead of Firebase.
  */
 export class LectureProgressService {
   /**
    * Create or update lecture progress
-   * @param {string} userId - User ID
-   * @param {string} courseId - Course ID
-   * @param {string} lectureId - Lecture ID
-   * @param {Object} progressData - Progress data
+   * Maps to POST /api/enrollments/lectures/:lectureId/progress
    */
   static async updateLectureProgress(
     userId,
     courseId,
     lectureId,
-    progressData
+    progressData,
   ) {
     try {
-      const progressId = `${userId}_${courseId}_${lectureId}`;
-
-      const existingProgress = await this.getLectureProgress(
-        userId,
-        courseId,
-        lectureId
-      );
-
-      const updateData = {
-        userId,
-        courseId,
-        lectureId,
-        ...progressData,
-        lastUpdated: firestoreService.serverTimestamp(),
+      // The backend expects: { currentPosition, videoDuration, isCompleted }
+      const payload = {
+        currentPosition: progressData.currentPosition,
+        videoDuration: progressData.videoDuration,
+        isCompleted: progressData.completed,
       };
 
-      if (existingProgress) {
-        // Update existing progress
-        return await firestoreService.update(
-          LECTURE_PROGRESS_COLLECTION,
-          progressId,
-          updateData
-        );
-      } else {
-        // Create new progress record
-        return await firestoreService.createWithId(
-          LECTURE_PROGRESS_COLLECTION,
-          progressId,
-          {
-            ...updateData,
-            createdAt: firestoreService.serverTimestamp(),
-          }
-        );
-      }
+      const result = await EnrollmentService.updateLectureProgress(
+        lectureId,
+        payload,
+      );
+      return result;
     } catch (error) {
       console.error("Error updating lecture progress:", error);
       return { success: false, error: error.message };
@@ -72,12 +39,9 @@ export class LectureProgressService {
    */
   static async getLectureProgress(userId, courseId, lectureId) {
     try {
-      const progressId = `${userId}_${courseId}_${lectureId}`;
-      const result = await firestoreService.getById(
-        LECTURE_PROGRESS_COLLECTION,
-        progressId
-      );
-      return result.success ? result.data : null;
+      // Backend returns all progress for a course at once for efficiency
+      const progressMap = await this.getCourseProgress(userId, courseId);
+      return progressMap.find((p) => p.lectureId === lectureId) || null;
     } catch (error) {
       console.error("Error getting lecture progress:", error);
       return null;
@@ -86,19 +50,19 @@ export class LectureProgressService {
 
   /**
    * Get all lecture progress for a course
+   * Maps to GET /api/enrollments/:courseId/progress
    */
   static async getCourseProgress(userId, courseId) {
     try {
-      const result = await firestoreService.getAll(
-        LECTURE_PROGRESS_COLLECTION,
-        {
-          where: [
-            ["userId", "==", userId],
-            ["courseId", "==", courseId],
-          ],
-        }
+      const result = await EnrollmentService.getEnrollmentWithProgress(
+        userId,
+        courseId,
       );
-      return result.success ? result.data : [];
+      if (result.success && result.data) {
+        // Backend returns { enrollment, progressDetails }
+        return result.data.progressDetails || [];
+      }
+      return [];
     } catch (error) {
       console.error("Error getting course progress:", error);
       return [];
@@ -112,21 +76,20 @@ export class LectureProgressService {
     userId,
     courseId,
     lectureId,
-    videoDuration
+    videoDuration,
   ) {
     const progressData = {
       completed: true,
-      completedAt: firestoreService.serverTimestamp(),
-      watchTime: videoDuration, // Full duration watched
-      currentPosition: videoDuration, // At the end
-      completionPercentage: 100,
+      watchTime: videoDuration,
+      currentPosition: videoDuration,
+      videoDuration: videoDuration,
     };
 
     return await this.updateLectureProgress(
       userId,
       courseId,
       lectureId,
-      progressData
+      progressData,
     );
   }
 
@@ -138,39 +101,19 @@ export class LectureProgressService {
     courseId,
     lectureId,
     currentPosition,
-    videoDuration
+    videoDuration,
   ) {
-    const completionPercentage =
-      videoDuration > 0
-        ? Math.round((currentPosition / videoDuration) * 100)
-        : 0;
-    const isCompleted = completionPercentage >= 90; // Consider 90% as completed
-
     const progressData = {
       currentPosition,
       videoDuration,
-      completionPercentage,
-      completed: isCompleted,
-      lastWatched: firestoreService.serverTimestamp(),
+      completed: currentPosition / videoDuration >= 0.9,
     };
-
-    // If marking as completed for the first time, set completion timestamp
-    if (isCompleted) {
-      const existingProgress = await this.getLectureProgress(
-        userId,
-        courseId,
-        lectureId
-      );
-      if (!existingProgress?.completed) {
-        progressData.completedAt = firestoreService.serverTimestamp();
-      }
-    }
 
     return await this.updateLectureProgress(
       userId,
       courseId,
       lectureId,
-      progressData
+      progressData,
     );
   }
 
@@ -179,9 +122,12 @@ export class LectureProgressService {
    */
   static async calculateCourseProgress(userId, courseId, totalLectures) {
     try {
-      const progressData = await this.getCourseProgress(userId, courseId);
+      const result = await EnrollmentService.getEnrollmentWithProgress(
+        userId,
+        courseId,
+      );
 
-      if (!progressData || progressData.length === 0) {
+      if (!result.success || !result.data) {
         return {
           overallProgress: 0,
           completedLectures: 0,
@@ -191,24 +137,21 @@ export class LectureProgressService {
         };
       }
 
-      const completedLectures = progressData.filter((p) => p.completed);
-      const overallProgress =
-        totalLectures > 0
-          ? Math.round((completedLectures.length / totalLectures) * 100)
-          : 0;
+      const { enrollment, progressDetails } = result.data;
+      const completedLectureIds = enrollment.completedLectures || [];
 
-      // Find last watched lecture
-      const lastWatched = progressData
-        .filter((p) => p.lastWatched)
-        .sort((a, b) => b.lastWatched.seconds - a.lastWatched.seconds)[0];
+      // Find last watched lecture from progress details
+      const lastWatched = [...progressDetails].sort(
+        (a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt),
+      )[0];
 
       return {
-        overallProgress,
-        completedLectures: completedLectures.length,
-        totalLectures: totalLectures || 0,
-        completedLectureIds: completedLectures.map((p) => p.lectureId),
+        overallProgress: enrollment.progress || 0,
+        completedLectures: completedLectureIds.length,
+        totalLectures: totalLectures || 0, // In backend this is better known
+        completedLectureIds: completedLectureIds,
         lastWatchedLecture: lastWatched?.lectureId || null,
-        detailedProgress: progressData,
+        detailedProgress: progressDetails,
       };
     } catch (error) {
       console.error("Error calculating course progress:", error);
@@ -230,7 +173,7 @@ export class LectureProgressService {
       const progress = await this.getLectureProgress(
         userId,
         courseId,
-        lectureId
+        lectureId,
       );
       return progress?.currentPosition || 0;
     } catch (error) {
@@ -243,85 +186,19 @@ export class LectureProgressService {
    * Reset lecture progress (for retaking)
    */
   static async resetLectureProgress(userId, courseId, lectureId) {
+    // Backend doesn't have explicit reset, but we can send 0 progress
     const progressData = {
       completed: false,
       currentPosition: 0,
-      completionPercentage: 0,
-      completedAt: null,
-      lastWatched: firestoreService.serverTimestamp(),
+      videoDuration: 0, // Will be updated by next watch
     };
 
     return await this.updateLectureProgress(
       userId,
       courseId,
       lectureId,
-      progressData
+      progressData,
     );
-  }
-
-  /**
-   * Get analytics data for course creators
-   */
-  static async getCourseAnalytics(courseId) {
-    try {
-      const result = await firestoreService.getAll(
-        LECTURE_PROGRESS_COLLECTION,
-        {
-          where: [["courseId", "==", courseId]],
-        }
-      );
-
-      if (!result.success) {
-        return { success: false, error: result.error };
-      }
-
-      const progressData = result.data;
-      const uniqueUsers = [...new Set(progressData.map((p) => p.userId))];
-      const totalEnrollments = uniqueUsers.length;
-
-      // Calculate completion rates per lecture
-      const lectureStats = {};
-      progressData.forEach((progress) => {
-        if (!lectureStats[progress.lectureId]) {
-          lectureStats[progress.lectureId] = {
-            totalViews: 0,
-            completions: 0,
-            totalWatchTime: 0,
-          };
-        }
-
-        lectureStats[progress.lectureId].totalViews++;
-        if (progress.completed) {
-          lectureStats[progress.lectureId].completions++;
-        }
-        if (progress.currentPosition) {
-          lectureStats[progress.lectureId].totalWatchTime +=
-            progress.currentPosition;
-        }
-      });
-
-      return {
-        success: true,
-        data: {
-          totalEnrollments,
-          lectureStats,
-          overallCompletionRate:
-            totalEnrollments > 0
-              ? Math.round(
-                  (Object.values(lectureStats).reduce(
-                    (sum, stat) => sum + stat.completions,
-                    0
-                  ) /
-                    (Object.keys(lectureStats).length * totalEnrollments)) *
-                    100
-                )
-              : 0,
-        },
-      };
-    } catch (error) {
-      console.error("Error getting course analytics:", error);
-      return { success: false, error: error.message };
-    }
   }
 }
 

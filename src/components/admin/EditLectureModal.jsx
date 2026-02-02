@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
-import { firestoreService, COLLECTIONS } from "../../services";
+import { adminLectureService } from "../../services";
 import { toast } from "react-toastify";
 import FileUpload from "../ui/FileUpload";
 import MultiFileUpload from "../ui/MultiFileUpload";
@@ -19,7 +19,7 @@ const EditLectureModal = ({ lecture, courses, onClose, onSuccess }) => {
     learningPoints:
       Array.isArray(lecture.learningPoints) && lecture.learningPoints.length > 0
         ? lecture.learningPoints.map((point) =>
-            typeof point === "string" ? { text: point, timestamp: "" } : point
+            typeof point === "string" ? { text: point, timestamp: "" } : point,
           )
         : [{ text: "", timestamp: "" }],
   });
@@ -69,7 +69,7 @@ const EditLectureModal = ({ lecture, courses, onClose, onSuccess }) => {
     setFormData((prev) => ({
       ...prev,
       learningPoints: prev.learningPoints.map((point, i) =>
-        i === index ? { ...point, [field]: value } : point
+        i === index ? { ...point, [field]: value } : point,
       ),
     }));
   };
@@ -110,26 +110,29 @@ const EditLectureModal = ({ lecture, courses, onClose, onSuccess }) => {
 
     try {
       const lectureData = {
-        ...formData,
+        title: formData.title,
+        subtitle: formData.subtitle,
+        videoUrl: formData.videoUrl,
+        thumbnail: formData.thumbnail,
+        duration: formData.duration || "0:00",
         order: parseInt(formData.order) || 0,
+        description: formData.description,
         resources: formData.resources || [],
         learningPoints: formData.learningPoints.filter(
-          (point) => point.text && point.text.trim() !== ""
+          (point) => point.text && point.text.trim() !== "",
         ),
-        updatedAt: new Date().toISOString(),
       };
 
-      const result = await firestoreService.update(
-        COLLECTIONS.LECTURES,
+      const result = await adminLectureService.updateLecture(
         lecture.id,
-        lectureData
+        lectureData,
       );
 
       if (result.success) {
         toast.success("Lecture updated successfully!");
         onSuccess();
       } else {
-        toast.error(result.error || "Failed to update lecture");
+        toast.error(result.message || "Failed to update lecture");
       }
     } finally {
       setLoading(false);
@@ -308,7 +311,7 @@ const EditLectureModal = ({ lecture, courses, onClose, onSuccess }) => {
                           handleLearningPointChange(
                             index,
                             "text",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder={`Learning point ${index + 1}`}
@@ -323,7 +326,7 @@ const EditLectureModal = ({ lecture, courses, onClose, onSuccess }) => {
                           handleLearningPointChange(
                             index,
                             "timestamp",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="0:00"

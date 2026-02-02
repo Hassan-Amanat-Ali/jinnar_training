@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiShield, FiUser, FiChevronDown, FiCheck, FiTrash2 } from "react-icons/fi";
-import { UserService, COLLECTIONS, firestoreService } from "../../services";
+import {
+  FiShield,
+  FiUser,
+  FiChevronDown,
+  FiCheck,
+  FiTrash2,
+} from "react-icons/fi";
+import { UserService } from "../../services";
 import { toast } from "react-toastify";
 
 const UserManagement = () => {
@@ -60,9 +66,9 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const result = await firestoreService.getAll(COLLECTIONS.USERS);
+      const result = await UserService.getAllUsers();
       if (result.success) {
-        setUsers(result.data);
+        setUsers(result.data.users || result.data);
       }
     } catch {
       toast.error("Failed to fetch users");
@@ -110,7 +116,9 @@ const UserManagement = () => {
     }
 
     // Double confirmation for safety
-    const doubleConfirm = window.confirm("This will permanently delete the user and all their data. Are you absolutely sure?");
+    const doubleConfirm = window.confirm(
+      "This will permanently delete the user and all their data. Are you absolutely sure?",
+    );
 
     if (!doubleConfirm) {
       return;
@@ -232,7 +240,7 @@ const UserManagement = () => {
                               fallback.className =
                                 "w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0";
                               fallback.style.backgroundColor = `#${getAvatarColor(
-                                name
+                                name,
                               )}`;
                               fallback.textContent = initials;
                               parent.insertBefore(fallback, e.target);
@@ -243,7 +251,7 @@ const UserManagement = () => {
                             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0"
                             style={{
                               backgroundColor: `#${getAvatarColor(
-                                user.displayName || user.email || "User"
+                                user.displayName || user.email || "User",
                               )}`,
                             }}
                           >
@@ -295,8 +303,8 @@ const UserManagement = () => {
                             user.role === "admin"
                               ? "bg-red-100 text-red-800"
                               : user.role === "employee"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-800"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {user.role || "user"}
@@ -312,7 +320,7 @@ const UserManagement = () => {
                           <button
                             onClick={() =>
                               setOpenDropdown(
-                                openDropdown === user.id ? null : user.id
+                                openDropdown === user.id ? null : user.id,
                               )
                             }
                             className={`w-full sm:w-auto inline-flex items-center justify-between gap-2 px-3 sm:px-4 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
@@ -327,7 +335,7 @@ const UserManagement = () => {
                                 {
                                   className:
                                     "w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0",
-                                }
+                                },
                               )}
                               <span className="capitalize">
                                 {user.role || "user"}
@@ -345,7 +353,8 @@ const UserManagement = () => {
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-fadeIn">
                               {["user", "employee", "admin"].map((role) => {
                                 const config = getRoleConfig(role);
-                                const isSelected = (user.role || "user") === role;
+                                const isSelected =
+                                  (user.role || "user") === role;
                                 return (
                                   <button
                                     key={role}
@@ -384,7 +393,13 @@ const UserManagement = () => {
 
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteUser(user.id, user.displayName, user.email)}
+                          onClick={() =>
+                            handleDeleteUser(
+                              user.id,
+                              user.displayName,
+                              user.email,
+                            )
+                          }
                           className="p-2 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                           title="Delete User"
                         >

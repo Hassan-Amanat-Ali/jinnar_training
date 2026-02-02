@@ -50,27 +50,17 @@ const CourseCard = ({
               {course.description}
             </p>
 
-
             <div className="flex items-center gap-2 mt-auto">
-              {course.isJinnarCourse ? (
-                <>
-                  <button
-                    onClick={() => onEnroll(course.id)}
-                    disabled={enrollmentLoading}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap ${
-                      enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {enrollmentLoading ? "Loading..." : "View"}
-                  </button>
-                  <button
-                    onClick={() => onDownload && onDownload(course)}
-                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
-                  >
-                    Download
-                  </button>
-                </>
+              {course.courseType === "pdf" ? (
+                // PDF courses: Only Download button
+                <button
+                  onClick={() => onDownload && onDownload(course)}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap"
+                >
+                  Download
+                </button>
               ) : (
+                // Video courses: View and Enroll buttons
                 <>
                   <button
                     onClick={() => onEnroll(course.id)}
@@ -79,13 +69,13 @@ const CourseCard = ({
                       enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
-                    {enrollmentLoading ? "Enrolling..." : "Enroll"}
+                    {enrollmentLoading ? "Enrolling..." : "Enroll Now"}
                   </button>
                   <Button
                     href={ROUTES.COURSE_DETAIL.replace(":id", course.id)}
                     className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
                   >
-                    Details
+                    View Details
                   </Button>
                 </>
               )}
@@ -128,28 +118,19 @@ const CourseCard = ({
           {course.description}
         </p>
 
-
         <div className="flex items-center gap-2 mt-auto whitespace-nowrap">
-          {course.isJinnarCourse ? (
-            <>
-              <Button
-                text={enrollmentLoading ? "Loading..." : "View"}
-                onClick={() => onEnroll(course.id)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-1 ${
-                  enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={enrollmentLoading}
-              />
-              <Button
-                text="Download"
-                onClick={() => onDownload && onDownload(course)}
-                className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1 whitespace-nowrap"
-              />
-            </>
+          {course.courseType === "pdf" ? (
+            // PDF courses: Only Download button
+            <Button
+              text="Download"
+              onClick={() => onDownload && onDownload(course)}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors w-full"
+            />
           ) : (
+            // Video courses: View and Enroll buttons
             <>
               <Button
-                text={enrollmentLoading ? "Enrolling..." : "Enroll"}
+                text={enrollmentLoading ? "Enrolling..." : "Enroll Now"}
                 onClick={() => onEnroll(course.id)}
                 className={`px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-1 ${
                   enrollmentLoading ? "opacity-50 cursor-not-allowed" : ""
@@ -157,7 +138,7 @@ const CourseCard = ({
                 disabled={enrollmentLoading}
               />
               <Button
-                text="Details"
+                text="View Details"
                 href={ROUTES.COURSE_DETAIL.replace(":id", String(course.id))}
                 className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1 whitespace-nowrap"
               />

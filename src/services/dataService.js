@@ -51,16 +51,24 @@ const fetchWithAuth = async (endpoint, options = {}) => {
 
 // User Service
 export class UserService {
+  static async getDashboardStats() {
+    return fetchWithAuth("/admin/stats");
+  }
+
+  static async getAllUsers(options = {}) {
+    const { page = 1, limit = 20, search = "" } = options;
+    const params = new URLSearchParams({ page, limit, search });
+    return fetchWithAuth(`/admin/users?${params.toString()}`);
+  }
+
   static async createUser(userId, userData) {
     // Backend handles creation on register/login logic usually.
-    // If this is needed for updates:
     return await this.updateUser(userId, userData);
   }
 
   static async getUserById(userId) {
     const currentUser = authService.getCurrentUser();
 
-    // If requesting own profile
     if (
       currentUser &&
       (currentUser._id === userId ||
@@ -70,21 +78,38 @@ export class UserService {
       return fetchWithAuth("/user/profile");
     }
 
-    // Public profile
+    if (userId === "all") {
+      return this.getAllUsers();
+    }
+
     return fetchWithAuth(`/user/public/${userId}`);
   }
 
   static async updateUser(userId, updates) {
-    // Assumes updating OWN profile
     return fetchWithAuth("/user/update", {
-      method: "POST", // Backend uses POST for update
+      method: "POST",
       body: JSON.stringify(updates),
     });
   }
 
-  static async deleteUser(userId) {
-    // Backend likely doesn't expose delete self easily or it's a specific route
-    return { success: false, error: "Delete user not implemented via API" };
+  static async deleteUser(id) {
+    return fetchWithAuth(`/admin/users/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  static async verifyUser(userId, status, reason = "") {
+    return fetchWithAuth("/admin/verify-user", {
+      method: "PATCH",
+      body: JSON.stringify({ userId, status, reason }),
+    });
+  }
+
+  static async suspendUser(userId, suspend, reason = "") {
+    return fetchWithAuth("/admin/suspend-user", {
+      method: "PATCH",
+      body: JSON.stringify({ userId, suspend, reason }),
+    });
   }
 }
 
@@ -113,9 +138,42 @@ export class CourseService {
       // But backend structure is arguably better.
       // Let's return the `course` and attach `lectures`.
       const { course, lectures } = result.data;
+
+      const getServerUrl = () => {
+        const baseUrl =
+          import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+        return baseUrl.replace(/\/api$/, "");
+      };
+
+      const serverUrl = getServerUrl();
+
+      // Normalize lecture IDs and URLs
+      const normalizedLectures = (lectures || []).map((l) => {
+        let videoUrl = l.videoUrl || l.src;
+        if (videoUrl && videoUrl.startsWith("/uploads")) {
+          videoUrl = `${serverUrl}${videoUrl}`;
+        }
+
+        let thumbnail = l.thumbnail || l.thumb;
+        if (thumbnail && thumbnail.startsWith("/uploads")) {
+          thumbnail = `${serverUrl}${thumbnail}`;
+        }
+
+        return {
+          ...l,
+          id: l.id || l._id,
+          videoUrl,
+          thumbnail,
+        };
+      });
+
       return {
         success: true,
-        data: { ...course, lectures },
+        data: {
+          ...course,
+          id: course.id || course._id,
+          lectures: normalizedLectures,
+        },
       };
     }
     return result;
@@ -123,17 +181,24 @@ export class CourseService {
 
   static async getAllCourses(options = {}) {
     // Options might contain filter/search
-    // Backend supports query params: page, limit, search, category
+    // Backend supports query params: page, limit, search, category, courseType
     // We need to map options to query string
     const params = new URLSearchParams();
     if (options.category) params.append("category", options.category);
     if (options.limit) params.append("limit", options.limit);
+    if (options.search) params.append("search", options.search);
+    if (options.page) params.append("page", options.page);
+    if (options.courseType) params.append("courseType", options.courseType);
 
     const queryString = params.toString();
     const result = await fetchWithAuth(`/courses?${queryString}`);
 
     if (result.success) {
-      return { success: true, data: result.data.courses }; // Backend returns { courses, pagination }
+      return {
+        success: true,
+        data: result.data.courses,
+        pagination: result.data.pagination,
+      }; // Backend returns { courses, pagination }
     }
     return result;
   }
@@ -204,6 +269,13 @@ export class EnrollmentService {
 
   static async getEnrollmentWithProgress(userId, courseId) {
     return this.updateEnrollmentProgress(userId, courseId);
+  }
+
+  static async updateLectureProgress(lectureId, progressData) {
+    return fetchWithAuth(`/enrollments/lectures/${lectureId}/progress`, {
+      method: "POST",
+      body: JSON.stringify(progressData),
+    });
   }
 
   static async getNextLecture(userId, courseId) {

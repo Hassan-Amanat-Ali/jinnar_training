@@ -8,7 +8,6 @@ import {
   FiEye,
 } from "react-icons/fi";
 import { CourseService, UserService } from "../../services";
-import { firestoreService, COLLECTIONS } from "../../services";
 import AddCourseModal from "./AddCourseModal";
 import AddLectureModal from "./AddLectureModal";
 
@@ -21,35 +20,27 @@ const AdminStats = ({ onNavigate }) => {
   });
   const [loading, setLoading] = useState(true);
   const [showAddCourseModal, setShowAddCourseModal] = useState(false);
-  const [showAddLectureModal, setShowAddLectureModal] = useState(false);
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [coursesResult, usersResult, lecturesResult] = await Promise.all([
+        setLoading(true);
+        const [statsResult, coursesResult] = await Promise.all([
+          UserService.getDashboardStats(),
           CourseService.getAllCourses(),
-          firestoreService.getAll(COLLECTIONS.USERS),
-          firestoreService.getAll("lectures"),
         ]);
 
-        const totalEnrollments = coursesResult.success
-          ? coursesResult.data.reduce(
-              (sum, course) => sum + (course.totalEnrollments || 0),
-              0
-            )
-          : 0;
+        if (statsResult.success) {
+          const { users, gigs, financials } = statsResult.data;
+          setStats({
+            totalUsers: users.total || 0,
+            totalCourses: coursesResult.success ? coursesResult.data.length : 0,
+            totalLectures: 0, // Still need a way to get total lectures across all courses
+            totalEnrollments: financials.totalOrders || 0,
+          });
+        }
 
-        setStats({
-          totalCourses: coursesResult.success ? coursesResult.data.length : 0,
-          totalUsers: usersResult.success ? usersResult.data.length : 0,
-          totalLectures: lecturesResult.success
-            ? lecturesResult.data.length
-            : 0,
-          totalEnrollments,
-        });
-
-        // Set courses for the lecture modal
         if (coursesResult.success) {
           setCourses(coursesResult.data);
         }

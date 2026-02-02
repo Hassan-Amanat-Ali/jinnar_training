@@ -1,199 +1,112 @@
-import firestoreService from "./firestoreService";
-
+/**
+ * FavoritesService - Stubbed for API migration
+ * Originally used Firebase, now uses localStorage as a temporary bridge
+ * until backend supports favorites.
+ */
 class FavoritesService {
   constructor() {
-    this.collectionName = "favorites";
+    this.storageKey = "jinnar_favorites";
   }
 
-  /**
-   * Add a course to user's favorites
-   * @param {string} userId - User ID
-   * @param {string} courseId - Course ID
-   * @returns {Promise<{success: boolean, data?: any, error?: string}>}
-   */
+  _getFavorites() {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  _saveFavorites(favorites) {
+    localStorage.setItem(this.storageKey, JSON.stringify(favorites));
+  }
+
   async addToFavorites(userId, courseId) {
     try {
-      const favoriteId = `${userId}_${courseId}`;
-      const favoriteData = {
-        id: favoriteId,
-        userId,
-        courseId,
-        createdAt: new Date(),
-      };
-
-      const result = await firestoreService.createWithId(
-        this.collectionName,
-        favoriteId,
-        favoriteData
+      const favorites = this._getFavorites();
+      const exists = favorites.find(
+        (f) => f.userId === userId && f.courseId === courseId,
       );
 
-      if (result.success) {
-        return {
-          success: true,
-          data: result.data,
-        };
-      } else {
-        return {
-          success: false,
-          error: result.error || "Failed to add to favorites",
-        };
+      if (!exists) {
+        favorites.push({
+          userId,
+          courseId,
+          createdAt: new Date().toISOString(),
+        });
+        this._saveFavorites(favorites);
       }
+
+      return { success: true };
     } catch (error) {
-      console.error("Error adding to favorites:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to add to favorites",
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Remove a course from user's favorites
-   * @param {string} userId - User ID
-   * @param {string} courseId - Course ID
-   * @returns {Promise<{success: boolean, data?: any, error?: string}>}
-   */
   async removeFromFavorites(userId, courseId) {
     try {
-      const favoriteId = `${userId}_${courseId}`;
-
-      const result = await firestoreService.delete(
-        this.collectionName,
-        favoriteId
+      const favorites = this._getFavorites();
+      const updated = favorites.filter(
+        (f) => !(f.userId === userId && f.courseId === courseId),
       );
-
-      if (result.success) {
-        return {
-          success: true,
-          data: result.data,
-        };
-      } else {
-        return {
-          success: false,
-          error: result.error || "Failed to remove from favorites",
-        };
-      }
+      this._saveFavorites(updated);
+      return { success: true };
     } catch (error) {
-      console.error("Error removing from favorites:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to remove from favorites",
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get all favorite courses for a user
-   * @param {string} userId - User ID
-   * @returns {Promise<{success: boolean, data?: any[], error?: string}>}
-   */
   async getUserFavorites(userId) {
     try {
-      const result = await firestoreService.getAll(this.collectionName, {
-        where: [["userId", "==", userId]],
-      });
-
-      if (result.success) {
-        return {
-          success: true,
-          data: result.data || [],
-        };
-      } else {
-        return {
-          success: false,
-          error: result.error || "Failed to fetch favorites",
-        };
-      }
+      const favorites = this._getFavorites();
+      const userFavs = favorites.filter((f) => f.userId === userId);
+      return { success: true, data: userFavs };
     } catch (error) {
-      console.error("Error fetching user favorites:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to fetch favorites",
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Check if a course is in user's favorites
-   * @param {string} userId - User ID
-   * @param {string} courseId - Course ID
-   * @returns {Promise<{success: boolean, data?: boolean, error?: string}>}
-   */
   async isFavorite(userId, courseId) {
     try {
-      const favoriteId = `${userId}_${courseId}`;
-
-      const result = await firestoreService.getById(
-        this.collectionName,
-        favoriteId
+      const favorites = this._getFavorites();
+      const exists = favorites.some(
+        (f) => f.userId === userId && f.courseId === courseId,
       );
-
-      return {
-        success: true,
-        data: result.success && result.data !== null,
-      };
+      return { success: true, data: exists };
     } catch (error) {
-      console.error("Error checking favorite status:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to check favorite status",
-      };
+      return { success: false, data: false };
     }
   }
 
-  /**
-   * Get favorite courses with course details
-   * @param {string} userId - User ID
-   * @returns {Promise<{success: boolean, data?: any[], error?: string}>}
-   */
   async getFavoriteCoursesWithDetails(userId) {
     try {
-      // First get user favorites
       const favoritesResult = await this.getUserFavorites(userId);
-
-      if (!favoritesResult.success) {
-        return favoritesResult;
-      }
+      if (!favoritesResult.success) return favoritesResult;
 
       const favorites = favoritesResult.data;
       if (!favorites || favorites.length === 0) {
-        return {
-          success: true,
-          data: [],
-        };
+        return { success: true, data: [] };
       }
 
-      // Get course details for each favorite
-      const courseIds = favorites.map((fav) => fav.courseId);
-      const { CourseService } = await import("./index");
+      // Use dynamic import to avoid circular dependencies
+      const { CourseService } = await import("./dataService");
 
-      const coursesPromises = courseIds.map((courseId) =>
-        CourseService.getCourseById(courseId)
+      const coursePromises = favorites.map((f) =>
+        CourseService.getCourseById(f.courseId),
       );
+      const results = await Promise.all(coursePromises);
 
-      const coursesResults = await Promise.all(coursesPromises);
+      const favoriteCourses = results
+        .filter((r) => r.success && r.data)
+        .map((r) => ({ ...r.data, isFavorite: true }));
 
-      const favoriteCourses = coursesResults
-        .filter((result) => result.success && result.data)
-        .map((result) => ({
-          ...result.data,
-          isFavorite: true,
-        }));
-
-      return {
-        success: true,
-        data: favoriteCourses,
-      };
+      return { success: true, data: favoriteCourses };
     } catch (error) {
-      console.error("Error fetching favorite courses with details:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to fetch favorite courses",
-      };
+      console.error("Error fetching favorite courses:", error);
+      return { success: false, error: error.message };
     }
   }
 }
 
-// Create and export a singleton instance
 const favoritesService = new FavoritesService();
 export default favoritesService;

@@ -47,7 +47,7 @@ const Watch = () => {
 
         if (result.success && result.data) {
           const lectureData = result.data.map((lecture) => ({
-            id: lecture.id,
+            id: lecture.id || lecture._id,
             title: lecture.title,
             subtitle: lecture.subtitle || lecture.title,
             src: lecture.videoUrl,
@@ -103,7 +103,7 @@ const Watch = () => {
         }
       }
     },
-    [currentUser, id]
+    [currentUser, id],
   );
 
   // Memoize navigation handlers to prevent re-creating on every render
@@ -115,7 +115,7 @@ const Watch = () => {
       // Use replace to avoid adding to browser history for smoother experience
       navigate(`/courses/${id}/watch/${next.id}`, { replace: true });
     },
-    [lectures, id, navigate]
+    [lectures, id, navigate],
   );
 
   const handleSelect = React.useCallback(
@@ -123,16 +123,16 @@ const Watch = () => {
       const idx = lectures.findIndex((l) => l.id === nextId);
       goTo(idx);
     },
-    [lectures, goTo]
+    [lectures, goTo],
   );
 
   const handlePrev = React.useCallback(
     () => goTo(navigationState.index - 1),
-    [goTo, navigationState.index]
+    [goTo, navigationState.index],
   );
   const handleNext = React.useCallback(
     () => goTo(navigationState.index + 1),
-    [goTo, navigationState.index]
+    [goTo, navigationState.index],
   );
 
   // Loading state

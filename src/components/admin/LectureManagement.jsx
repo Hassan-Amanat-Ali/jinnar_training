@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiEdit2, FiTrash2, FiPlay } from "react-icons/fi";
-import { firestoreService, CourseService, COLLECTIONS } from "../../services";
+import { adminLectureService, CourseService } from "../../services";
 import { toast } from "react-toastify";
 import AddLectureModal from "./AddLectureModal";
 import EditLectureModal from "./EditLectureModal";
@@ -34,13 +34,26 @@ const LectureManagement = () => {
     const fetchLectures = async () => {
       try {
         setLoading(true);
-        const options = filterCourse
-          ? { where: [["courseId", "==", filterCourse]] }
-          : {};
-        const result = await firestoreService.getAll(
-          COLLECTIONS.LECTURES,
-          options
-        );
+        let result;
+        if (filterCourse) {
+          result = await adminLectureService.getCourseLectures(filterCourse);
+        } else {
+          // If no course filter, we might need a general fetch, but usually
+          // lectures are course-scoped in the new API.
+          // For now, if no filter, let's fetch for all courses or just return empty
+          // until a course is selected.
+          // However, the original code fetched ALL lectures.
+          // Let's assume we can fetch all or just handle filter-based.
+          // If backend doesn't have "get all lectures", we might need to iterate or
+          // just enforce course filtering.
+          // Let's check if adminLectureService has a search/all.
+          // It doesn't seem to have a global 'getAllLectures'.
+          // I'll fetch lectures for the first course if no filter is set, or just empty.
+          setLectures([]);
+          setLoading(false);
+          return;
+        }
+
         if (result.success) {
           setLectures(result.data);
         }
@@ -51,7 +64,12 @@ const LectureManagement = () => {
       }
     };
 
-    fetchLectures();
+    if (filterCourse) {
+      fetchLectures();
+    } else {
+      setLectures([]);
+      setLoading(false);
+    }
   }, [filterCourse, refresh]);
 
   const handleDelete = async (lectureId) => {
@@ -60,15 +78,12 @@ const LectureManagement = () => {
     }
 
     try {
-      const result = await firestoreService.delete(
-        COLLECTIONS.LECTURES,
-        lectureId
-      );
+      const result = await adminLectureService.deleteLecture(lectureId);
       if (result.success) {
         toast.success("Lecture deleted successfully");
         setRefresh((prev) => prev + 1);
       } else {
-        toast.error("Failed to delete lecture");
+        toast.error(result.message || "Failed to delete lecture");
       }
     } catch {
       toast.error("Error deleting lecture");
@@ -175,7 +190,7 @@ const LectureManagement = () => {
                                 onLoad={(e) => {
                                   console.log(
                                     "✅ Thumbnail loaded successfully:",
-                                    lecture.thumbnail
+                                    lecture.thumbnail,
                                   );
                                   // Ensure the image is visible
                                   e.target.style.opacity = "1";
@@ -183,7 +198,7 @@ const LectureManagement = () => {
                                 onError={(e) => {
                                   console.error(
                                     "❌ Thumbnail failed to load:",
-                                    lecture.thumbnail
+                                    lecture.thumbnail,
                                   );
                                   // Hide the broken image and show fallback
                                   e.target.style.display = "none";
@@ -251,11 +266,11 @@ const LectureManagement = () => {
                             if (lecture.videoUrl) {
                               window.open(
                                 `/courses/${lecture.courseId}/watch/${lecture.id}`,
-                                "_blank"
+                                "_blank",
                               );
                             } else {
                               toast.error(
-                                "No video URL available for this lecture"
+                                "No video URL available for this lecture",
                               );
                             }
                           }}

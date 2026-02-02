@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { FiPlus, FiEdit2, FiTrash2, FiDownload, FiVideo, FiFileText, FiList } from "react-icons/fi";
+import {
+  FiPlus,
+  FiEdit2,
+  FiTrash2,
+  FiDownload,
+  FiVideo,
+  FiFileText,
+  FiList,
+} from "react-icons/fi";
 import { adminCourseService } from "../../services";
 import { toast } from "react-toastify";
 import AddCourseModal from "./AddCourseModal";
 import EditCourseModal from "./EditCourseModal";
 import LectureManagementModal from "./LectureManagementModal";
 
-const API_BASE_URL = "https://api.jinnar.com";
+const API_BASE_URL = "http://localhost:3000";
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -22,14 +30,17 @@ const CourseManagement = () => {
       setLoading(true);
       const result = await adminCourseService.getAllCourses();
       if (result.success) {
-        console.log('Fetched courses:', result.data);
-        console.log('Course types:', result.data.map(c => ({ title: c.title, type: c.courseType })));
+        console.log("Fetched courses:", result.data);
+        console.log(
+          "Course types:",
+          result.data.map((c) => ({ title: c.title, type: c.courseType })),
+        );
         setCourses(result.data);
       } else {
         toast.error(result.message || "Failed to fetch courses");
       }
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error("Error fetching courses:", error);
       toast.error("Failed to fetch courses");
     } finally {
       setLoading(false);
@@ -70,8 +81,9 @@ const CourseManagement = () => {
       });
       if (result.success) {
         toast.success(
-          `Course ${course.published ? "unpublished" : "published"
-          } successfully`
+          `Course ${
+            course.published ? "unpublished" : "published"
+          } successfully`,
         );
         fetchCourses();
       } else {
@@ -88,8 +100,10 @@ const CourseManagement = () => {
       return;
     }
 
-    const fullUrl = pdfUrl.startsWith('http') ? pdfUrl : `${API_BASE_URL}${pdfUrl}`;
-    window.open(fullUrl, '_blank');
+    const fullUrl = pdfUrl.startsWith("http")
+      ? pdfUrl
+      : `${API_BASE_URL}${pdfUrl}`;
+    window.open(fullUrl, "_blank");
   };
 
   const handleManageLectures = (course) => {
@@ -98,13 +112,13 @@ const CourseManagement = () => {
   };
 
   const getThumbnailUrl = (thumbnail) => {
-    if (!thumbnail) return '/placeholder-course.jpg';
-    if (thumbnail.startsWith('http')) return thumbnail;
+    if (!thumbnail) return "/placeholder-course.jpg";
+    if (thumbnail.startsWith("http")) return thumbnail;
     return `${API_BASE_URL}${thumbnail}`;
   };
 
   // Filter courses based on active tab
-  const filteredCourses = courses.filter(course => {
+  const filteredCourses = courses.filter((course) => {
     if (activeTab === "all") return true;
     if (activeTab === "pdf") return course.courseType === "pdf";
     if (activeTab === "video") return course.courseType === "video";
@@ -136,32 +150,40 @@ const CourseManagement = () => {
       <div className="mb-6 flex gap-4 border-b border-gray-200">
         <button
           onClick={() => setActiveTab("all")}
-          className={`pb-3 px-4 font-medium transition-colors border-b-2 ${activeTab === "all"
-            ? "border-primary text-primary"
-            : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+          className={`pb-3 px-4 font-medium transition-colors border-b-2 ${
+            activeTab === "all"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
         >
           All Courses ({courses.length})
         </button>
         <button
           onClick={() => setActiveTab("pdf")}
-          className={`pb-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${activeTab === "pdf"
-            ? "border-primary text-primary"
-            : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+          className={`pb-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "pdf"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
         >
           <FiFileText className="w-4 h-4" />
-          PDF Courses ({courses.filter(c => c.courseType === "pdf").length})
+          PDF Courses ({courses.filter((c) => c.courseType === "pdf").length})
         </button>
         <button
           onClick={() => setActiveTab("video")}
-          className={`pb-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${activeTab === "video"
-            ? "border-primary text-primary"
-            : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+          className={`pb-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "video"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
         >
           <FiVideo className="w-4 h-4" />
-          Lecture-Based ({courses.filter(c => c.courseType === "video" || !c.courseType).length})
+          Lecture-Based (
+          {
+            courses.filter((c) => c.courseType === "video" || !c.courseType)
+              .length
+          }
+          )
         </button>
       </div>
 
@@ -213,7 +235,7 @@ const CourseManagement = () => {
                           alt={course.title}
                           className="w-12 h-9 sm:w-16 sm:h-12 object-cover rounded mr-2 sm:mr-4 flex-shrink-0"
                           onError={(e) => {
-                            e.target.src = '/placeholder-course.jpg';
+                            e.target.src = "/placeholder-course.jpg";
                           }}
                         />
                         <div className="min-w-0">
@@ -227,10 +249,13 @@ const CourseManagement = () => {
                       </div>
                     </td>
                     <td className="hidden md:table-cell px-3 sm:px-6 py-4">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${course.courseType === "pdf"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-purple-100 text-purple-800"
-                        }`}>
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          course.courseType === "pdf"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
                         {course.courseType === "pdf" ? "PDF" : "Lectures"}
                       </span>
                     </td>
@@ -241,15 +266,32 @@ const CourseManagement = () => {
                       {course.duration}
                     </td>
                     <td className="px-3 sm:px-6 py-4">
-                      <button
-                        onClick={() => handleTogglePublished(course)}
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${course.published
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleTogglePublished(course)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                            course.published ? "bg-green-500" : "bg-gray-300"
                           }`}
-                      >
-                        {course.published ? "Published" : "Draft"}
-                      </button>
+                          title={course.published ? "Unpublish" : "Publish"}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              course.published
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                        <span
+                          className={`text-xs font-medium ${
+                            course.published
+                              ? "text-green-700"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {course.published ? "Published" : "Draft"}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2 sm:gap-3">

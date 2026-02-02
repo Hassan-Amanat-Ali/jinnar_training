@@ -3,7 +3,7 @@ import { FiX, FiUpload, FiFileText, FiVideo } from "react-icons/fi";
 import { adminCourseService, adminUploadService } from "../../services";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = "https://api.jinnar.com";
+const API_BASE_URL = "http://localhost:3000";
 
 const EditCourseModal = ({ course, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
@@ -27,20 +27,20 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
     learningOutcomes: course.learningOutcomes || [],
   });
 
-  // Static course categories
+  // Course categories - should match backend expectations
   const categories = [
-    { id: 'programming', name: 'Programming & Development' },
-    { id: 'business', name: 'Business & Entrepreneurship' },
-    { id: 'design', name: 'Design & Creativity' },
-    { id: 'marketing', name: 'Marketing & Sales' },
-    { id: 'personal-development', name: 'Personal Development' },
-    { id: 'health-fitness', name: 'Health & Fitness' },
-    { id: 'language', name: 'Language Learning' },
-    { id: 'music', name: 'Music & Arts' },
-    { id: 'photography', name: 'Photography & Video' },
-    { id: 'teaching', name: 'Teaching & Academics' },
-    { id: 'technology', name: 'Technology & IT' },
-    { id: 'finance', name: 'Finance & Accounting' },
+    { id: "Programming", name: "Programming & Development" },
+    { id: "Business", name: "Business & Entrepreneurship" },
+    { id: "Design", name: "Design & Creativity" },
+    { id: "Marketing", name: "Marketing & Sales" },
+    { id: "Personal Development", name: "Personal Development" },
+    { id: "Health & Fitness", name: "Health & Fitness" },
+    { id: "Language Learning", name: "Language Learning" },
+    { id: "Music & Arts", name: "Music & Arts" },
+    { id: "Photography & Video", name: "Photography & Video" },
+    { id: "Teaching & Academics", name: "Teaching & Academics" },
+    { id: "Technology & IT", name: "Technology & IT" },
+    { id: "Finance & Accounting", name: "Finance & Accounting" },
   ];
 
   const handleChange = (e) => {
@@ -50,7 +50,7 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
 
   const handleArrayChange = (e, field) => {
     const value = e.target.value;
-    const array = value.split('\n').filter(item => item.trim() !== '');
+    const array = value.split("\n").filter((item) => item.trim() !== "");
     setFormData((prev) => ({ ...prev, [field]: array }));
   };
 
@@ -58,25 +58,28 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
       return;
     }
 
     try {
       setUploading(true);
-      const result = await adminUploadService.uploadThumbnail(file, (progress) => {
-        setUploadProgress(progress);
-      });
+      const result = await adminUploadService.uploadThumbnail(
+        file,
+        (progress) => {
+          setUploadProgress(progress);
+        },
+      );
 
       if (result.success) {
         setFormData((prev) => ({ ...prev, thumbnail: result.url }));
-        toast.success('Thumbnail uploaded successfully');
+        toast.success("Thumbnail uploaded successfully");
       } else {
-        toast.error(result.message || 'Failed to upload thumbnail');
+        toast.error(result.message || "Failed to upload thumbnail");
       }
     } catch (error) {
-      toast.error('Error uploading thumbnail');
+      toast.error("Error uploading thumbnail");
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -87,25 +90,28 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      toast.error('Please select a PDF file');
+    if (file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
       return;
     }
 
     try {
       setUploading(true);
-      const result = await adminUploadService.uploadMaterial(file, (progress) => {
-        setUploadProgress(progress);
-      });
+      const result = await adminUploadService.uploadMaterial(
+        file,
+        (progress) => {
+          setUploadProgress(progress);
+        },
+      );
 
       if (result.success) {
         setFormData((prev) => ({ ...prev, pdfUrl: result.url }));
-        toast.success('PDF uploaded successfully');
+        toast.success("PDF uploaded successfully");
       } else {
-        toast.error(result.message || 'Failed to upload PDF');
+        toast.error(result.message || "Failed to upload PDF");
       }
     } catch (error) {
-      toast.error('Error uploading PDF');
+      toast.error("Error uploading PDF");
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -120,7 +126,7 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
       return;
     }
 
-    if (formData.courseType === 'pdf' && !formData.pdfUrl) {
+    if (formData.courseType === "pdf" && !formData.pdfUrl) {
       toast.error("Please upload a PDF file for PDF courses");
       return;
     }
@@ -144,13 +150,13 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
 
   const getThumbnailUrl = (thumbnail) => {
     if (!thumbnail) return null;
-    if (thumbnail.startsWith('http')) return thumbnail;
+    if (thumbnail.startsWith("http")) return thumbnail;
     return `${API_BASE_URL}${thumbnail}`;
   };
 
   const getPDFUrl = (pdfUrl) => {
     if (!pdfUrl) return null;
-    if (pdfUrl.startsWith('http')) return pdfUrl;
+    if (pdfUrl.startsWith("http")) return pdfUrl;
     return `${API_BASE_URL}${pdfUrl}`;
   };
 
@@ -176,7 +182,7 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
               Course Type
             </label>
             <div className="flex items-center gap-2">
-              {formData.courseType === 'pdf' ? (
+              {formData.courseType === "pdf" ? (
                 <>
                   <FiFileText className="w-5 h-5 text-green-600" />
                   <span className="font-medium">PDF Course</span>
@@ -187,7 +193,9 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                   <span className="font-medium">Lecture-Based Course</span>
                 </>
               )}
-              <span className="text-xs text-gray-500 ml-2">(Cannot be changed after creation)</span>
+              <span className="text-xs text-gray-500 ml-2">
+                (Cannot be changed after creation)
+              </span>
             </div>
           </div>
 
@@ -330,7 +338,7 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
               <label className="cursor-pointer flex flex-col items-center">
                 <FiUpload className="w-8 h-8 text-gray-400 mb-2" />
                 <span className="text-sm text-gray-600">
-                  {formData.thumbnail ? 'Change thumbnail' : 'Upload thumbnail'}
+                  {formData.thumbnail ? "Change thumbnail" : "Upload thumbnail"}
                 </span>
                 <input
                   type="file"
@@ -348,14 +356,16 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-600 mt-1">{uploadProgress}%</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {uploadProgress}%
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
           {/* PDF Upload/View (Only for PDF courses) */}
-          {formData.courseType === 'pdf' && (
+          {formData.courseType === "pdf" && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Course PDF <span className="text-red-500">*</span>
@@ -374,7 +384,7 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                 <label className="cursor-pointer flex flex-col items-center">
                   <FiFileText className="w-8 h-8 text-green-400 mb-2" />
                   <span className="text-sm text-gray-600">
-                    {formData.pdfUrl ? 'Replace PDF' : 'Upload PDF'}
+                    {formData.pdfUrl ? "Replace PDF" : "Upload PDF"}
                   </span>
                   <input
                     type="file"
@@ -392,7 +402,9 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">{uploadProgress}%</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {uploadProgress}%
+                    </p>
                   </div>
                 )}
               </div>
@@ -406,8 +418,8 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                 Learning Outcomes (one per line)
               </label>
               <textarea
-                value={formData.learningOutcomes.join('\n')}
-                onChange={(e) => handleArrayChange(e, 'learningOutcomes')}
+                value={formData.learningOutcomes.join("\n")}
+                onChange={(e) => handleArrayChange(e, "learningOutcomes")}
                 rows="3"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -418,8 +430,8 @@ const EditCourseModal = ({ course, onClose, onSuccess }) => {
                 Requirements (one per line)
               </label>
               <textarea
-                value={formData.requirements.join('\n')}
-                onChange={(e) => handleArrayChange(e, 'requirements')}
+                value={formData.requirements.join("\n")}
+                onChange={(e) => handleArrayChange(e, "requirements")}
                 rows="3"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />

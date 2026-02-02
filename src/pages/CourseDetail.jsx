@@ -68,7 +68,7 @@ const CourseDetail = () => {
         } else {
           // Fallback to dummy data
           const dummyCourse = dummyCourses.find(
-            (course) => course.id === parseInt(id)
+            (course) => course.id === parseInt(id),
           );
           if (dummyCourse) {
             setCourse(dummyCourse);
@@ -79,7 +79,7 @@ const CourseDetail = () => {
         console.error("Error fetching course:", error);
         // Fallback to dummy data on error
         const dummyCourse = dummyCourses.find(
-          (course) => course.id === parseInt(id)
+          (course) => course.id === parseInt(id),
         );
         if (dummyCourse) {
           setCourse(dummyCourse);
@@ -103,7 +103,7 @@ const CourseDetail = () => {
 
         // Fetch courses from the same category
         const categoryResult = await CourseService.getCoursesByCategory(
-          course.category
+          course.category,
         );
         let categoryCourses = [];
         if (categoryResult.success && categoryResult.data) {
@@ -119,7 +119,7 @@ const CourseDetail = () => {
           allPopularCourses = popularResult.data
             .filter((c) => c.id !== course.id) // Exclude current course
             .sort(
-              (a, b) => (b.totalEnrollments || 0) - (a.totalEnrollments || 0)
+              (a, b) => (b.totalEnrollments || 0) - (a.totalEnrollments || 0),
             ) // Sort by enrollment
             .slice(0, 6); // Limit to 6 courses
         }
@@ -143,8 +143,14 @@ const CourseDetail = () => {
   };
 
   const handleStartLearning = () => {
-    // Demo: first lecture id is '1'
-    navigate(`/courses/${id}/watch/1`);
+    // Navigate to first lecture if available
+    if (course.lectures && course.lectures.length > 0) {
+      const firstLectureId = course.lectures[0].id || course.lectures[0]._id;
+      navigate(`/courses/${id}/watch/${firstLectureId}`);
+    } else {
+      // Fallback/Legacy: first lecture id might be '1' but usually it should be a real ID
+      navigate(`/courses/${id}/watch/1`);
+    }
   };
 
   if (loading) {
