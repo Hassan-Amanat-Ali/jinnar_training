@@ -50,7 +50,7 @@ const Footer = () => {
       formData.append("email", email.trim());
       formData.append(
         "_subject",
-        "New Newsletter Subscription - Training Jinnar"
+        "New Newsletter Subscription - Training Jinnar",
       );
       formData.append("_next", window.location.href);
       formData.append("_captcha", "true");
@@ -64,7 +64,7 @@ const Footer = () => {
           headers: {
             Accept: "application/json",
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -72,7 +72,7 @@ const Footer = () => {
           "🎉 Successfully subscribed! Welcome to our newsletter!",
           {
             position: "bottom-left",
-          }
+          },
         );
 
         // Reset email input
@@ -102,7 +102,6 @@ const Footer = () => {
     { name: "Privacy Policy", href: ROUTES.PRIVACY_POLICY },
     { name: "Terms of Service", href: ROUTES.TERMS_OF_SERVICE },
     // { name: "Refunds", href: ROUTES.REFUNDS },
-
   ];
 
   const companyLinks = [
@@ -113,11 +112,18 @@ const Footer = () => {
   ];
 
   const socialIcons = [
-    { icon: FiFacebook, href: "#" },
-    { icon: PiDiscordLogo, href: "#" },
-    { icon: VscGithubAlt, href: "#" },
-    { icon: FaInstagram, href: "#" },
-    { icon: FaFigma, href: "#" },
+    {
+      icon: FiFacebook,
+      href: "https://www.facebook.com/share/1F2AEC5cYr/?mibextid=wwXIfr",
+    },
+    {
+      icon: FaInstagram,
+      href: "https://www.instagram.com/ji_nnar?igsh=M3Z4cnBidDYyaHhp",
+    },
+    {
+      icon: FaYoutube,
+      href: "https://youtube.com/@jinnarcompany?si=jfCGJtzcumw4PfGV",
+    },
   ];
 
   return (
@@ -206,6 +212,8 @@ const Footer = () => {
                     <a
                       key={index}
                       href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center text-black/80 hover:bg-primary hover:text-white transition-colors duration-200"
                     >
                       <IconComponent className="w-4 h-4" />
