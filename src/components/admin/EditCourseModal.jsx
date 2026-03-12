@@ -3,7 +3,7 @@ import { FiX, FiUpload, FiFileText, FiVideo } from "react-icons/fi";
 import { adminCourseService, adminUploadService } from "../../services";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://api.jinnar.com";
 
 const EditCourseModal = ({ course, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);

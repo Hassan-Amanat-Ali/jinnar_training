@@ -1,7 +1,7 @@
 import authService from "./authService";
 
 // Helper for API calls
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://api.jinnar.com/api";
 
 // Stub collections to prevent breakages in imports
 export const COLLECTIONS = {
@@ -141,7 +141,7 @@ export class CourseService {
 
       const getServerUrl = () => {
         const baseUrl =
-          import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+          import.meta.env.VITE_API_URL || "https://api.jinnar.com/api";
         return baseUrl.replace(/\/api$/, "");
       };
 

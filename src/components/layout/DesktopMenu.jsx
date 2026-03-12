@@ -99,9 +99,9 @@ const DesktopUserMenu = ({ currentUser, ROUTES }) => {
       optimized = optimized.replace(/=s\d+/, "=s96");
     } else if (optimized.startsWith("/")) {
       const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+        import.meta.env.VITE_API_URL || "https://api.jinnar.com/api";
       // If API_URL ends with /api, we usually want the origin, but if the path is /api/files, we just need the origin.
-      // Assuming API_URL is http://localhost:3000/api
+      // Assuming API_URL is https://api.jinnar.com/api
       const origin = API_URL.replace(/\/api\/?$/, "");
       optimized = `${origin}${optimized}`;
     }
