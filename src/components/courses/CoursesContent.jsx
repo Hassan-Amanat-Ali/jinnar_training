@@ -69,7 +69,7 @@ const CoursesContent = () => {
             description: course.description,
             image: course.thumbnail?.startsWith("http")
               ? course.thumbnail
-              : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.thumbnail}`,
+              : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "https://api.jinnar.com"}/uploads/courses/${course.thumbnail}`,
             duration: course.duration || "Self-paced",
             enrolled: course.totalEnrollments || course.enrollmentCount || 0,
             category: course.category?.name || "Uncategorized",
@@ -408,7 +408,7 @@ const CoursesContent = () => {
       if (course.pdfUrl) {
         const pdfFullUrl = course.pdfUrl.startsWith("http")
           ? course.pdfUrl
-          : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.pdfUrl}`;
+          : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "https://api.jinnar.com"}/uploads/courses/${course.pdfUrl}`;
         window.open(pdfFullUrl, "_blank");
         toast.success(`Opening ${course.title}`, {
           position: "top-center",
@@ -502,7 +502,7 @@ const CoursesContent = () => {
     if (course.courseType === "pdf" && course.pdfUrl) {
       const pdfFullUrl = course.pdfUrl.startsWith("http")
         ? course.pdfUrl
-        : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000"}/uploads/courses/${course.pdfUrl}`;
+        : `${import.meta.env.VITE_API_URL?.replace("/api", "") || "https://api.jinnar.com"}/uploads/courses/${course.pdfUrl}`;
 
       const link = document.createElement("a");
       link.href = pdfFullUrl;

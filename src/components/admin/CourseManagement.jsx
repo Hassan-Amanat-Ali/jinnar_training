@@ -14,7 +14,7 @@ import AddCourseModal from "./AddCourseModal";
 import EditCourseModal from "./EditCourseModal";
 import LectureManagementModal from "./LectureManagementModal";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://api.jinnar.com";
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);

@@ -207,7 +207,7 @@ const LoggedInProfile = ({ currentUser, onClose, ROUTES }) => {
     if (!url) return null;
     if (url.startsWith("/")) {
       const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+        import.meta.env.VITE_API_URL || "https://api.jinnar.com/api";
       const origin = API_URL.replace(/\/api\/?$/, "");
       return `${origin}${url}`;
     }
