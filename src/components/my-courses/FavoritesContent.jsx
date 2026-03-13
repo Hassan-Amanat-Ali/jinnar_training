@@ -6,6 +6,7 @@ import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../hooks/useAuth";
 import { favoritesService } from "../../services";
 import { Button } from "../ui";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 
 const FavoriteCard = ({ course, onRemoveFavorite }) => {
   const navigate = useNavigate();
@@ -171,9 +172,11 @@ const FavoritesContent = () => {
         <p className="text-gray-600 mb-6">
           Please sign in to see your favorite courses.
         </p>
-        <Button href={ROUTES.LOGIN} className="btn-primary">
-          Sign In
-        </Button>
+        <Button
+          text="Sign In"
+          onClick={() => redirectToJinnarAuth({ intent: "login" })}
+          className="btn-primary"
+        />
       </div>
     );
   }

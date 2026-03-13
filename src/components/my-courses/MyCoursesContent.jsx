@@ -8,6 +8,7 @@ import { EnrollmentService, CourseService } from "../../services";
 import { LectureProgressService } from "../../services/lectureProgressService";
 import { TabsComponent } from "../ui";
 import FavoritesContent from "./FavoritesContent";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 
 const ProgressCard = ({ stats }) => {
   return (
@@ -362,7 +363,7 @@ const MyCoursesContent = () => {
             Please log in to view your enrolled courses.
           </p>
           <button
-            onClick={() => navigate(ROUTES.LOGIN)}
+            onClick={() => redirectToJinnarAuth({ intent: "login" })}
             className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary/90"
           >
             Log In

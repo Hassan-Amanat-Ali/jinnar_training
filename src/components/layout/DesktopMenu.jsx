@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { profileService } from "../../services";
 import { NotificationBell } from "../common";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 
 const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
   <DesktopActions
@@ -16,20 +17,21 @@ const DesktopMenu = ({ isLoggedIn, currentUser, ROUTES }) => (
 const DesktopActions = ({ isLoggedIn, currentUser, ROUTES }) => (
   <div className="hidden lg:flex items-center space-x-4">
     {!isLoggedIn ? (
-      <DesktopAuthButtons ROUTES={ROUTES} />
+      <DesktopAuthButtons />
     ) : (
       <DesktopUserMenu currentUser={currentUser} ROUTES={ROUTES} />
     )}
   </div>
 );
 
-const DesktopAuthButtons = ({ ROUTES }) => (
+const DesktopAuthButtons = () => (
   <div className="bg-[#D9D9D9]/35 rounded-full p-1">
-    <Link to={ROUTES.LOGIN}>
-      <button className="text-black/70 hover:text-black font-medium px-4 py-2 rounded-full transition-colors hover:bg-white text-sm">
-        Log In
-      </button>
-    </Link>
+    <button
+      onClick={() => redirectToJinnarAuth({ intent: "login" })}
+      className="text-black/70 hover:text-black font-medium px-4 py-2 rounded-full transition-colors hover:bg-white text-sm"
+    >
+      Log In
+    </button>
   </div>
 );
 

@@ -4,6 +4,7 @@ import { Logo } from "../../assets";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { profileService } from "../../services";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 
 const MobileMenu = ({
   isOpen,
@@ -104,7 +105,7 @@ const MobileMenuNavigation = ({ navigation, isActiveRoute, onClose }) => (
 const MobileMenuActions = ({ isLoggedIn, currentUser, onClose, ROUTES }) => (
   <div className="p-4 sm:p-5 border-t border-black/10 space-y-3 sm:space-y-4 bg-white flex-shrink-0">
     {!isLoggedIn ? (
-      <LoggedOutActions onClose={onClose} ROUTES={ROUTES} />
+      <LoggedOutActions onClose={onClose} />
     ) : (
       <LoggedInProfile
         currentUser={currentUser}
@@ -115,13 +116,17 @@ const MobileMenuActions = ({ isLoggedIn, currentUser, onClose, ROUTES }) => (
   </div>
 );
 
-const LoggedOutActions = ({ onClose, ROUTES }) => (
+const LoggedOutActions = ({ onClose }) => (
   <div className="space-y-2.5">
-    <Link to={ROUTES.LOGIN} onClick={onClose}>
-      <button className="w-full text-center text-black/80 hover:text-black font-medium py-2.5 sm:py-3 px-4 rounded-xl transition-all duration-200 hover:bg-black/5 border border-black/10 text-sm sm:text-base active:scale-95">
-        Log In
-      </button>
-    </Link>
+    <button
+      onClick={() => {
+        onClose();
+        redirectToJinnarAuth({ intent: "login" });
+      }}
+      className="w-full text-center text-black/80 hover:text-black font-medium py-2.5 sm:py-3 px-4 rounded-xl transition-all duration-200 hover:bg-black/5 border border-black/10 text-sm sm:text-base active:scale-95"
+    >
+      Log In
+    </button>
   </div>
 );
 

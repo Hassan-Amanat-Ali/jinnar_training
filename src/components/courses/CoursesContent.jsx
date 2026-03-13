@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../hooks/useAuth";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 import CoursesFilters from "./CoursesFilters";
 import CoursesListing from "./CoursesListing";
 import {
@@ -13,7 +12,6 @@ import {
 } from "../../services";
 
 const CoursesContent = () => {
-  const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
   const [coursesState, setCoursesState] = useState([]);
   const [allCourses, setAllCourses] = useState([]); // Store all courses for filter counts
@@ -310,7 +308,7 @@ const CoursesContent = () => {
       toast.info("Please log in to add favorites", {
         position: "top-center",
       });
-      navigate(ROUTES.LOGIN);
+      redirectToJinnarAuth({ intent: "login" });
       return;
     }
 
@@ -402,7 +400,7 @@ const CoursesContent = () => {
         toast.info("Please log in to access PDF courses", {
           position: "top-center",
         });
-        navigate(ROUTES.LOGIN);
+        redirectToJinnarAuth({ intent: "login" });
         return;
       }
 
@@ -428,7 +426,7 @@ const CoursesContent = () => {
       toast.info("Please log in to enroll in courses", {
         position: "top-center",
       });
-      navigate(ROUTES.LOGIN);
+      redirectToJinnarAuth({ intent: "login" });
       return;
     }
 
@@ -496,7 +494,7 @@ const CoursesContent = () => {
       toast.info("Please log in to download courses", {
         position: "top-center",
       });
-      navigate(ROUTES.LOGIN);
+      redirectToJinnarAuth({ intent: "login" });
       return;
     }
 

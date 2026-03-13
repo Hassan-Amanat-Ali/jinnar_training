@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Layout } from "./components/layout";
 import { ScrollToTopOnRouteChange, ProtectedRoute } from "./components/common";
+import ExternalAuthRedirect from "./components/common/ExternalAuthRedirect";
+import ExternalAuthReturn from "./components/common/ExternalAuthReturn";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ROUTES } from "./constants/routes";
 import {
@@ -12,7 +14,6 @@ import {
   CourseDetail,
   Portfolio,
   Blog,
-  Login,
   NotFound,
   PrivacyPolicy,
   TermsOfService,
@@ -23,7 +24,6 @@ import {
   // Profile Pages
   EditProfile,
   MyCourses,
-  Team,
   Notification,
   Settings,
   AdminDashboard,
@@ -42,7 +42,9 @@ function App() {
 
         <Routes>
           {/* Auth routes without layout */}
-          <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.LOGIN} element={<ExternalAuthRedirect />} />
+          <Route path={ROUTES.SIGNUP} element={<ExternalAuthRedirect />} />
+          <Route path={ROUTES.AUTH_RETURN} element={<ExternalAuthReturn />} />
 
           {/* Admin Login - separate from user auth */}
           <Route path="/admin/login" element={<AdminLogin />} />

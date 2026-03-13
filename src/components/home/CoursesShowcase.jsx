@@ -6,6 +6,7 @@ import { ROUTES } from "../../constants/routes";
 import { jinnarCoursesData } from "../../data/jinnarCourses";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import { redirectToJinnarAuth } from "../../utils/authRedirect";
 
 // Employee-only course titles
 const employeeOnlyCourses = [
@@ -110,7 +111,7 @@ const CoursesShowcase = () => {
       toast.info("Please log in to download training documents", {
         position: "top-center",
       });
-      navigate(ROUTES.LOGIN);
+      redirectToJinnarAuth({ intent: "login" });
       return;
     }
 

@@ -90,11 +90,47 @@ class AuthService {
   }
 
   async signOut() {
+    this.clearSession();
+    return { success: true, message: "Signed out successfully!" };
+  }
+
+  clearSession() {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.notifySubscribers(null);
-    return { success: true, message: "Signed out successfully!" };
   }
+
+  async setSession(token, user = null) {
+    if (!token) {
+      return { success: false, message: "Missing auth token" };
+    }
+
+    localStorage.setItem(this.tokenKey, token);
+
+    let normalizedUser = user;
+    if (!normalizedUser) {
+      normalizedUser = await this.fetchUserProfile(token);
+    }
+
+    if (normalizedUser && normalizedUser._id && !normalizedUser.uid) {
+      normalizedUser.uid = normalizedUser._id;
+      normalizedUser.id = normalizedUser._id;
+    }
+
+    if (normalizedUser) {
+      localStorage.setItem(this.userKey, JSON.stringify(normalizedUser));
+    }
+
+    this.notifySubscribers(normalizedUser || null);
+
+    return {
+      success: true,
+      token,
+      user: normalizedUser || null,
+      message: "Session initialized successfully",
+    };
+  }
+
 
   onAuthStateChange(callback) {
     this.subscribers.push(callback);
