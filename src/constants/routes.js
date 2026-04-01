@@ -9,6 +9,7 @@ export const ROUTES = {
   CONTACT: "/contact",
   COURSES: "/courses",
   COURSE_DETAIL: "/courses/:id",
+  PDF_COURSE_DETAIL: "/courses/pdf/:id",
   WATCH: "/courses/:id/watch/:lectureId",
   PORTFOLIO: "/portfolio",
   BLOG: "/blog",
@@ -31,8 +32,14 @@ export const ROUTES = {
   LEGAL: "/legal",
   FAQ: "/faq",
   JINNAR_COURSES: "/jinnar-courses",
+  JINNAR_COURSE_DETAIL: "/jinnar-courses/:slug",
   // Add more routes as needed
 };
+
+export const getJinnarCourseDetailPath = (slug) =>
+  `/jinnar-courses/${slug}`;
+
+export const getPdfCourseDetailPath = (id) => `/courses/pdf/${id}`;
 
 export const PROTECTED_ROUTES = [
   ROUTES.DASHBOARD,
@@ -51,6 +58,7 @@ export const PUBLIC_ROUTES = [
   ROUTES.CONTACT,
   ROUTES.COURSES,
   ROUTES.COURSE_DETAIL,
+  ROUTES.PDF_COURSE_DETAIL,
   ROUTES.PORTFOLIO,
   ROUTES.BLOG,
   ROUTES.LOGIN,
@@ -63,4 +71,5 @@ export const PUBLIC_ROUTES = [
   ROUTES.LEGAL,
   ROUTES.FAQ,
   ROUTES.JINNAR_COURSES,
+  ROUTES.JINNAR_COURSE_DETAIL,
 ];

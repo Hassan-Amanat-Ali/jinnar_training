@@ -12,6 +12,7 @@ import {
   Contact,
   Courses,
   CourseDetail,
+  PdfCourseDetail,
   Portfolio,
   Blog,
   NotFound,
@@ -21,6 +22,7 @@ import {
   Legal,
   FAQ,
   JinnarCourses,
+  JinnarCourseDetail,
   // Profile Pages
   EditProfile,
   MyCourses,
@@ -66,8 +68,16 @@ function App() {
 
           {/* JinnarCourses Page */}
           <Route path={ROUTES.JINNAR_COURSES} element={<JinnarCourses />} />
+          <Route
+            path={ROUTES.JINNAR_COURSE_DETAIL}
+            element={<JinnarCourseDetail />}
+          />
 
           <Route path={ROUTES.COURSE_DETAIL} element={<CourseDetail />} />
+          <Route
+            path={ROUTES.PDF_COURSE_DETAIL}
+            element={<PdfCourseDetail />}
+          />
           <Route
             path={ROUTES.WATCH}
             element={

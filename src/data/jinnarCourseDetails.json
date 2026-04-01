@@ -1,0 +1,303 @@
+[
+  {
+    "slug": "jinnar-employees-training-programs",
+    "heading": "Jinnar Employees Training Programs",
+    "summary": "A structured internal training path that aligns employees on standards, service quality, and day-to-day operational discipline.",
+    "duration": "3-4 hours",
+    "level": "Foundation",
+    "audience": "New and existing Jinnar employees",
+    "highlights": ["Role clarity", "Workplace standards", "Communication routines", "Service mindset"],
+    "whatYouLearn": ["How to follow Jinnar operating expectations", "How to communicate professionally with teams and clients", "How to handle common workplace scenarios", "How to build consistency in execution"],
+    "sections": ["Orientation and company standards", "Daily workflow and accountability", "Internal communication and reporting", "Customer-facing professionalism"],
+    "faq": [
+      { "question": "Is this mandatory for all employees?", "answer": "Yes, this is a baseline course for quality consistency." },
+      { "question": "Can this be repeated for refreshers?", "answer": "Yes, teams can use it for periodic refresher sessions." }
+    ]
+  },
+  {
+    "slug": "basic-business-and-financial-literacy",
+    "heading": "Basic Business & Financial Literacy",
+    "summary": "Core financial and business principles for entrepreneurs and small teams to make better daily decisions.",
+    "duration": "2-3 hours",
+    "level": "Beginner",
+    "audience": "Small business owners and aspiring entrepreneurs",
+    "highlights": ["Cash flow basics", "Profit awareness", "Simple budgeting", "Pricing logic"],
+    "whatYouLearn": ["How to read basic business numbers", "How to separate business and personal money", "How to track revenue, cost, and margins", "How to make practical budget plans"],
+    "sections": ["Money fundamentals for business", "Budgeting and spend control", "Simple record keeping", "Pricing and profit checkpoints"],
+    "faq": [
+      { "question": "Do I need accounting knowledge before starting?", "answer": "No, the course is designed for complete beginners." },
+      { "question": "Will this help side-hustle operators?", "answer": "Yes, the lessons apply to both full-time and part-time businesses." }
+    ]
+  },
+  {
+    "slug": "business-plan-training-program",
+    "heading": "Business Plan Training Program",
+    "summary": "Learn to create a practical business plan that can guide operations, attract support, and reduce risk.",
+    "duration": "3 hours",
+    "level": "Beginner to Intermediate",
+    "audience": "Founders and early-stage operators",
+    "highlights": ["Business model clarity", "Market analysis", "Cost and revenue planning", "Execution roadmap"],
+    "whatYouLearn": ["How to structure a clear business plan", "How to define customers and value proposition", "How to map startup and running costs", "How to build realistic milestones"],
+    "sections": ["Business concept and goals", "Market and customer profile", "Financial planning essentials", "Implementation timeline"],
+    "faq": [
+      { "question": "Is this useful for existing businesses?", "answer": "Yes, it also helps mature businesses realign strategy." },
+      { "question": "Can this support funding conversations?", "answer": "Yes, a structured plan improves investor and lender discussions." }
+    ]
+  },
+  {
+    "slug": "cost-management-training-program",
+    "heading": "Cost Management Training Program",
+    "summary": "A practical approach to controlling expenses while protecting quality and customer experience.",
+    "duration": "2 hours",
+    "level": "Intermediate",
+    "audience": "Business owners, supervisors, and operations teams",
+    "highlights": ["Expense mapping", "Waste reduction", "Cost controls", "Margin protection"],
+    "whatYouLearn": ["How to identify high-impact cost areas", "How to reduce unnecessary spending", "How to balance quality with affordability", "How to set simple cost monitoring routines"],
+    "sections": ["Understanding cost categories", "Spotting inefficiencies", "Building control systems", "Reviewing and improving monthly"],
+    "faq": [
+      { "question": "Will this force aggressive budget cuts?", "answer": "No, the focus is smart control, not harmful cuts." },
+      { "question": "Can teams use this in weekly reviews?", "answer": "Yes, the framework is designed for recurring review cycles." }
+    ]
+  },
+  {
+    "slug": "customer-service-excellence",
+    "heading": "Customer Service Excellence",
+    "summary": "Build trust and loyalty through stronger communication, responsiveness, and service recovery techniques.",
+    "duration": "2-3 hours",
+    "level": "Foundation",
+    "audience": "Frontline teams and business owners",
+    "highlights": ["Service standards", "Difficult conversations", "Response quality", "Customer loyalty"],
+    "whatYouLearn": ["How to create great first impressions", "How to handle complaints with confidence", "How to keep communication clear and respectful", "How to turn one-time buyers into repeat customers"],
+    "sections": ["Service mindset and expectations", "Communication and active listening", "Complaint handling workflow", "Retention and relationship building"],
+    "faq": [
+      { "question": "Does this include complaint scripts?", "answer": "Yes, it provides practical response structures." },
+      { "question": "Can this apply to online businesses?", "answer": "Yes, the principles work for both in-person and digital service." }
+    ]
+  },
+  {
+    "slug": "how-to-start-a-new-business-training-program",
+    "heading": "How to Start a New Business Training Program",
+    "summary": "A startup playbook from idea validation to first customers and early operating systems.",
+    "duration": "4 hours",
+    "level": "Beginner",
+    "audience": "Aspiring entrepreneurs",
+    "highlights": ["Startup readiness", "Validation steps", "Go-to-market basics", "Launch planning"],
+    "whatYouLearn": ["How to test whether your idea solves a real problem", "How to define your minimum launch offer", "How to set up simple operations and records", "How to reach your first paying customers"],
+    "sections": ["Idea validation and customer needs", "Building your first offer", "Setup and compliance basics", "Launch and traction"],
+    "faq": [
+      { "question": "Is this only for tech startups?", "answer": "No, it is designed for practical businesses across sectors." },
+      { "question": "Does it include post-launch actions?", "answer": "Yes, it covers early growth and refinement priorities." }
+    ]
+  },
+  {
+    "slug": "jinnar-worker-excellence-certification-program",
+    "heading": "Jinnar Worker Excellence Certification Program",
+    "summary": "A certification-focused training path to elevate professional standards and measurable performance.",
+    "duration": "3 hours",
+    "level": "Intermediate",
+    "audience": "Jinnar workers pursuing certification",
+    "highlights": ["Professional conduct", "Quality benchmarks", "Performance routines", "Certification readiness"],
+    "whatYouLearn": ["How to meet core worker excellence criteria", "How to improve consistency and reliability", "How to document work quality and progress", "How to prepare for assessment"],
+    "sections": ["Certification framework", "Service quality and reliability", "Performance tracking habits", "Assessment preparation"],
+    "faq": [
+      { "question": "Is prior training required?", "answer": "Basic onboarding knowledge is recommended." },
+      { "question": "What does certification improve?", "answer": "It can improve trust, opportunities, and role progression." }
+    ]
+  },
+  {
+    "slug": "onboarding-and-orientation-for-newcomers",
+    "heading": "Onboarding & Orientation (For Newcomers)",
+    "summary": "A smooth onboarding experience to help new joiners understand culture, tools, and expected outcomes quickly.",
+    "duration": "1.5-2 hours",
+    "level": "Beginner",
+    "audience": "New joiners and first-time team members",
+    "highlights": ["Role onboarding", "Tool familiarization", "Team integration", "First-week readiness"],
+    "whatYouLearn": ["How to understand role expectations early", "How to work with internal tools and workflows", "How to communicate within teams", "How to plan your first 30 days effectively"],
+    "sections": ["Welcome and expectations", "Systems and working tools", "Team communication channels", "First month success plan"],
+    "faq": [
+      { "question": "Is this only for full-time staff?", "answer": "No, it supports anyone joining the workflow." },
+      { "question": "Can managers reuse this for onboarding?", "answer": "Yes, it is ideal as a repeatable onboarding reference." }
+    ]
+  },
+  {
+    "slug": "partnership-training-program",
+    "heading": "Partnership Training Program",
+    "summary": "Build durable business partnerships through alignment, trust, and shared performance expectations.",
+    "duration": "2 hours",
+    "level": "Intermediate",
+    "audience": "Founders, business development teams, and managers",
+    "highlights": ["Partner selection", "Alignment framework", "Governance basics", "Conflict prevention"],
+    "whatYouLearn": ["How to evaluate and select strategic partners", "How to define shared goals and roles", "How to structure communication rhythms", "How to prevent and resolve common partnership friction"],
+    "sections": ["Partnership strategy", "Due diligence and selection", "Operational governance", "Health checks and renewal"],
+    "faq": [
+      { "question": "Is this only for large organizations?", "answer": "No, small businesses benefit significantly from these principles." },
+      { "question": "Does it discuss legal agreements?", "answer": "It covers practical agreement fundamentals and scope clarity." }
+    ]
+  },
+  {
+    "slug": "project-management-training-program",
+    "heading": "Project Management Training Program",
+    "summary": "Deliver projects on time with clear scope, task ownership, and milestone tracking.",
+    "duration": "3 hours",
+    "level": "Intermediate",
+    "audience": "Team leads, coordinators, and operations managers",
+    "highlights": ["Scope planning", "Task sequencing", "Risk awareness", "Delivery tracking"],
+    "whatYouLearn": ["How to define clear project scope and outputs", "How to break work into manageable phases", "How to track progress with simple tools", "How to communicate blockers and resolve delays"],
+    "sections": ["Project setup and scoping", "Planning and scheduling", "Execution and coordination", "Closeout and lessons learned"],
+    "faq": [
+      { "question": "Do I need software tools to apply this?", "answer": "No, the model works with both digital and manual tracking." },
+      { "question": "Can this be used for small projects?", "answer": "Yes, the framework scales down effectively." }
+    ]
+  },
+  {
+    "slug": "raising-capital-training-program",
+    "heading": "Raising Capital Training Program",
+    "summary": "Understand practical fundraising options and prepare stronger capital-readiness materials.",
+    "duration": "2.5 hours",
+    "level": "Intermediate",
+    "audience": "Entrepreneurs and small business owners",
+    "highlights": ["Funding options", "Readiness checklist", "Investor narrative", "Risk framing"],
+    "whatYouLearn": ["How to compare debt, equity, and grant pathways", "How to prepare basic funding documentation", "How to present business potential and traction", "How to discuss risks with confidence"],
+    "sections": ["Capital strategy", "Financial readiness", "Pitch and narrative", "Follow-up and negotiation basics"],
+    "faq": [
+      { "question": "Is this only for venture capital?", "answer": "No, it covers multiple realistic funding routes." },
+      { "question": "Will this help with bank applications?", "answer": "Yes, many readiness steps support bank financing too." }
+    ]
+  },
+  {
+    "slug": "tier-2-training-program",
+    "heading": "Tier 2 Training Program",
+    "summary": "An advanced capability track focused on deeper execution quality and emerging leadership behaviors.",
+    "duration": "3 hours",
+    "level": "Advanced",
+    "audience": "Mid-level employees and high performers",
+    "highlights": ["Execution maturity", "Advanced workflows", "Coaching basics", "Team reliability"],
+    "whatYouLearn": ["How to improve quality under pressure", "How to guide teammates through common issues", "How to make better operational decisions", "How to model dependable performance"],
+    "sections": ["Role expansion and expectations", "Advanced operating patterns", "Peer support and coaching", "Performance improvement loops"],
+    "faq": [
+      { "question": "Who should take Tier 2?", "answer": "Employees ready for broader responsibility and impact." },
+      { "question": "Is there a progression from Tier 2?", "answer": "Yes, this prepares learners for Tier 3 and leadership tracks." }
+    ]
+  },
+  {
+    "slug": "tier-3-training-program",
+    "heading": "Tier 3 Training Program",
+    "summary": "Leadership-oriented training for strategic thinking, team management, and operational excellence.",
+    "duration": "4 hours",
+    "level": "Advanced",
+    "audience": "Senior employees and leadership-track professionals",
+    "highlights": ["Strategic planning", "Leadership communication", "Decision quality", "Performance systems"],
+    "whatYouLearn": ["How to align teams around strategy", "How to make high-quality decisions with limited data", "How to build accountability systems", "How to mentor and elevate team performance"],
+    "sections": ["Strategic leadership foundations", "Operational decision frameworks", "People leadership and development", "Sustainable performance management"],
+    "faq": [
+      { "question": "Is Tier 2 required first?", "answer": "It is recommended, but not always mandatory." },
+      { "question": "Does this include team management tools?", "answer": "Yes, it includes practical leadership and review structures." }
+    ]
+  },
+  {
+    "slug": "time-management-for-support-and-admin-teams",
+    "heading": "Time Management for Support & Admin Teams",
+    "summary": "Improve throughput and reduce stress with stronger prioritization, planning, and communication rhythms.",
+    "duration": "2 hours",
+    "level": "Foundation",
+    "audience": "Support and admin teams",
+    "highlights": ["Priority setting", "Task batching", "Calendar discipline", "Response planning"],
+    "whatYouLearn": ["How to prioritize urgent vs important work", "How to reduce context switching", "How to structure focused work blocks", "How to communicate workload constraints early"],
+    "sections": ["Understanding work patterns", "Planning and prioritization", "Execution habits", "Team coordination and follow-through"],
+    "faq": [
+      { "question": "Can this reduce burnout risk?", "answer": "Yes, better planning and boundaries improve sustainability." },
+      { "question": "Is this useful for remote teams?", "answer": "Yes, the methods apply to both on-site and remote workflows." }
+    ]
+  },
+  {
+    "slug": "time-management-training-program-jinnar-workers",
+    "heading": "Time Management Training Program - Jinnar Workers",
+    "summary": "A focused module to help workers improve punctuality, consistency, and completion speed without sacrificing quality.",
+    "duration": "2 hours",
+    "level": "Beginner to Intermediate",
+    "audience": "Jinnar field and service workers",
+    "highlights": ["Daily planning", "Efficiency habits", "Punctuality standards", "Output quality"],
+    "whatYouLearn": ["How to plan each day with realistic targets", "How to avoid common time-waste patterns", "How to maintain quality while working faster", "How to close tasks with clear reporting"],
+    "sections": ["Workday setup", "Task flow optimization", "Quality and speed balance", "End-of-day review habits"],
+    "faq": [
+      { "question": "Is this suitable for new workers?", "answer": "Yes, the content is practical and easy to apply quickly." },
+      { "question": "Do supervisors benefit from this too?", "answer": "Yes, supervisors can use it to coach team routines." }
+    ]
+  },
+  {
+    "slug": "understanding-taxes-for-small-businesses-kenya",
+    "heading": "Understanding Taxes for Small Businesses - Kenya",
+    "summary": "A practical guide to small-business tax responsibilities, filings, and compliance basics in Kenya.",
+    "duration": "2 hours",
+    "level": "Beginner",
+    "audience": "Kenyan small business owners and operators",
+    "highlights": ["Tax obligations", "Record readiness", "Filing basics", "Compliance habits"],
+    "whatYouLearn": ["How to understand key business tax categories", "How to keep records prepared for reporting", "How to avoid common compliance mistakes", "How to plan taxes into monthly operations"],
+    "sections": ["Tax fundamentals", "Business records and evidence", "Filing workflow essentials", "Compliance checklist"],
+    "faq": [
+      { "question": "Does this replace legal tax advice?", "answer": "No, it provides education and practical readiness guidance." },
+      { "question": "Is it suitable for sole proprietors?", "answer": "Yes, it is designed for small and growing businesses." }
+    ]
+  },
+  {
+    "slug": "understanding-taxes-for-small-businesses-uganda",
+    "heading": "Understanding Taxes for Small Businesses - Uganda",
+    "summary": "An accessible tax primer for Ugandan small businesses covering obligations, record discipline, and reporting flow.",
+    "duration": "2 hours",
+    "level": "Beginner",
+    "audience": "Ugandan small business owners",
+    "highlights": ["Tax framework basics", "Records and receipts", "Filing routine", "Penalty prevention"],
+    "whatYouLearn": ["How to identify common tax obligations", "How to maintain documentation for compliance", "How to prepare periodic tax submissions", "How to reduce errors in reporting"],
+    "sections": ["Tax orientation", "Operational record keeping", "Submission preparation", "Compliance maintenance"],
+    "faq": [
+      { "question": "Will this help first-time business owners?", "answer": "Yes, it explains the essentials in simple language." },
+      { "question": "Can this support accounting handovers?", "answer": "Yes, better records make accountant collaboration easier." }
+    ]
+  },
+  {
+    "slug": "understanding-taxes-for-small-businesses-south-africa",
+    "heading": "Understanding Taxes for Small Businesses - South Africa",
+    "summary": "Build confidence in South African small-business tax processes with clear, practical compliance workflows.",
+    "duration": "2 hours",
+    "level": "Beginner",
+    "audience": "South African entrepreneurs and SME teams",
+    "highlights": ["Tax structure overview", "Prepared records", "Submission process", "Risk reduction"],
+    "whatYouLearn": ["How to understand SME tax responsibilities", "How to improve record quality for submissions", "How to run a repeatable tax-preparation process", "How to identify warning signs early"],
+    "sections": ["Tax categories and obligations", "Record and process setup", "Submission and tracking", "Long-term compliance habits"],
+    "faq": [
+      { "question": "Is this relevant to micro businesses?", "answer": "Yes, the principles are useful from micro to growing SMEs." },
+      { "question": "Does it include practical checklists?", "answer": "Yes, it emphasizes checklist-based execution." }
+    ]
+  },
+  {
+    "slug": "understanding-taxes-for-small-businesses-tanzania-shorter-version",
+    "heading": "Understanding Taxes for Small Businesses - Tanzania (Shorter Version)",
+    "summary": "A concise tax-learning format for Tanzanian small businesses focused on high-impact essentials.",
+    "duration": "60-90 minutes",
+    "level": "Beginner",
+    "audience": "Tanzanian small business owners needing a quick practical guide",
+    "highlights": ["Essential obligations", "Basic records", "Quick filing overview", "Common pitfalls"],
+    "whatYouLearn": ["How to prioritize core compliance actions", "How to keep minimum necessary records", "How to avoid frequent filing errors", "How to build a simple monthly routine"],
+    "sections": ["Top-priority tax essentials", "Simple record setup", "Submission checkpoints", "Quick monthly compliance plan"],
+    "faq": [
+      { "question": "Why is this version shorter?", "answer": "It is designed for faster onboarding and immediate application." },
+      { "question": "Can I still use this for long-term operations?", "answer": "Yes, and you can expand with advanced materials later." }
+    ]
+  },
+  {
+    "slug": "teamwork-and-collaboration-skills",
+    "heading": "Teamwork & Collaboration Skills",
+    "summary": "Strengthen cross-team collaboration through trust, communication clarity, and shared ownership behaviors.",
+    "duration": "2 hours",
+    "level": "Foundation",
+    "audience": "All teams and contributors",
+    "highlights": ["Communication clarity", "Shared accountability", "Conflict handling", "Team effectiveness"],
+    "whatYouLearn": ["How to work effectively across different roles", "How to communicate expectations and handoffs", "How to resolve friction constructively", "How to build a dependable team culture"],
+    "sections": ["Foundations of effective teamwork", "Communication and collaboration norms", "Conflict response and recovery", "Sustaining high-performing teams"],
+    "faq": [
+      { "question": "Is this course role-specific?", "answer": "No, it is useful across all functions and levels." },
+      { "question": "Can managers apply this to team rituals?", "answer": "Yes, it maps well to meetings, reviews, and handoff workflows." }
+    ]
+  }
+]
+

@@ -3,7 +3,17 @@
  * Document-based training resources for Africa's informal sector workers
  */
 
-export const jinnarCoursesData = [
+const toSlug = (value) =>
+  value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const rawJinnarCoursesData = [
   {
     id: 1,
     title: "Jinnar Employees Training Programs",
@@ -250,5 +260,10 @@ export const jinnarCoursesData = [
     fileName: "Jinnar - Training- Teamwork & Collaboration Skills.docx",
   },
 ];
+
+export const jinnarCoursesData = rawJinnarCoursesData.map((course) => ({
+  ...course,
+  slug: toSlug(course.title),
+}));
 
 export default jinnarCoursesData;

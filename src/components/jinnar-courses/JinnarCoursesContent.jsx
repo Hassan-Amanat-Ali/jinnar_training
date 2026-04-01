@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaFileAlt,
   FaDownload,
@@ -9,6 +10,7 @@ import {
   FaBookOpen,
 } from "react-icons/fa";
 import { jinnarCoursesData } from "../../data/jinnarCourses";
+import { getJinnarCourseDetailPath } from "../../constants/routes";
 
 // Course categories with icons
 const categories = [
@@ -17,6 +19,7 @@ const categories = [
 ];
 
 const JinnarCoursesContent = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("popular");
@@ -45,13 +48,8 @@ const JinnarCoursesContent = () => {
     }
   };
 
-  // Handle file preview
-  const handlePreview = (course) => {
-    if (!course.filePath) {
-      alert("Preview not available for this course.");
-      return;
-    }
-    window.open(course.filePath, "_blank");
+  const handleViewCourse = (course) => {
+    navigate(getJinnarCourseDetailPath(course.slug));
   };
 
   // Filter and sort courses
@@ -183,11 +181,11 @@ const JinnarCoursesContent = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-4 left-4 right-4 flex gap-2">
                       <button
-                        onClick={() => handlePreview(course)}
+                        onClick={() => handleViewCourse(course)}
                         className="flex-1 bg-white text-primary text-sm font-medium py-2 rounded-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
                       >
                         <FaEye />
-                        <span>Preview</span>
+                        <span>View</span>
                       </button>
                       <button
                         onClick={() => handleDownload(course)}

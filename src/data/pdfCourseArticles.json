@@ -1,0 +1,143 @@
+{
+  "articles": [
+    {
+      "slug": "basic-business-and-financial-literacy",
+      "subtitle": "Practical foundation for small business owners",
+      "readTime": "12 min read",
+      "lastUpdated": "2026-04-01",
+      "overview": [
+        "This course explains core financial decisions in simple terms so entrepreneurs can run day-to-day operations confidently.",
+        "It focuses on practical bookkeeping, pricing, margins, and cash-flow awareness that can be applied immediately."
+      ],
+      "learningObjectives": [
+        "Separate personal and business money",
+        "Track sales, expenses, and margin clearly",
+        "Build a simple monthly budget and review routine",
+        "Use numbers for better pricing decisions"
+      ],
+      "articleSections": [
+        {
+          "heading": "Why financial literacy matters",
+          "paragraphs": [
+            "When business owners understand their numbers, they can avoid preventable losses and improve cash control.",
+            "Financial literacy does not require accounting mastery. It starts with consistent habits and basic business math."
+          ],
+          "points": [
+            "Better spending discipline",
+            "Improved planning confidence",
+            "Faster decisions under pressure"
+          ]
+        },
+        {
+          "heading": "The minimum records to keep",
+          "paragraphs": [
+            "A strong baseline is enough for most small operations: daily sales, expenses, stock movement, and supplier payments.",
+            "The aim is clarity and consistency, not complexity."
+          ],
+          "points": [
+            "Daily sales log",
+            "Expense tracker",
+            "Weekly stock check",
+            "Monthly summary"
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "question": "Do I need accounting software to apply this course?",
+          "answer": "No. You can start with paper or a spreadsheet and upgrade later."
+        },
+        {
+          "question": "Who should take this course?",
+          "answer": "Any founder, shop owner, or team lead handling day-to-day business decisions."
+        }
+      ]
+    },
+    {
+      "slug": "customer-service-excellence",
+      "subtitle": "Customer trust and retention in action",
+      "readTime": "10 min read",
+      "lastUpdated": "2026-04-01",
+      "overview": [
+        "This course helps teams create consistent service quality across every customer touchpoint.",
+        "It combines communication skills, response frameworks, and complaint recovery practices."
+      ],
+      "learningObjectives": [
+        "Set clear service standards",
+        "Handle complaints with confidence",
+        "Strengthen first-response quality",
+        "Increase repeat customer behavior"
+      ],
+      "articleSections": [
+        {
+          "heading": "Service standards that customers notice",
+          "paragraphs": [
+            "Customers remember speed, clarity, and respect. Teams that formalize these standards improve trust quickly.",
+            "A simple service checklist can align all staff across shifts."
+          ],
+          "points": [
+            "Response time expectations",
+            "Tone and professionalism",
+            "Clear next-step communication"
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can this be used for online and offline businesses?",
+          "answer": "Yes. The framework is channel-agnostic and works for both."
+        }
+      ]
+    }
+  ],
+  "defaultArticle": {
+    "subtitle": "Complete course article",
+    "readTime": "8 min read",
+    "overview": [
+      "This article-style page presents the full course context, practical takeaways, and quick-reference guidance.",
+      "Use it as your study companion while viewing or downloading the PDF."
+    ],
+    "learningObjectives": [
+      "Understand course scope and outcomes",
+      "Apply ideas in day-to-day work",
+      "Use a simple review checklist after completion"
+    ],
+    "articleSections": [
+      {
+        "heading": "Course context",
+        "paragraphs": [
+          "This resource is designed to give a practical path from foundational concepts to direct application.",
+          "Read each section as an operational guide, not only as theory."
+        ],
+        "points": [
+          "Start from fundamentals",
+          "Practice with real examples",
+          "Review and adapt regularly"
+        ]
+      },
+      {
+        "heading": "Implementation guide",
+        "paragraphs": [
+          "Apply one recommendation at a time and measure the impact weekly.",
+          "Sustainable improvement comes from repetition, reflection, and team alignment."
+        ],
+        "points": [
+          "Choose one change to start",
+          "Track progress every week",
+          "Adjust based on results"
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is this page a replacement for the PDF?",
+        "answer": "No. It complements the PDF by making key points easy to consume like a blog article."
+      },
+      {
+        "question": "Can I share this with my team?",
+        "answer": "Yes. Use this page as a quick onboarding and discussion reference."
+      }
+    ]
+  }
+}
+

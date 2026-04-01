@@ -15,10 +15,10 @@ const CoursesListing = ({
   onToggleFavorite,
   onEnroll,
   onDownload,
+  onViewPdf,
   enrollmentLoading = false,
   selectedCategories = [],
   searchQuery = "",
-  isAdmin = false,
   coursesHeading = null, // Custom heading override
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -196,6 +196,7 @@ const CoursesListing = ({
               onToggleFavorite={onToggleFavorite}
               onEnroll={onEnroll}
               onDownload={onDownload}
+              onViewPdf={onViewPdf}
               enrollmentLoading={enrollmentLoading}
             />
           ))}

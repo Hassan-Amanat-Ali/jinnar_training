@@ -11,6 +11,7 @@ const CourseCard = ({
   onEnroll,
   enrollmentLoading = false,
   onDownload,
+  onViewPdf,
 }) => {
   const isListView = viewMode === "list";
 
@@ -52,13 +53,20 @@ const CourseCard = ({
 
             <div className="flex items-center gap-2 mt-auto">
               {course.courseType === "pdf" ? (
-                // PDF courses: Only Download button
-                <button
-                  onClick={() => onDownload && onDownload(course)}
-                  className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap"
-                >
-                  Download
-                </button>
+                <>
+                  <button
+                    onClick={() => onViewPdf && onViewPdf(course)}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => onDownload && onDownload(course)}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap"
+                  >
+                    Download
+                  </button>
+                </>
               ) : (
                 // Video courses: View and Enroll buttons
                 <>
@@ -120,12 +128,18 @@ const CourseCard = ({
 
         <div className="flex items-center gap-2 mt-auto whitespace-nowrap">
           {course.courseType === "pdf" ? (
-            // PDF courses: Only Download button
-            <Button
-              text="Download"
-              onClick={() => onDownload && onDownload(course)}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors w-full"
-            />
+            <>
+              <Button
+                text="View"
+                onClick={() => onViewPdf && onViewPdf(course)}
+                className="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors flex-1"
+              />
+              <Button
+                text="Download"
+                onClick={() => onDownload && onDownload(course)}
+                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-1"
+              />
+            </>
           ) : (
             // Video courses: View and Enroll buttons
             <>

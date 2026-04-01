@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth";
 import { redirectToJinnarAuth } from "../../utils/authRedirect";
 import CoursesFilters from "./CoursesFilters";
 import CoursesListing from "./CoursesListing";
+import { getPdfCourseDetailPath } from "../../constants/routes";
 import {
   CourseService,
   EnrollmentService,
@@ -12,6 +14,7 @@ import {
 } from "../../services";
 
 const CoursesContent = () => {
+  const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
   const [coursesState, setCoursesState] = useState([]);
   const [allCourses, setAllCourses] = useState([]); // Store all courses for filter counts
@@ -521,6 +524,12 @@ const CoursesContent = () => {
     }
   };
 
+  const handleViewPdf = (course) => {
+    if (course?.courseType === "pdf") {
+      navigate(getPdfCourseDetailPath(course.id));
+    }
+  };
+
   return (
     <section className="py-16 lg:py-20 bg-gray-50">
       <div className="section-container">
@@ -604,6 +613,7 @@ const CoursesContent = () => {
                   onToggleFavorite={handleToggleFavorite}
                   onEnroll={handleEnroll}
                   onDownload={handleDownload}
+                  onViewPdf={handleViewPdf}
                   enrollmentLoading={enrollmentLoading}
                   selectedCategories={selectedCategories}
                   searchQuery={searchQuery}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, CourseSkeleton, CategoryFilterSkeleton } from "../ui";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../constants/routes";
+import { ROUTES, getJinnarCourseDetailPath } from "../../constants/routes";
 import { jinnarCoursesData } from "../../data/jinnarCourses";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
@@ -49,8 +49,8 @@ const CoursesShowcase = () => {
           isJinnarCourse: true,
           filePath: course.filePath,
           fileName: course.fileName,
+          slug: course.slug,
         }));
-
         // Filter Jinnar courses based on user role
         let filteredJinnarCourses;
         if (hasEmployeeAccess) {
@@ -105,6 +105,12 @@ const CoursesShowcase = () => {
       : courses
           .filter((course) => course.category === activeCategory)
           .slice(0, 6);
+
+  const handleView = (course) => {
+    if (course.slug) {
+      navigate(getJinnarCourseDetailPath(course.slug));
+    }
+  };
 
   const handleDownload = (course) => {
     if (!isAuthenticated) {
@@ -199,11 +205,19 @@ const CoursesShowcase = () => {
             // Display actual courses
             filteredCourses.map((course) => {
               const actionButtons = (
-                <Button
-                  text="Download"
-                  className="btn-base-medium btn-primary w-full"
-                  onClick={() => handleDownload(course)}
-                />
+                <>
+                  <Button
+                    text="View"
+                    icon={<FaEye className="w-4 h-4" />}
+                    className="btn-base-medium btn-outline w-full"
+                    onClick={() => handleView(course)}
+                  />
+                  <Button
+                    text="Download"
+                    className="btn-base-medium btn-primary w-full"
+                    onClick={() => handleDownload(course)}
+                  />
+                </>
               );
 
               return (

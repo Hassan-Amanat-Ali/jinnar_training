@@ -3,6 +3,7 @@ export { default as About } from "./About";
 export { default as Contact } from "./Contact";
 export { default as Courses } from "./Courses";
 export { default as CourseDetail } from "./CourseDetail";
+export { default as PdfCourseDetail } from "./PdfCourseDetail";
 export { default as Portfolio } from "./Portfolio";
 export { default as Blog } from "./Blog";
 export { default as Login } from "./Login";
@@ -14,6 +15,7 @@ export { default as Refunds } from "./Refunds";
 export { default as Legal } from "./Legal";
 export { default as FAQ } from "./FAQ";
 export { default as JinnarCourses } from "./JinnarCourses";
+export { default as JinnarCourseDetail } from "./JinnarCourseDetail.jsx";
 export { default as AdminDashboard } from "./AdminDashboard";
 
 // Profile Pages
